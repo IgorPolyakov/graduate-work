@@ -3,11 +3,39 @@
 #include <QDebug>
 #include <qmath.h>
 #include <QTime>
+#include <QDir>
 #include <iostream>
 #include <getopt.h>
 //#include <omp.h>
 
+int **getArrBright(QImage image)
+{
+    int gray;
+    //get some space for array of bright
+    int** ary = new int*[image.width()];
+    for(int i = 0; i < image.width(); ++i)
+        ary[i] = new int[image.height()];
 
+    for(int i = 0; i < image.width(); i++)
+    {
+        for(int j = 0; j < image.height(); j++)
+        {
+            gray = qGray(image.pixel(i, j));
+            ary[i][j] = gray;
+            std::cout << ary[i][j] << " ";
+            //qDebug() << ary[i][j];
+        };
+        qDebug() << "\n";
+    };
+    return ary;
+}
+
+void freeArrBright(int** trash, int size)
+{
+    for(int i = 0; i < size; ++i)
+        delete[] trash[i];
+    delete [] trash;
+}
 int main(int argc, char *argv[])
 {
     QImage firstImg,secondImg,outImg;
@@ -52,11 +80,13 @@ int main(int argc, char *argv[])
     firstImg  =  firstImg.convertToFormat(QImage::Format_ARGB32);
     secondImg = secondImg.convertToFormat(QImage::Format_ARGB32);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
-    /*
-        if (!outImg.load (QString (argv[8]))) {
-            std::cout << "Cannot load out picture\n";
-            return(-1);
-        }
-    */
+
+    int** pArr = getArrBright(firstImg);
+    freeArrBright(pArr, firstImg.height()*firstImg.width());
+    QDir outDir("output");
+    if(!outDir.exists())
+    {
+        outDir.mkpath(".");
+    }
     return 0;
 }//End of Main
