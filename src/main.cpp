@@ -15,7 +15,7 @@ int **getArrBright(QImage image)
     int** ary = new int*[image.width()];
     for(int i = 0; i < image.width(); ++i)
         ary[i] = new int[image.height()];
-
+    //convert color image to grayscale
     for(int i = 0; i < image.width(); i++)
     {
         for(int j = 0; j < image.height(); j++)
@@ -23,9 +23,8 @@ int **getArrBright(QImage image)
             gray = qGray(image.pixel(i, j));
             ary[i][j] = gray;
             std::cout << ary[i][j] << " ";
-            //qDebug() << ary[i][j];
         };
-        qDebug() << "\n";
+        std::cout << "\n";
     };
     return ary;
 }
@@ -36,6 +35,7 @@ void freeArrBright(int** trash, int size)
         delete[] trash[i];
     delete [] trash;
 }
+
 int main(int argc, char *argv[])
 {
     QImage firstImg,secondImg,outImg;
@@ -78,11 +78,14 @@ int main(int argc, char *argv[])
         }
     }
     firstImg  =  firstImg.convertToFormat(QImage::Format_ARGB32);
+    qDebug() << "About image :: Size:"<< firstImg.size() << "\n";//<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n";
     secondImg = secondImg.convertToFormat(QImage::Format_ARGB32);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
     int** pArr = getArrBright(firstImg);
-    freeArrBright(pArr, firstImg.height()*firstImg.width());
+
+
+    freeArrBright(pArr, firstImg.width());
     QDir outDir("output");
     if(!outDir.exists())
     {
