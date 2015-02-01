@@ -1,12 +1,16 @@
-//#include <QCoreApplication>
-#include <QImage>
+#include <QColor>
 #include <QDebug>
-#include <qmath.h>
-#include <QTime>
 #include <QDir>
+#include <QImage>
+#include <qmath.h>
+#include <QPainter>
+#include <QPen>
+#include <QPixmap>
+#include <QtCore>
+#include <QtGui>
+#include <QTime>
 #include <iostream>
 #include <getopt.h>
-//#include <omp.h>
 
 int **getArrBright(QImage image)
 {
@@ -22,11 +26,23 @@ int **getArrBright(QImage image)
         {
             gray = qGray(image.pixel(i, j));
             ary[i][j] = gray;
-            std::cout << ary[i][j] << " ";
+            //std::cout << ary[i][j] << " ";
         };
-        std::cout << "\n";
+        //std::cout << "\n";
     };
     return ary;
+}
+
+void drawVectorOnImage()
+{
+    /*QPixmap pixmap;
+    pixmap.load(QString::fromUtf8("frame00.png"));
+    QPainter painter(&pixmap);
+    QPen Red(Qt::red);
+    painter.setPen(Red);
+    painter.drawLine(50,50,250,250);
+    pixmap.save("output/out");*/
+
 }
 
 void freeArrBright(int** trash, int size)
@@ -36,8 +52,14 @@ void freeArrBright(int** trash, int size)
     delete [] trash;
 }
 
+void imageInfo (QImage image)
+{
+    qDebug() << "About image :: Size:"<< image.size() << "\n";//<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n"
+}
+
 int main(int argc, char *argv[])
 {
+    QCoreApplication app(argc, argv);
     QImage firstImg,secondImg,outImg;
     /*if(argc == 0)
     {
@@ -65,8 +87,8 @@ int main(int argc, char *argv[])
                 break;
             case 'v':
                 //QString version(GIT_VERSION);
-                std::cout << "App version" << "\n";
-                break;
+                std::cout << "Version: " << GITHASH << "\n";
+                return(0);
             case 'h':
                 std::cout << "Usage ./binary -l <First image> -o <Second image>\n";
                 break;
@@ -78,7 +100,7 @@ int main(int argc, char *argv[])
         }
     }
     firstImg  =  firstImg.convertToFormat(QImage::Format_ARGB32);
-    qDebug() << "About image :: Size:"<< firstImg.size() << "\n";//<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n";
+    imageInfo(firstImg);
     secondImg = secondImg.convertToFormat(QImage::Format_ARGB32);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
@@ -91,5 +113,6 @@ int main(int argc, char *argv[])
     {
         outDir.mkpath(".");
     }
-    return 0;
+    drawVectorOnImage();
+    return app.exec();
 }//End of Main
