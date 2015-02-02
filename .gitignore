@@ -27,7 +27,10 @@ Makefile*
 
 *.autosave
 
-#QtCtreator Qml
+# QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+# Project files
 lukas_kanade_qt
+output/
