@@ -5,11 +5,12 @@
 #include <iostream>
 #include <getopt.h>
 #include "lk_func.h"
+//#include "lk_struct.h"
 
 int main(int argc, char *argv[])
 {
     //QCoreApplication app(argc, argv);
-    QImage firstImg, secondImg, outImg;
+    QImage leftImg, rightImg, outImg;
     if (optarg == NULL) {
         //std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.";
         //return(0);
@@ -18,14 +19,14 @@ int main(int argc, char *argv[])
     while ((pr = getopt(argc, argv, "l:r:vhd")) != -1) {
         switch (pr) {
         case 'l':
-            if (!firstImg.load(optarg)) {
+            if (!leftImg.load(optarg)) {
                 std::cout << "Cannot load first picture\n";
                 return (-1);
             }
             qDebug() << "F Image path" << optarg;
             break;
         case 'r':
-            if (!secondImg.load(optarg)) {
+            if (!rightImg.load(optarg)) {
                 std::cout << "Cannot load second picture\n";
                 return (-1);
             }
@@ -49,18 +50,23 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    firstImg  =  firstImg.convertToFormat(QImage::Format_ARGB32);
-    imageInfo(firstImg);
-    secondImg = secondImg.convertToFormat(QImage::Format_ARGB32);
-    imageInfo(secondImg);
+    leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
+    //imageInfo(leftImg);
+    rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
+    //imageInfo(rightImg);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
-    int** pArr = getArrBright(firstImg);
-    freeArrBright(pArr, firstImg.width());
+    int** pToLeftImg = getArrBright(leftImg);
+    int** pToRightImg = getArrBright(rightImg);
     QDir outDir("output");
     if (!outDir.exists()) {
         outDir.mkpath(".");
     }
-    caclGrid(firstImg);
+    subSize ARA = {10, 20, 10, 20};
+    imageInfo(leftImg, pToLeftImg);
+    calcOptFlow(ARA, pToLeftImg, pToRightImg);
+
+    freeArrBright(pToLeftImg, leftImg.width());
+    freeArrBright(pToRightImg, rightImg.width());
     return 0;
 }//End of Main
