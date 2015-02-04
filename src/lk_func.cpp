@@ -33,6 +33,7 @@ int **getArrBright(QImage image)
 
 void calcGrid(QImage image)
 {
+    QPainter paint(&image);
     unsigned int widthMax, heightMax;
     unsigned int widthStep, heightStep;
     unsigned int widthStart, heightStart;
@@ -46,15 +47,13 @@ void calcGrid(QImage image)
 
     for (unsigned int i = widthStart ; i < widthMax; i = widthStep + i) {
         for (unsigned int j = heightStart; j < heightMax; j = heightStep + j) {
-            QPainter paint(&image);
             paint.drawPoint(i, j);
-            image.save("output/out.png");
-        };
-    };
+        }
+    }
     image.save("output/out.png");
 }
 
-void calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
+int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
 {
     int iY = 0,   iX = 0,   iT = 0;
     qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
@@ -63,11 +62,14 @@ void calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
             iX += arrayGray[i - 1][j] - arrayGray[i + 1][j];
             iY += arrayGray[i][j - 1] - arrayGray[i][j + 1];
             iT += arrayGray[i][j] - arrayGrayNext[i][j];
-            //qDebug() << " " << i << " " << j << " \n";
-            std::cout << 100+arrayGray[i][j] << " ";
-        };
+            std::cout << arrayGray[i][j] << " ";
+        }
         std::cout << "\n";
-    };
+    }
+    int A[2][2] = {{iX * iX, iX * iY}, {iX * iY, iY * iY}};
+    int b[2] = {iX * iT, iY * iT };
+
+    return shiftVectr;
 }
 
 void freeArrBright(int** trash, int size)
@@ -77,12 +79,22 @@ void freeArrBright(int** trash, int size)
     delete [] trash;
 }
 
+int* matrixVectorMultiplic(int** array, int* vector)
+{
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            c[i] += (array[i][j] * vector[j]);
+        }
+    }
+    return c;
+}
+
 void imageInfo(QImage image, int** arr)
 {
     qDebug() << "About image :: Size:" << image.size() << "\n"; //<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n"
     for (int i = 0; i < image.width(); i++) {
         for (int j = 0; j < image.height(); j++) {
-            std::cout << 100+arr[i][j] << " ";
+            std::cout << arr[i][j] << " ";
         }
         std::cout << "||\n";
     }
