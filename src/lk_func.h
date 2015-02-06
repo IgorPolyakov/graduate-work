@@ -6,10 +6,13 @@
 #ifndef LK_FUNC_H
 #define LK_FUNC_H
 
-int **getArrBright(QImage image);
+int** getArrBright(QImage image);
+int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext);
+int* matrixVectorMultiplic(int** array, int* vector);
 void calcGrid(QImage image);
-void freeArrBright(int** trash, int size);
+void freeMemoryFloat(int** trash, int size);
+void freeMemoryInt(int** trash, int size);
 void imageInfo(QImage image, int** arr);
-void calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext);
+void inversion(int **A, int N);
 
 #endif

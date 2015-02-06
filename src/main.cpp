@@ -62,11 +62,11 @@ int main(int argc, char *argv[])
     if (!outDir.exists()) {
         outDir.mkpath(".");
     }
-    subSize ARA = {10, 20, 10, 20};
+    subSize ARA = {10, 15, 10, 15};
     imageInfo(leftImg, pToLeftImg);
     calcOptFlow(ARA, pToLeftImg, pToRightImg);
 
-    freeArrBright(pToLeftImg, leftImg.width());
-    freeArrBright(pToRightImg, rightImg.width());
+    freeMemoryInt(pToLeftImg, leftImg.width());
+    freeMemoryInt(pToRightImg, rightImg.width());
     return 0;
 }//End of Main

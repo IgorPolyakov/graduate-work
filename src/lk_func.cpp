@@ -5,6 +5,63 @@
 #include <iostream>
 
 #define STEP 10
+#define SIZE_MAT_TO_INV 2
+
+void inversion(int **A, int N)
+{
+    int temp;
+
+    int **E = new int *[N];
+
+    for (int i = 0; i < N; i++)
+        E[i] = new int [N];
+
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++) {
+            E[i][j] = 0.0;
+
+            if (i == j)
+                E[i][j] = 1.0;
+        }
+
+    for (int k = 0; k < N; k++) {
+        temp = A[k][k];
+
+        for (int j = 0; j < N; j++) {
+            A[k][j] /= temp;
+            E[k][j] /= temp;
+        }
+
+        for (int i = k + 1; i < N; i++) {
+            temp = A[i][k];
+
+            for (int j = 0; j < N; j++) {
+                A[i][j] -= A[k][j] * temp;
+                E[i][j] -= E[k][j] * temp;
+            }
+        }
+    }
+
+    for (int k = N - 1; k > 0; k--) {
+        for (int i = k - 1; i >= 0; i--) {
+            temp = A[i][k];
+
+            for (int j = 0; j < N; j++) {
+                A[i][j] -= A[k][j] * temp;
+                E[i][j] -= E[k][j] * temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            A[i][j] = E[i][j];
+
+    for (int i = 0; i < N; i++)
+        delete [] E[i];
+
+    delete [] E;
+}
 
 int **getArrBright(QImage image)
 {
@@ -56,9 +113,10 @@ void calcGrid(QImage image)
 int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
 {
     int iY = 0,   iX = 0,   iT = 0;
-    qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
+    //qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
     for (int i = window.x_l; i < window.x_r; i++) {
         for (int j = window.y_l; j < window.y_r; j++) {
+            qDebug() << iX<< iY<<iT;
             iX += arrayGray[i - 1][j] - arrayGray[i + 1][j];
             iY += arrayGray[i][j - 1] - arrayGray[i][j + 1];
             iT += arrayGray[i][j] - arrayGrayNext[i][j];
@@ -66,13 +124,35 @@ int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
         }
         std::cout << "\n";
     }
-    int A[2][2] = {{iX * iX, iX * iY}, {iX * iY, iY * iY}};
-    int b[2] = {iX * iT, iY * iT };
 
+    int **A = new int *[SIZE_MAT_TO_INV];
+
+    for (int i = 0; i < SIZE_MAT_TO_INV; i++)
+        A[i] = new int [SIZE_MAT_TO_INV];
+
+    A[0][0] = iX * iX;
+    A[0][1] = iX * iY;
+    A[1][0] = iX * iY;
+    A[1][1] = iY * iY;
+    qDebug() << A;
+
+    int b[SIZE_MAT_TO_INV] = {iX * iT, iY * iT };
+
+    int* shiftVectr = matrixVectorMultiplic(A, b);
+
+    qDebug() << shiftVectr[0] << shiftVectr[1];
+    freeMemoryFloat(A, SIZE_MAT_TO_INV);
     return shiftVectr;
 }
 
-void freeArrBright(int** trash, int size)
+void freeMemoryInt(int** trash, int size)
+{
+    for (int i = 0; i < size; ++i)
+        delete[] trash[i];
+    delete [] trash;
+}
+
+void freeMemoryFloat(int** trash, int size)
 {
     for (int i = 0; i < size; ++i)
         delete[] trash[i];
@@ -81,8 +161,9 @@ void freeArrBright(int** trash, int size)
 
 int* matrixVectorMultiplic(int** array, int* vector)
 {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
+    int* c = new int[2];
+    for (int i = 0; i < SIZE_MAT_TO_INV; i++) {
+        for (int j = 0; j < SIZE_MAT_TO_INV; j++) {
             c[i] += (array[i][j] * vector[j]);
         }
     }
