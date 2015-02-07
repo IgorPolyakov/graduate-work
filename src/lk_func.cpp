@@ -116,7 +116,7 @@ int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
     //qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
     for (int i = window.x_l; i < window.x_r; i++) {
         for (int j = window.y_l; j < window.y_r; j++) {
-            qDebug() << iX<< iY<<iT;
+            qDebug() << iX << iY << iT;
             iX += arrayGray[i - 1][j] - arrayGray[i + 1][j];
             iY += arrayGray[i][j - 1] - arrayGray[i][j + 1];
             iT += arrayGray[i][j] - arrayGrayNext[i][j];
@@ -136,7 +136,10 @@ int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
     A[1][1] = iY * iY;
     qDebug() << A;
 
-    int b[SIZE_MAT_TO_INV] = {iX * iT, iY * iT };
+    int* b = new int [SIZE_MAT_TO_INV];
+    b[0] = iX * iT;
+    b[1] = iY * iT;
+    inversion(A, SIZE_MAT_TO_INV);
 
     int* shiftVectr = matrixVectorMultiplic(A, b);
 
@@ -162,11 +165,17 @@ void freeMemoryFloat(int** trash, int size)
 int* matrixVectorMultiplic(int** array, int* vector)
 {
     int* c = new int[2];
+    c[0] = 0;
+    c[1] = 0;
+    qDebug() << "\n" << array[0][0] << " " << array[0][1] << " " << array[1][0] << " " << array[1][1] << " ";
+    qDebug() << vector[0] << " " << vector[1]<< " \n";
     for (int i = 0; i < SIZE_MAT_TO_INV; i++) {
         for (int j = 0; j < SIZE_MAT_TO_INV; j++) {
-            c[i] += (array[i][j] * vector[j]);
+            c[i] += array[i][j] * vector[j];
+            qDebug() << c[i];
         }
     }
+    //qDebug() << c[0] << " " << c[1]<< " \n";
     return c;
 }
 

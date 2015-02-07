@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
         outDir.mkpath(".");
     }
     subSize ARA = {10, 15, 10, 15};
-    imageInfo(leftImg, pToLeftImg);
     calcOptFlow(ARA, pToLeftImg, pToRightImg);
 
     freeMemoryInt(pToLeftImg, leftImg.width());
