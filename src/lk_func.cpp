@@ -7,14 +7,14 @@
 #define STEP 10
 #define SIZE_MAT_TO_INV 2
 
-void inversion(int **A, int N)
+void inversion(double **A, int N)
 {
-    int temp;
+    double temp;
 
-    int **E = new int *[N];
+    double **E = new double *[N];
 
     for (int i = 0; i < N; i++)
-        E[i] = new int [N];
+        E[i] = new double [N];
 
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++) {
@@ -110,7 +110,7 @@ void calcGrid(QImage image)
     image.save("output/out.png");
 }
 
-int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
+double* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
 {
     int iY = 0,   iX = 0,   iT = 0;
     //qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
@@ -125,23 +125,24 @@ int* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
         std::cout << "\n";
     }
 
-    int **A = new int *[SIZE_MAT_TO_INV];
+    double **A = new double *[SIZE_MAT_TO_INV];
 
     for (int i = 0; i < SIZE_MAT_TO_INV; i++)
-        A[i] = new int [SIZE_MAT_TO_INV];
+        A[i] = new double [SIZE_MAT_TO_INV];
 
     A[0][0] = iX * iX;
     A[0][1] = iX * iY;
     A[1][0] = iX * iY;
     A[1][1] = iY * iY;
-    qDebug() << A;
 
     int* b = new int [SIZE_MAT_TO_INV];
     b[0] = iX * iT;
     b[1] = iY * iT;
-    inversion(A, SIZE_MAT_TO_INV);
 
-    int* shiftVectr = matrixVectorMultiplic(A, b);
+    qDebug() << "\n BEFORE " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << "\n";
+    inversion( A, SIZE_MAT_TO_INV);
+    qDebug() << "\n AFTER " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << "\n";
+    double* shiftVectr = matrixVectorMultiplic(A, b);
 
     qDebug() << shiftVectr[0] << shiftVectr[1];
     freeMemoryFloat(A, SIZE_MAT_TO_INV);
@@ -155,23 +156,22 @@ void freeMemoryInt(int** trash, int size)
     delete [] trash;
 }
 
-void freeMemoryFloat(int** trash, int size)
+void freeMemoryFloat(double** trash, int size)
 {
     for (int i = 0; i < size; ++i)
         delete[] trash[i];
     delete [] trash;
 }
 
-int* matrixVectorMultiplic(int** array, int* vector)
+double* matrixVectorMultiplic(double** array, int* vector)
 {
-    int* c = new int[2];
+    double* c = new double[2];
     c[0] = 0;
     c[1] = 0;
-    qDebug() << "\n" << array[0][0] << " " << array[0][1] << " " << array[1][0] << " " << array[1][1] << " ";
     qDebug() << vector[0] << " " << vector[1]<< " \n";
     for (int i = 0; i < SIZE_MAT_TO_INV; i++) {
         for (int j = 0; j < SIZE_MAT_TO_INV; j++) {
-            c[i] += array[i][j] * vector[j];
+            c[i] += array[i][j] * (double)vector[j];
             qDebug() << c[i];
         }
     }
