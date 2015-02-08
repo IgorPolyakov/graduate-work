@@ -1,0 +1,1 @@
+bool g_isDebug;

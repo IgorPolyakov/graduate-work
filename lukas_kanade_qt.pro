@@ -7,10 +7,9 @@ REVISION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD describe)
 DEFINES += GITHASH=\\\"$$REVISION\\\"
 SOURCES += \
     src/lk_func.cpp \
-    src/main.cpp
-    src/lk_func.c #\
-    #src/global.c
+    src/main.cpp \
+    src/global.cpp
 HEADERS +=  \
     src/lk_func.h\
-    src/lk_struct.h #\
-    #src/global.h
+    src/lk_struct.h \
+    src/global.h

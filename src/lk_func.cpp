@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QImage>
 #include <QDebug>
+#include <QFileInfo>
 #include <iostream>
 
 #define STEP 10
@@ -117,18 +118,18 @@ void computeGrid(QImage image)
 double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iT = 0;
-    qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
+    if(g_isDebug) qDebug() << "SubSize:X(" << window.x_l << window.x_r << ")\n\t (" << window.y_r << "XX" << ")\n";
     for (int i = window.x_l; i < window.x_r; i++) {
         for (int j = window.y_l; j < window.y_r; j++) {
-            qDebug() << "<< iX << iY << iT " << iX << iY << iT <<"\n";
+            if(g_isDebug) qDebug() << "X:" << iX << "Y:"<< iY <<"T:"<< iT <<"\n";
             iX += ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-            qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
+            //if(g_isDebug) qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
             iY += ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) /2;
-            qDebug() << "Al[" << i << "]["<< j - 1 <<"] = " << arrGrayPrevious[i][j-1] << "\t " << "Ar" << i << "]["<<j+1<<"] = "<< arrGrayPrevious[i][j+1] << "\n";
+            //if(g_isDebug) qDebug() << "Al[" << i << "]["<< j - 1 <<"] = " << arrGrayPrevious[i][j-1] << "\t " << "Ar" << i << "]["<<j+1<<"] = "<< arrGrayPrevious[i][j+1] << "\n";
             iT += ((double)arrGrayPrevious[i][j] - (double)arrGrayNext[i][j]) / 2;
-            qDebug() << "A[" << i<< "]["<<j<<"] = " << arrGrayPrevious[i][j] << " ";
+            //if(g_isDebug) qDebug() << "A[" << i<< "]["<<j<<"] = " << arrGrayPrevious[i][j] << " ";
         }
-        qDebug() << "\n";
+        //if(g_isDebug) qDebug() << "\n";
     }
 
     double **A = new double *[setSizeMatToInvers()];
@@ -145,9 +146,10 @@ double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
     b[0] = iX * iT;
     b[1] = iY * iT;
 
-    qDebug() << "\n BEFORE " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << b[0] << b[1] << "\n";
+    if(g_isDebug) qDebug() << "\nBEFORE\n" << "A =\t"<< A[0][0]<<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
     inversion( A, setSizeMatToInvers());
-    qDebug() << "\n AFTER " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << "\n";
+    if(g_isDebug) qDebug() << "\nAFTER\n" << "A =\t"<< A[0][0]<<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
+    if(g_isDebug) qDebug() << "\n b =\t" << b[0] << "\n\t" << b[1];
     double* shiftVectr = multiplicMtrxAndVectr(A, b);
 
     //if(debug) qDebug() << shiftVectr[0] << shiftVectr[1];
@@ -182,15 +184,10 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
     return tmp;
 }
 
-void getImageInfo(QImage image, int** arr)
+void getImageInfo(QImage image, QString path)
 {
-    qDebug() << "About image :: Size:" << image.size() << "\n"; //<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n"
-    for (int i = 0; i < image.width(); i++) {
-        for (int j = 0; j < image.height(); j++) {
-            qDebug() << arr[i][j] << " ";
-        }
-        qDebug() << "||\n";
-    }
+    QFileInfo fileImage(path);
+    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes" << image.size();
 }
 
 int** genrateData(int w, int h) {
