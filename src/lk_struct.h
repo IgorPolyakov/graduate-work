@@ -1,7 +1,7 @@
 #ifndef LK_STRUCT_H
 #define LK_STRUCT_H
 
-struct subSize {
+struct SubSize {
     int x_l;
     int x_r;
     int y_l;

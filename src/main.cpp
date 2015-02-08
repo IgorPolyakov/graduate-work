@@ -5,11 +5,9 @@
 #include <iostream>
 #include <getopt.h>
 #include "lk_func.h"
-//#include "lk_struct.h"
 
 int main(int argc, char *argv[])
 {
-    //QCoreApplication app(argc, argv);
     QImage leftImg, rightImg, outImg;
     if (optarg == NULL) {
         //std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.";
@@ -51,19 +49,22 @@ int main(int argc, char *argv[])
         }
     }
     leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
-    //imageInfo(leftImg);
     rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
-    //imageInfo(rightImg);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
     int** pToLeftImg = getArrBright(leftImg);
+//   int** pToLeftImg = genrateData(leftImg.height(),leftImg.width());
+
+    getImageInfo(leftImg, pToLeftImg);
     int** pToRightImg = getArrBright(rightImg);
     QDir outDir("output");
     if (!outDir.exists()) {
         outDir.mkpath(".");
     }
-    subSize ARA = {10, 15, 10, 15};
-    calcOptFlow(ARA, pToLeftImg, pToRightImg);
+    SubSize ARA = {10, 13, 10, 13};
+
+
+    computeOptFlow(ARA, pToLeftImg, pToRightImg);
 
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());

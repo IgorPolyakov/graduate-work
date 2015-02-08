@@ -5,7 +5,11 @@
 #include <iostream>
 
 #define STEP 10
-#define SIZE_MAT_TO_INV 2
+
+int setSizeMatToInvers()
+{
+    return 2;
+}
 
 void inversion(double **A, int N)
 {
@@ -88,7 +92,7 @@ int **getArrBright(QImage image)
 
 }*/
 
-void calcGrid(QImage image)
+void computeGrid(QImage image)
 {
     QPainter paint(&image);
     unsigned int widthMax, heightMax;
@@ -110,42 +114,44 @@ void calcGrid(QImage image)
     image.save("output/out.png");
 }
 
-double* calcOptFlow(subSize window, int** arrayGray, int** arrayGrayNext)
+double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
 {
-    int iY = 0,   iX = 0,   iT = 0;
-    //qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
+    double iY = 0,   iX = 0,   iT = 0;
+    qDebug() << " " << window.x_l << " " << window.x_r << " " << window.y_l << " " << window.y_r << " \n";
     for (int i = window.x_l; i < window.x_r; i++) {
         for (int j = window.y_l; j < window.y_r; j++) {
-            qDebug() << iX << iY << iT;
-            iX += arrayGray[i - 1][j] - arrayGray[i + 1][j];
-            iY += arrayGray[i][j - 1] - arrayGray[i][j + 1];
-            iT += arrayGray[i][j] - arrayGrayNext[i][j];
-            std::cout << arrayGray[i][j] << " ";
+            qDebug() << "<< iX << iY << iT " << iX << iY << iT <<"\n";
+            iX += ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
+            qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
+            iY += ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) /2;
+            qDebug() << "Al[" << i << "]["<< j - 1 <<"] = " << arrGrayPrevious[i][j-1] << "\t " << "Ar" << i << "]["<<j+1<<"] = "<< arrGrayPrevious[i][j+1] << "\n";
+            iT += ((double)arrGrayPrevious[i][j] - (double)arrGrayNext[i][j]) / 2;
+            qDebug() << "A[" << i<< "]["<<j<<"] = " << arrGrayPrevious[i][j] << " ";
         }
-        std::cout << "\n";
+        qDebug() << "\n";
     }
 
-    double **A = new double *[SIZE_MAT_TO_INV];
+    double **A = new double *[setSizeMatToInvers()];
 
-    for (int i = 0; i < SIZE_MAT_TO_INV; i++)
-        A[i] = new double [SIZE_MAT_TO_INV];
+    for (int i = 0; i < setSizeMatToInvers(); i++)
+        A[i] = new double [setSizeMatToInvers()];
 
     A[0][0] = iX * iX;
     A[0][1] = iX * iY;
     A[1][0] = iX * iY;
     A[1][1] = iY * iY;
 
-    int* b = new int [SIZE_MAT_TO_INV];
+    int* b = new int [setSizeMatToInvers()];
     b[0] = iX * iT;
     b[1] = iY * iT;
 
-    qDebug() << "\n BEFORE " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << "\n";
-    inversion( A, SIZE_MAT_TO_INV);
+    qDebug() << "\n BEFORE " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << b[0] << b[1] << "\n";
+    inversion( A, setSizeMatToInvers());
     qDebug() << "\n AFTER " << A[0][0]<<  A[0][1] <<  A[1][0] <<    A[1][1] << "\n";
-    double* shiftVectr = matrixVectorMultiplic(A, b);
+    double* shiftVectr = multiplicMtrxAndVectr(A, b);
 
-    qDebug() << shiftVectr[0] << shiftVectr[1];
-    freeMemoryFloat(A, SIZE_MAT_TO_INV);
+    //if(debug) qDebug() << shiftVectr[0] << shiftVectr[1];
+    freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
 }
 
@@ -163,29 +169,41 @@ void freeMemoryFloat(double** trash, int size)
     delete [] trash;
 }
 
-double* matrixVectorMultiplic(double** array, int* vector)
+double* multiplicMtrxAndVectr(double** array, int* vector)
 {
-    double* c = new double[2];
-    c[0] = 0;
-    c[1] = 0;
-    qDebug() << vector[0] << " " << vector[1]<< " \n";
-    for (int i = 0; i < SIZE_MAT_TO_INV; i++) {
-        for (int j = 0; j < SIZE_MAT_TO_INV; j++) {
-            c[i] += array[i][j] * (double)vector[j];
-            qDebug() << c[i];
+    double* tmp = new double[setSizeMatToInvers()];
+    tmp[0] = 0;
+    tmp[1] = 0;//вот тут вот не правильно(( но да ладно)
+    for (int i = 0; i < setSizeMatToInvers(); i++) {
+        for (int j = 0; j < setSizeMatToInvers(); j++) {
+            tmp[i] += array[i][j] * (double)vector[j];
         }
     }
-    //qDebug() << c[0] << " " << c[1]<< " \n";
-    return c;
+    return tmp;
 }
 
-void imageInfo(QImage image, int** arr)
+void getImageInfo(QImage image, int** arr)
 {
     qDebug() << "About image :: Size:" << image.size() << "\n"; //<< " Height:" << firstImg.height() << " W:" << firstImg.width() << "\n"
     for (int i = 0; i < image.width(); i++) {
         for (int j = 0; j < image.height(); j++) {
-            std::cout << arr[i][j] << " ";
+            qDebug() << arr[i][j] << " ";
         }
-        std::cout << "||\n";
+        qDebug() << "||\n";
     }
 }
+
+int** genrateData(int w, int h) {
+    int **E = new int *[w];
+
+    for (int i = 0; i < w; i++)
+        E[i] = new int [h];
+
+    for (int i = 0; i < w; i++) {
+        for (int j = 0; j < h; j++) {
+            E[i][j] = i+j+10;
+        }
+    }
+
+    return E;
+};
