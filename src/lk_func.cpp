@@ -115,12 +115,12 @@ void computeGrid(QImage image)
     image.save("output/out.png");
 }
 
-double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(SubSize* window, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iT = 0;
-    if(g_isDebug) qDebug() << "SubSize:X(" << window.x_l << window.x_r << ")\n\t (" << window.y_r << "XX" << ")\n";
-    for (int i = window.x_l; i < window.x_r; i++) {
-        for (int j = window.y_l; j < window.y_r; j++) {
+    if(g_isDebug) qDebug() << "SubSize:X(" << window->x_l << window->x_r << ")\n\t (" << window->y_r << "XX" << ")\n";
+    for (int i = window->x_l; i < window->x_r; i++) {
+        for (int j = window->y_l; j < window->y_r; j++) {
             if(g_isDebug) qDebug() << "X:" << iX << "Y:"<< iY <<"T:"<< iT <<"\n";
             iX += ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
             //if(g_isDebug) qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
