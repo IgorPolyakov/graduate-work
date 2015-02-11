@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     g_isDebug = false;
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
-        return(0);
+        return (0);
     }
     int pr = 0;
     while ((pr = getopt(argc, argv, "l:r:vhd")) != -1) {
@@ -63,10 +63,7 @@ int main(int argc, char *argv[])
     if (!outDir.exists()) {
         outDir.mkpath(".");
     }
-    SubSize ARA = {10, 13, 10, 13};
-
-
-    computeOptFlow(ARA, pToLeftImg, pToRightImg);
+    computeGrid(leftImg, pToLeftImg, pToRightImg);
 
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
