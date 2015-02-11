@@ -50,13 +50,11 @@ int main(int argc, char *argv[])
             break;
         }
     }
-
     leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
     rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
     outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
     int** pToLeftImg = getArrBright(leftImg);
-//   int** pToLeftImg = genrateData(leftImg.height(),leftImg.width());
     int** pToRightImg = getArrBright(rightImg);
 
     QDir outDir("output");

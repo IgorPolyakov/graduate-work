@@ -12,7 +12,7 @@ double* multiplicMtrxAndVectr(double **array, int* vector);
 int** genrateData(int w, int h);
 int** getArrBright(QImage image);
 void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext);
-void drawVectorOnImage(QImage *image, double* shiftVector, struct SubSize ARA);
+//void drawVectorOnImage(QImage *image, double* shiftVector, struct SubSize ARA);
 void freeMemoryFloat(double** trash, int size);
 void freeMemoryInt(int** trash, int size);
 void getImageInfo(QImage image, QString path);

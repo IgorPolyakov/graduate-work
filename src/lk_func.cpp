@@ -6,6 +6,8 @@
 #include <iostream>
 
 #define STEP 10
+#define WINDOW_SIZE 3
+
 
 int setSizeMatToInvers()
 {
@@ -85,40 +87,31 @@ int **getArrBright(QImage image)
     return ary;
 }
 
-void drawVectorOnImage(QImage* image, double* shiftVector, struct SubSize ARA)
-{
-    QPainter painter(&image);
-    painter.drawLine((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2, (ARA.x_l + ARA.x_r) / 2 + shiftVector[0], (ARA.y_l + ARA.y_r) / 2 + shiftVector[1]);
-    qDebug()  << "\n " << (ARA.x_l + ARA.x_r) / 2  << " " << (ARA.y_l + ARA.y_r) / 2  << " " << (ARA.x_l + ARA.x_r) / 2 + shiftVector[0]  << " " << (ARA.y_l + ARA.y_r) / 2 + shiftVector[1];
-}
-
 void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
 {
     SubSize ARA;
-    unsigned int widthMax, heightMax;
-    unsigned int widthStep, heightStep;
-    unsigned int widthStart, heightStart;
+    double* shiftVector = new double[2];
 
-    widthStart = image.width() / (STEP * 2);
-    heightStart = image.width() / (STEP * 2);
-    widthMax = image.width();
-    heightMax = image.height();
-    widthStep = image.width() / STEP;
-    heightStep = image.height() / STEP;
-    double* tmp = new double[2];
+    QPainter painter(&image);
+    painter.setPen(QPen(Qt::red));
+    for (int i = STEP ; i < image.width(); i = STEP + i) {
+        for (int j = STEP; j < image.height(); j = STEP + j) {
+            ARA.x_l = i - WINDOW_SIZE;
+            ARA.x_r = i + WINDOW_SIZE;
+            ARA.y_l = j - WINDOW_SIZE;
+            ARA.y_r = j + WINDOW_SIZE;
 
-    for (unsigned int i = widthStart ; i < widthMax; i = widthStep + i) {
-        for (unsigned int j = heightStart; j < heightMax; j = heightStep + j) {
-            ARA.x_l = i - 1;
-            ARA.x_r = i + 1;
-            ARA.y_l = j - 1;
-            ARA.y_r = j + 1;
+            shiftVector = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
+            if((shiftVector[0]==shiftVector[0])||(shiftVector[1]==shiftVector[0]))//NaN Checking
+                painter.drawLine((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2, (ARA.x_l + ARA.x_r) / 2 + shiftVector[1], (ARA.y_l + ARA.y_r) / 2 + shiftVector[0]);
+            else
+                //painter.drawPoint((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2);
+            if(shiftVector[0]>5||shiftVector[1]>5)
+                qDebug()<<shiftVector[0]<<shiftVector[1]<<" \t\t\t " << i << j;
 
-            tmp = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
-            drawVectorOnImage(image, tmp, ARA);
         }
     }
-    image.save("output/out.png");
+    image.save("input/img1100.png");
 }
 
 double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
@@ -128,7 +121,7 @@ double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
 
     for (int i = window.x_l; i < window.x_r; i++) {
         for (int j = window.y_l; j < window.y_r; j++) {
-            if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
+            //if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
             double tmpX, tmpY, tmpT;
             tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
             iX += tmpX * tmpX;
@@ -164,7 +157,7 @@ double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
     if (g_isDebug) qDebug() << "\nAFTER\n" << "A =\t" << A[0][0] <<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
     if (g_isDebug) qDebug() << "\n b =\t" << b[0] << "\n\t" << b[1];
     double* shiftVectr = multiplicMtrxAndVectr(A, b);
-    qDebug() << shiftVectr[0] << shiftVectr[1];
+    //qDebug() << shiftVectr[0] << shiftVectr[1];
 
     freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
