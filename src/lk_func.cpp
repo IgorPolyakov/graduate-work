@@ -107,14 +107,14 @@ void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
             else
                 //painter.drawPoint((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2);
             if(shiftVector[0]>5||shiftVector[1]>5)
-                qDebug()<<shiftVector[0]<<shiftVector[1]<<" \t\t\t " << i << j;
+                if (g_isDebug) qDebug()<<shiftVector[0]<<shiftVector[1]<<" \t\t\t " << i << j;
 
         }
     }
     image.save("input/img1100.png");
 }
 
-double* computeOptFlow(SubSize* window, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
     if (g_isDebug) qDebug() << "SubSize:X(" << window.x_l << window.x_r << ")\n\t (" << window.y_r << "XX" << ")\n";

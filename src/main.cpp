@@ -4,18 +4,21 @@
 #include <qmath.h>
 #include <iostream>
 #include <getopt.h>
+#include <stdlib.h>
 #include "lk_func.h"
 
 int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
     g_isDebug = false;
+    g_sizeWindowSeach = 3;
+    g_stepForGrid = 5;
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:r:vhd")) != -1) {
+    while ((pr = getopt(argc, argv, "l:r:vhdwg")) != -1) {
         switch (pr) {
         case 'l':
             if (!leftImg.load(optarg)) {
@@ -40,12 +43,22 @@ int main(int argc, char *argv[])
             std::cout << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             std::cout << "\n\t-l\t\t load left image";
             std::cout << "\n\t-r\t\t load right image";
+            std::cout << "\n\t-w\t\t size window search (3px by default)";
+            std::cout << "\n\t-g\t\t step for grid (5px by default)";
             std::cout << "\n\t-v\t\t show version";
             std::cout << "\n\t-h\t\t show help";
             std::cout << "\n\t-d\t\t debug mod on\n";
             return (0);
+        case 'w':
+            g_sizeWindowSeach = atoi(optarg);
+            std::cout << "Size window search: " << g_sizeWindowSeach << "\n";
+            break;
+        case 'g':
+            g_stepForGrid = atoi(optarg);
+            std::cout << "Step for grid: " << g_stepForGrid << "\n";
+            break;
         case 'd':
-            std::cout << "Debug mode ON" << "\n";
+            std::cout << "Debug mode: ON" << "\n";
             g_isDebug = true;
             break;
         }
