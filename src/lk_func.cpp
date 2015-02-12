@@ -5,10 +5,6 @@
 #include <QFileInfo>
 #include <iostream>
 
-#define STEP 10
-#define WINDOW_SIZE 3
-
-
 int setSizeMatToInvers()
 {
     return 2;
@@ -89,38 +85,35 @@ int **getArrBright(QImage image)
 
 void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
 {
-    SubSize ARA;
+    SubSize* ARA = new SubSize;
+    ARA->radiusCode = g_sizeWindowSeach;
     double* shiftVector = new double[2];
 
     QPainter painter(&image);
     painter.setPen(QPen(Qt::red));
-    for (int i = STEP ; i < image.width(); i = STEP + i) {
-        for (int j = STEP; j < image.height(); j = STEP + j) {
-            ARA.x_l = i - WINDOW_SIZE;
-            ARA.x_r = i + WINDOW_SIZE;
-            ARA.y_l = j - WINDOW_SIZE;
-            ARA.y_r = j + WINDOW_SIZE;
-
+    for (int i = g_stepForGrid ; i < image.width() - g_stepForGrid; i = g_stepForGrid + i) {
+        for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
+            ARA->xCore = i;
+            ARA->yCore = j;
             shiftVector = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
-            if((shiftVector[0]==shiftVector[0])||(shiftVector[1]==shiftVector[0]))//NaN Checking
-                painter.drawLine((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2, (ARA.x_l + ARA.x_r) / 2 + shiftVector[1], (ARA.y_l + ARA.y_r) / 2 + shiftVector[0]);
+            if ((shiftVector[0] == shiftVector[0]) || (shiftVector[1] == shiftVector[1])) //NaN Checking
+                painter.drawLine(ARA->xCore, ARA->yCore, ARA->xCore + shiftVector[1], ARA->yCore + shiftVector[0]);
             else
-                //painter.drawPoint((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2);
-            if(shiftVector[0]>5||shiftVector[1]>5)
-                if (g_isDebug) qDebug()<<shiftVector[0]<<shiftVector[1]<<" \t\t\t " << i << j;
-
+                painter.drawPoint(ARA->xCore, ARA->yCore);
         }
     }
     image.save("input/img1100.png");
+    delete [] shiftVector;
+    delete [] ARA;
 }
 
-double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(SubSize* window, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
-    if (g_isDebug) qDebug() << "SubSize:X(" << window.x_l << window.x_r << ")\n\t (" << window.y_r << "XX" << ")\n";
+    if (g_isDebug) qDebug() << "SubSize:X" << window->xCore << "Y:" << window->yCore << "R:" << window->radiusCode << "\n";
 
-    for (int i = window.x_l; i < window.x_r; i++) {
-        for (int j = window.y_l; j < window.y_r; j++) {
+    for (int i = (window->xCore - window->radiusCode); i < (window->xCore + window->radiusCode); i++) {
+        for (int j = (window->yCore - window->radiusCode); j < (window->yCore + window->radiusCode); j++) {
             //if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
             double tmpX, tmpY, tmpT;
             tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;

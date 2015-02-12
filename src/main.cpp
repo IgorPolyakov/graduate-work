@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:r:vhdwg")) != -1) {
+    while ((pr = getopt(argc, argv, "l:r:vhdw:g:")) != -1) {
         switch (pr) {
         case 'l':
             if (!leftImg.load(optarg)) {
