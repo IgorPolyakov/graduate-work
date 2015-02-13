@@ -4,4 +4,6 @@
 extern bool g_isDebug;
 extern int g_sizeWindowSeach;
 extern int g_stepForGrid;
+extern int g_iteration;
+
 #endif // GLOBAL_H

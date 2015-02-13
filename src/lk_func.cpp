@@ -95,7 +95,12 @@ void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
         for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
             ARA->xCore = i;
             ARA->yCore = j;
-            shiftVector = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
+            for (int k = 0; k <= g_iteration; ++k) {
+                shiftVector = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
+                ARA->xCore = i + shiftVector[0];
+                ARA->yCore = j + shiftVector[1];
+                if (g_isDebug) qDebug() << "SubS89ize:X" << ARA->xCore << "Y:" << ARA->yCore << "R:" << ARA->radiusCode << "\n";
+            }
             if ((shiftVector[0] == shiftVector[0]) || (shiftVector[1] == shiftVector[1])) //NaN Checking
                 painter.drawLine(ARA->xCore, ARA->yCore, ARA->xCore + shiftVector[1], ARA->yCore + shiftVector[0]);
             else
@@ -142,16 +147,12 @@ double* computeOptFlow(SubSize* window, int** arrGrayPrevious, int** arrGrayNext
     A[1][1] = iY;
 
     int* b = new int [setSizeMatToInvers()];
+
     b[0] = -iTX;
     b[1] = -iTY;
 
-    if (g_isDebug) qDebug() << "\nBEFORE\n" << "A =\t" << A[0][0] <<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
     inversion(A, setSizeMatToInvers());
-    if (g_isDebug) qDebug() << "\nAFTER\n" << "A =\t" << A[0][0] <<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
-    if (g_isDebug) qDebug() << "\n b =\t" << b[0] << "\n\t" << b[1];
     double* shiftVectr = multiplicMtrxAndVectr(A, b);
-    //qDebug() << shiftVectr[0] << shiftVectr[1];
-
     freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
 }

@@ -13,12 +13,13 @@ int main(int argc, char *argv[])
     g_isDebug = false;
     g_sizeWindowSeach = 3;
     g_stepForGrid = 5;
+    g_iteration = 1;
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:r:vhdw:g:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:r:vhdi:w:g:")) != -1) {
         switch (pr) {
         case 'l':
             if (!leftImg.load(optarg)) {
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
             std::cout << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             std::cout << "\n\t-l\t\t load left image";
             std::cout << "\n\t-r\t\t load right image";
+            std::cout << "\n\t-i\t\t count iteration (1 by default)";
             std::cout << "\n\t-w\t\t size window search (3px by default)";
             std::cout << "\n\t-g\t\t step for grid (5px by default)";
             std::cout << "\n\t-v\t\t show version";
@@ -56,6 +58,10 @@ int main(int argc, char *argv[])
         case 'g':
             g_stepForGrid = atoi(optarg);
             std::cout << "Step for grid: " << g_stepForGrid << "\n";
+            break;
+        case 'i':
+            g_stepForGrid = atoi(optarg);
+            std::cout << "Count iteration: " << g_iteration << "\n";
             break;
         case 'd':
             std::cout << "Debug mode: ON" << "\n";
