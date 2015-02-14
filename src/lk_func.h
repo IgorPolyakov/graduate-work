@@ -7,7 +7,7 @@
 #ifndef LK_FUNC_H
 #define LK_FUNC_H
 
-double* computeOptFlow(SubSize* window, int** arrGrayPrevious, int** arrGrayNext);
+double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext);
 double* multiplicMtrxAndVectr(double **array, int* vector);
 int** genrateData(int w, int h);
 int** getArrBright(QImage image);
