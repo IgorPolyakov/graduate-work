@@ -96,16 +96,11 @@ void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
         for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
             initialWindow->xCore = i;
             initialWindow->yCore = j;
-
             shiftVector = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
-            if (g_isDebug) qDebug() << "SubS89ize:X" << initialWindow->xCore << "Y:" << initialWindow->yCore << "R:" << initialWindow->radiusCode << "\n";
-            if ((shiftVector[0] == shiftVector[0]) || (shiftVector[1] == shiftVector[1])) //NaN Checking
-                painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + shiftVector[1], initialWindow->yCore + shiftVector[0]);
-            else
-                painter.drawPoint(initialWindow->xCore, initialWindow->yCore);
+            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + shiftVector[0], initialWindow->yCore + shiftVector[1]);
         }
     }
-    image.save("input/img1100.png");
+    image.save("input/02.png");
     delete [] shiftVector;
     delete [] initialWindow;
 }
@@ -165,6 +160,10 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
             modifyWindow->xCore += floor(shiftVectr[0]);
             modifyWindow->yCore += floor(shiftVectr[1]);
+        }
+        else if ((shiftVectr[0] == 0.0f) && (shiftVectr[1] == 0.0f))
+        {
+            k = g_iteration;
         }
         else
             qDebug() << "eghfds";

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
     g_isDebug = false;
-    g_sizeWindowSeach = 1;
+    g_sizeWindowSeach = 3;
     g_stepForGrid = 10;
     g_iteration = 1;
     if (argc <= 1) {
