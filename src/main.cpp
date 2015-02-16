@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
     g_isDebug = false;
-    g_sizeWindowSeach = 3;
-    g_stepForGrid = 5;
+    g_sizeWindowSeach = 1;
+    g_stepForGrid = 10;
     g_iteration = 1;
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             std::cout << "Step for grid: " << g_stepForGrid << "\n";
             break;
         case 'i':
-            g_stepForGrid = atoi(optarg);
+            g_iteration = atoi(optarg);
             std::cout << "Count iteration: " << g_iteration << "\n";
             break;
         case 'd':
