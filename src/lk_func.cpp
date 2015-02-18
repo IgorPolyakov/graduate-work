@@ -4,10 +4,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <iostream>
-
-#define STEP 10
-#define WINDOW_SIZE 3
-
+#include <math.h>
 
 int setSizeMatToInvers()
 {
@@ -87,82 +84,88 @@ int **getArrBright(QImage image)
     return ary;
 }
 
-void computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
+QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
 {
-    SubSize ARA;
+    SubSize* initialWindow = new SubSize;
+    initialWindow->radiusCode = g_sizeWindowSeach;
     double* shiftVector = new double[2];
 
     QPainter painter(&image);
     painter.setPen(QPen(Qt::red));
-    for (int i = STEP ; i < image.width(); i = STEP + i) {
-        for (int j = STEP; j < image.height(); j = STEP + j) {
-            ARA.x_l = i - WINDOW_SIZE;
-            ARA.x_r = i + WINDOW_SIZE;
-            ARA.y_l = j - WINDOW_SIZE;
-            ARA.y_r = j + WINDOW_SIZE;
-
-            shiftVector = computeOptFlow(ARA, arrGrayPrevious, arrGrayNext);
-            if((shiftVector[0]==shiftVector[0])||(shiftVector[1]==shiftVector[0]))//NaN Checking
-                painter.drawLine((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2, (ARA.x_l + ARA.x_r) / 2 + shiftVector[1], (ARA.y_l + ARA.y_r) / 2 + shiftVector[0]);
-            else
-                //painter.drawPoint((ARA.x_l + ARA.x_r) / 2, (ARA.y_l + ARA.y_r) / 2);
-            if(shiftVector[0]>5||shiftVector[1]>5)
-                if (g_isDebug) qDebug()<<shiftVector[0]<<shiftVector[1]<<" \t\t\t " << i << j;
-
+    for (int i = g_stepForGrid ; i < image.width() - g_stepForGrid; i = g_stepForGrid + i) {
+        for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
+            initialWindow->xCore = i;
+            initialWindow->yCore = j;
+            shiftVector = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
+            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + shiftVector[0], initialWindow->yCore + shiftVector[1]);
         }
     }
-    image.save("input/img1100.png");
+    delete [] shiftVector;
+    delete [] initialWindow;
+    return image;
 }
 
-double* computeOptFlow(SubSize window, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
-    if (g_isDebug) qDebug() << "SubSize:X(" << window.x_l << window.x_r << ")\n\t (" << window.y_r << "XX" << ")\n";
+    double tmpX, tmpY, tmpT;
+    double* shiftVectr = new double[2];
+    SubSize* modifyWindow = new SubSize;
 
-    for (int i = window.x_l; i < window.x_r; i++) {
-        for (int j = window.y_l; j < window.y_r; j++) {
-            //if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
-            double tmpX, tmpY, tmpT;
-            tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-            iX += tmpX * tmpX;
-            //if(g_isDebug) qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
-            tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
-            iY += tmpY * tmpY;
-            iXY += tmpX * tmpY;
-            //if(g_isDebug) qDebug() << "Al[" << i << "]["<< j - 1 <<"] = " << arrGrayPrevious[i][j-1] << "\t " << "Ar" << i << "]["<<j+1<<"] = "<< arrGrayPrevious[i][j+1] << "\n";
-            tmpT = ((double)arrGrayPrevious[i][j] - (double)arrGrayNext[i][j]) / 2;
-            iTX += tmpX * tmpT;
-            iTY += tmpY * tmpT;
-            //if(g_isDebug) qDebug() << "A[" << i<< "]["<<j<<"] = " << arrGrayPrevious[i][j] << " ";
-        }
-        //if(g_isDebug) qDebug() << "\n";
-    }
-
+    modifyWindow->xCore = initialWindow->xCore;
+    modifyWindow->yCore = initialWindow->yCore;
+    modifyWindow->radiusCode = initialWindow->radiusCode;
     double **A = new double *[setSizeMatToInvers()];
 
     for (int i = 0; i < setSizeMatToInvers(); i++)
         A[i] = new double [setSizeMatToInvers()];
 
-    A[0][0] = iX;
-    A[0][1] = iXY;
-    A[1][0] = iXY;
-    A[1][1] = iY;
-
     int* b = new int [setSizeMatToInvers()];
-    b[0] = -iTX;
-    b[1] = -iTY;
 
-    if (g_isDebug) qDebug() << "\nBEFORE\n" << "A =\t" << A[0][0] <<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
-    inversion(A, setSizeMatToInvers());
-    if (g_isDebug) qDebug() << "\nAFTER\n" << "A =\t" << A[0][0] <<  A[0][1] <<  "\n\t" << A[1][0] << A[1][1];
-    if (g_isDebug) qDebug() << "\n b =\t" << b[0] << "\n\t" << b[1];
-    double* shiftVectr = multiplicMtrxAndVectr(A, b);
-    //qDebug() << shiftVectr[0] << shiftVectr[1];
+    if (g_isDebug) qDebug() << "SubSize:X" << initialWindow->xCore << "Y:" << initialWindow->yCore << "R:" << initialWindow->radiusCode << "\n";
+    for (int k = 0; k < g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
+        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i < (initialWindow->xCore + initialWindow->radiusCode); i++) {
+            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j < (initialWindow->yCore + initialWindow->radiusCode); j++) {
+                //if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
+                tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
+                //if(g_isDebug) qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
+                tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
+                iX  += tmpX * tmpX;
+                iY  += tmpY * tmpY;
+                iXY += tmpX * tmpY;
+            }
+        }
+        for (int i = (modifyWindow->xCore - modifyWindow->radiusCode); i < (modifyWindow->xCore + modifyWindow->radiusCode); i++) {
+            for (int j = (modifyWindow->yCore - modifyWindow->radiusCode); j < (modifyWindow->yCore + modifyWindow->radiusCode); j++) {
+                tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
+                tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
+                tmpT = ((double)arrGrayPrevious[i][j] - (double)arrGrayNext[i][j]) / 2;
+                iTX += tmpX * tmpT;
+                iTY += tmpY * tmpT;
+            }
+        }
+        A[0][0] = iX;
+        A[0][1] = iXY;
+        A[1][0] = iXY;
+        A[1][1] = iY;
 
+        b[0] = -iTX;
+        b[1] = -iTY;
+
+        inversion(A, setSizeMatToInvers());
+        shiftVectr = multiplicMtrxAndVectr(A, b);
+        if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
+            modifyWindow->xCore += floor(shiftVectr[0]);
+            modifyWindow->yCore += floor(shiftVectr[1]);
+        } else
+            qDebug() << "NaN Error";
+        if(g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "temp--";
+    }
+    if(g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
+    //delete shiftVectr;
 }
-
 void freeMemoryInt(int** trash, int size)
 {
     for (int i = 0; i < size; ++i)
@@ -208,6 +211,16 @@ int** genrateData(int w, int h)
             E[i][j] = i + j + 10;
         }
     }
-
     return E;
-};
+}
+
+void joinImage(QImage img1, QImage img2, QImage img3, QString info)
+{
+    QImage result(img1.width() + img2.width() + img3.width(),img1.height(),QImage::Format_ARGB32);
+    QPainter paint;
+    paint.begin(&result);
+    paint.drawImage(0,0, img1);
+    paint.drawImage(img1.width(),0, img2);
+    paint.drawImage(img1.width() + img2.width(),0, img3);
+    result.save("output/" + info + ".png");
+}
