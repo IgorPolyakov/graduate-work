@@ -5,6 +5,8 @@ struct SubSize {
     int xCore;
     int yCore;
     int radiusCode;
+    int xMax;
+    int yMax;
 };
 
 #endif

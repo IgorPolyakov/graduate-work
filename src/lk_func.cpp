@@ -88,6 +88,8 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
 {
     SubSize* initialWindow = new SubSize;
     initialWindow->radiusCode = g_sizeWindowSeach;
+    initialWindow->xMax = image.width();
+    initialWindow->yMax = image.height();
     double* shiftVector = new double[2];
 
     QPainter painter(&image);
@@ -115,6 +117,8 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
     modifyWindow->xCore = initialWindow->xCore;
     modifyWindow->yCore = initialWindow->yCore;
     modifyWindow->radiusCode = initialWindow->radiusCode;
+    modifyWindow->xMax = initialWindow->xMax;
+    modifyWindow->yMax = initialWindow->yMax;
     double **A = new double *[setSizeMatToInvers()];
 
     for (int i = 0; i < setSizeMatToInvers(); i++)
@@ -154,14 +158,21 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
 
         inversion(A, setSizeMatToInvers());
         shiftVectr = multiplicMtrxAndVectr(A, b);
+
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
             modifyWindow->xCore += floor(shiftVectr[0]);
             modifyWindow->yCore += floor(shiftVectr[1]);
         } else
             qDebug() << "NaN Error";
-        if(g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "temp--";
+        if (modifyWindow->xCore > modifyWindow->xMax) {
+            modifyWindow->xCore = modifyWindow->xMax;
+        }
+        if (modifyWindow->yCore > modifyWindow->yMax) {
+            modifyWindow->yCore = modifyWindow->yMax;
+        }
+        if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "temp--";
     }
-    if(g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
+    if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
     //delete shiftVectr;
@@ -216,11 +227,11 @@ int** genrateData(int w, int h)
 
 void joinImage(QImage img1, QImage img2, QImage img3, QString info)
 {
-    QImage result(img1.width() + img2.width() + img3.width(),img1.height(),QImage::Format_ARGB32);
+    QImage result(img1.width() + img2.width() + img3.width(), img1.height(), QImage::Format_ARGB32);
     QPainter paint;
     paint.begin(&result);
-    paint.drawImage(0,0, img1);
-    paint.drawImage(img1.width(),0, img2);
-    paint.drawImage(img1.width() + img2.width(),0, img3);
+    paint.drawImage(0, 0, img1);
+    paint.drawImage(img1.width(), 0, img2);
+    paint.drawImage(img1.width() + img2.width(), 0, img3);
     result.save("output/" + info + ".png");
 }
