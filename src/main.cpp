@@ -10,6 +10,7 @@
 int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
+    QString info;
     g_isDebug = false;
     g_sizeWindowSeach = 3;
     g_stepForGrid = 10;
@@ -71,7 +72,6 @@ int main(int argc, char *argv[])
     }
     leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
     rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
-    outImg = outImg.convertToFormat(QImage::Format_ARGB32);
 
     int** pToLeftImg = getArrBright(leftImg);
     int** pToRightImg = getArrBright(rightImg);
@@ -80,8 +80,10 @@ int main(int argc, char *argv[])
     if (!outDir.exists()) {
         outDir.mkpath(".");
     }
-    computeGrid(leftImg, pToLeftImg, pToRightImg);
+    info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
 
+    outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
+    joinImage(leftImg, rightImg, outImg, info);
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
     return 0;
