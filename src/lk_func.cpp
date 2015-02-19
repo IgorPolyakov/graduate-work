@@ -162,13 +162,16 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
             modifyWindow->xCore += floor(shiftVectr[0]);
             modifyWindow->yCore += floor(shiftVectr[1]);
-        } else
+        } else {
             qDebug() << "NaN Error";
+            shiftVectr[0] = 0;
+            shiftVectr[1] = 0;
+        }
         if (modifyWindow->xCore > modifyWindow->xMax) {
-            modifyWindow->xCore = modifyWindow->xMax;
+            modifyWindow->xCore = initialWindow->xCore;
         }
         if (modifyWindow->yCore > modifyWindow->yMax) {
-            modifyWindow->yCore = modifyWindow->yMax;
+            modifyWindow->yCore = initialWindow->yCore;
         }
         if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "temp--";
     }
@@ -194,8 +197,9 @@ void freeMemoryFloat(double** trash, int size)
 double* multiplicMtrxAndVectr(double** array, int* vector)
 {
     double* tmp = new double[setSizeMatToInvers()];
-    tmp[0] = 0;
-    tmp[1] = 0;//вот тут вот не правильно(( но да ладно)
+    for (int cnt = 0; cnt < setSizeMatToInvers(); ++cnt) {
+        tmp[cnt] = 0;
+    }
     for (int i = 0; i < setSizeMatToInvers(); i++) {
         for (int j = 0; j < setSizeMatToInvers(); j++) {
             tmp[i] += array[i][j] * (double)vector[j];

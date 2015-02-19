@@ -11,10 +11,17 @@ int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
     QString info;
+    /*
+     * Default opt'arg
+     * Begin
+     */
     g_isDebug = false;
     g_sizeWindowSeach = 4;
-    g_stepForGrid = 8;
+    g_stepForGrid = 10;
     g_iteration = 1;
+    /*
+     * end
+     */
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
         return (0);
