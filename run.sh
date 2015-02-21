@@ -2,7 +2,7 @@
 if [ -d "output" ]; then
 	rm -r output
 fi
-app_name=./lukas_kanade_qt
+app_name=./bin/lukas_kanade_qt
 
 img_1=input/frame00.png	#yosmite
 img_2=input/frame01.png	#yosmite

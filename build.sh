@@ -1,3 +1,5 @@
 #!/bin/bash
-qmake-qt4
+cd obj
+qmake
 make
+cd ../
