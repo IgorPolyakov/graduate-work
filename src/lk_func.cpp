@@ -127,8 +127,8 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
 
     if (g_isDebug) qDebug() << "SubSize:X" << initialWindow->xCore << "Y:" << initialWindow->yCore << "R:" << initialWindow->radiusCode << "\n";
     for (int k = 0; k <= g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
-        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i < (initialWindow->xCore + initialWindow->radiusCode); i++) {
-            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j < (initialWindow->yCore + initialWindow->radiusCode); j++) {
+        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i <= (initialWindow->xCore + initialWindow->radiusCode); i++) {
+            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j <= (initialWindow->yCore + initialWindow->radiusCode); j++) {
                 tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
                 tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
                 iX  += tmpX * tmpX;
