@@ -1,10 +1,12 @@
 TEMPLATE = app
-TARGET =
-DEPENDPATH += . src
-INCLUDEPATH += .
+TARGET = lukas_kanade_qt
+CONFIG += qt warn on debug
 # Input
 REVISION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD describe --long)
 DEFINES += GITHASH=\\\"$$REVISION\\\"
+DESTDIR = bin
+OBJECTS_DIR = obj
+MOC_DIR = obj
 SOURCES += \
     src/lk_func.cpp \
     src/main.cpp \

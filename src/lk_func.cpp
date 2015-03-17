@@ -90,7 +90,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
     initialWindow->radiusCode = g_sizeWindowSeach;
     initialWindow->xMax = image.width();
     initialWindow->yMax = image.height();
-    double* shiftVector = new double[2];
+    double* vectorOptFlw = new double[2];
 
     QPainter painter(&image);
     painter.setPen(QPen(Qt::red));
@@ -98,11 +98,11 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
         for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
             initialWindow->xCore = i;
             initialWindow->yCore = j;
-            shiftVector = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
-            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + shiftVector[0], initialWindow->yCore + shiftVector[1]);
+            vectorOptFlw = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
+            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
         }
     }
-    delete [] shiftVector;
+    delete [] vectorOptFlw;
     delete [] initialWindow;
     return image;
 }
@@ -112,13 +112,12 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
     double tmpX, tmpY, tmpT;
     double* shiftVectr = new double[2];
-    SubSize* modifyWindow = new SubSize;
+    for (int var = 0; var < 2; ++var) {
+        shiftVectr = 0;
+    }
+    int deltaX = 0;
+    int deltaY = 0;
 
-    modifyWindow->xCore = initialWindow->xCore;
-    modifyWindow->yCore = initialWindow->yCore;
-    modifyWindow->radiusCode = initialWindow->radiusCode;
-    modifyWindow->xMax = initialWindow->xMax;
-    modifyWindow->yMax = initialWindow->yMax;
     double **A = new double *[setSizeMatToInvers()];
 
     for (int i = 0; i < setSizeMatToInvers(); i++)
@@ -127,23 +126,16 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
     int* b = new int [setSizeMatToInvers()];
 
     if (g_isDebug) qDebug() << "SubSize:X" << initialWindow->xCore << "Y:" << initialWindow->yCore << "R:" << initialWindow->radiusCode << "\n";
-    for (int k = 0; k < g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
-        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i < (initialWindow->xCore + initialWindow->radiusCode); i++) {
-            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j < (initialWindow->yCore + initialWindow->radiusCode); j++) {
-                //if (g_isDebug) qDebug() << "X:" << iX << "Y:" << iY << "T:" << iTX << "\n";
+    for (int k = 0; k <= g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
+        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i <= (initialWindow->xCore + initialWindow->radiusCode); i++) {
+            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j <= (initialWindow->yCore + initialWindow->radiusCode); j++) {
                 tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-                //if(g_isDebug) qDebug() << "Al[" << i - 1 << "]["<<j<<"] = " << arrGrayPrevious[i-1][j] << "\t " << "Ar[" << i + 1 << "]["<<j<<"] = "<< arrGrayPrevious[i+1][j] << "\n";
                 tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
                 iX  += tmpX * tmpX;
                 iY  += tmpY * tmpY;
                 iXY += tmpX * tmpY;
-            }
-        }
-        for (int i = (modifyWindow->xCore - modifyWindow->radiusCode); i < (modifyWindow->xCore + modifyWindow->radiusCode); i++) {
-            for (int j = (modifyWindow->yCore - modifyWindow->radiusCode); j < (modifyWindow->yCore + modifyWindow->radiusCode); j++) {
-                tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-                tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
-                tmpT = ((double)arrGrayPrevious[i][j] - (double)arrGrayNext[i][j]) / 2;
+
+                tmpT = ((double)arrGrayPrevious[i + deltaX][j + deltaY] - (double)arrGrayNext[i + deltaX][j + deltaY]) / 2;
                 iTX += tmpX * tmpT;
                 iTY += tmpY * tmpT;
             }
@@ -159,18 +151,28 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
         inversion(A, setSizeMatToInvers());
         shiftVectr = multiplicMtrxAndVectr(A, b);
 
+        if (initialWindow->xCore + shiftVectr[0] + initialWindow->radiusCode > initialWindow->xMax) {
+            break;
+        }
+        if (initialWindow->xCore + shiftVectr[0] - initialWindow->radiusCode < 0) {
+            break;
+        }
+        if (initialWindow->yCore + shiftVectr[1] + initialWindow->radiusCode > initialWindow->yMax) {
+            break;
+        }
+        if (initialWindow->yCore + shiftVectr[1] - initialWindow->radiusCode < 0) {
+            break;
+        }
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
-            modifyWindow->xCore += floor(shiftVectr[0]);
-            modifyWindow->yCore += floor(shiftVectr[1]);
-        } else
+            deltaX = (int)floor(shiftVectr[0]);
+            deltaY = (int)floor(shiftVectr[1]);/*
+            deltaX = (int)floor(shiftVectr[0]);
+            deltaY = (int)floor(shiftVectr[1]);*/
+        } else {
             qDebug() << "NaN Error";
-        if (modifyWindow->xCore > modifyWindow->xMax) {
-            modifyWindow->xCore = modifyWindow->xMax;
+            shiftVectr[0] = 0;
+            shiftVectr[1] = 0;
         }
-        if (modifyWindow->yCore > modifyWindow->yMax) {
-            modifyWindow->yCore = modifyWindow->yMax;
-        }
-        if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "temp--";
     }
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, setSizeMatToInvers());
@@ -194,8 +196,9 @@ void freeMemoryFloat(double** trash, int size)
 double* multiplicMtrxAndVectr(double** array, int* vector)
 {
     double* tmp = new double[setSizeMatToInvers()];
-    tmp[0] = 0;
-    tmp[1] = 0;//вот тут вот не правильно(( но да ладно)
+    for (int cnt = 0; cnt < setSizeMatToInvers(); ++cnt) {
+        tmp[cnt] = 0;
+    }
     for (int i = 0; i < setSizeMatToInvers(); i++) {
         for (int j = 0; j < setSizeMatToInvers(); j++) {
             tmp[i] += array[i][j] * (double)vector[j];

@@ -11,10 +11,17 @@ int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
     QString info;
+    /*
+     * Default opt'arg
+     * Begin
+     */
     g_isDebug = false;
     g_sizeWindowSeach = 4;
-    g_stepForGrid = 8;
+    g_stepForGrid = 32;
     g_iteration = 1;
+    /*
+     * end
+     */
     if (argc <= 1) {
         std::cout << "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
         return (0);
@@ -81,7 +88,6 @@ int main(int argc, char *argv[])
         outDir.mkpath(".");
     }
     info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
-
     outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
     joinImage(leftImg, rightImg, outImg, info);
     freeMemoryInt(pToLeftImg, leftImg.width());
