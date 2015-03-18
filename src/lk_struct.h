@@ -1,12 +1,18 @@
 #ifndef LK_STRUCT_H
 #define LK_STRUCT_H
+/*!
+\file
+\brief Заголовочный файл с описанием используемых структур
 
+Данный файл содержит в себе определения основных
+структур, используемых в программе
+*/
 struct SubSize {
-    int xCore;
-    int yCore;
-    int radiusCode;
-    int xMax;
-    int yMax;
+    int xCore;          //!< Координата пиклеся по x
+    int yCore;          //!< Координата пиклеся по y
+    int radiusCode;     //!< Радиус окна, т.е. если  = 2, то сетка 5х5
+    int xMax;           //!< Размер изображения по горизонтали
+    int yMax;           //!< Размер изображения по вертикали
 };
 
 #endif

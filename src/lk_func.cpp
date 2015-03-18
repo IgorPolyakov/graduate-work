@@ -213,21 +213,6 @@ void getImageInfo(QImage image, QString path)
     qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes" << image.size();
 }
 
-int** genrateData(int w, int h)
-{
-    int **E = new int *[w];
-
-    for (int i = 0; i < w; i++)
-        E[i] = new int [h];
-
-    for (int i = 0; i < w; i++) {
-        for (int j = 0; j < h; j++) {
-            E[i][j] = i + j + 10;
-        }
-    }
-    return E;
-}
-
 void joinImage(QImage img1, QImage img2, QImage img3, QString info)
 {
     QImage result(img1.width() + img2.width() + img3.width(), img1.height(), QImage::Format_ARGB32);
