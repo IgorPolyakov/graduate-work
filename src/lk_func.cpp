@@ -223,3 +223,25 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(img1.width() + img2.width(), 0, img3);
     result.save("output/" + info + ".png");
 }
+
+int resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid)
+{
+    if((image.width()%2 == 0)||(image.height()%2 == 0))
+    {
+        for (int var = 0; var < total; ++var) {
+            for (int var = 0; var < total; ++var) {
+                arrGrayPrevious;
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Try another image, like this -> border%2=0";
+        return 1;
+    }
+}
+
+void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
+{
+    /***/
+}
