@@ -75,8 +75,9 @@ void getImageInfo(QImage image, QString path);
  */
 void inversion(double **A, int N);
 
-/*! Объединение трех изображений(первого, второго и первого с нанесенным поверх веторным полем)
+/*!
  * \brief joinImage
+ * Объединение трех изображений(первого, второго и первого с нанесенным поверх веторным полем)
  * \param [in] img1 − Первое изображение
  * \param [in] img2 − Второе изображение
  * \param [in] img3 − Первого с нанесенным поверх веторным полем
@@ -92,12 +93,12 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info);
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return изображение с нанесенным по верх векторным полем
  */
-int resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid);
+void resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid);
 
 /*! Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается.
  * \brief getMemoryForPyramid
  * \param [in] pointToPyramid
  */
-void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid);
+//void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid);
 
 #endif

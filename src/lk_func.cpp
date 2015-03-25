@@ -224,24 +224,42 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     result.save("output/" + info + ".png");
 }
 
-int resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid)
+void resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid)
 {
     if((image.width()%2 == 0)||(image.height()%2 == 0))
     {
-        for (int var = 0; var < total; ++var) {
-            for (int var = 0; var < total; ++var) {
-                arrGrayPrevious;
+        int newWidth = (image.width()/2);
+        int newHeight= (image.height()/2);
+        int newSize = newWidth * newHeight;
+        int count = 0;
+        uchar* ptmpImg = new uchar[newHeight * newWidth];
+
+        for (int i = 0; i < image.width(); i++) {
+            for (int j = 0; j < image.height(); j++) {
+                if(count == newSize){
+                    break;
+                }
+                else if((i%2 == 0)||(j%2 == 0))
+                {
+                    ptmpImg[count] = (uchar)((arrGrayPrevious[i][j] + arrGrayPrevious[i+1][j] + arrGrayPrevious[i][j+1] + arrGrayPrevious[i+1][j+1])/4);
+                    qDebug() << ptmpImg[count];
+                }
+                count++;
             }
         }
+
+        QImage result(ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
+        result.save("output/resize.png");
+        delete[] ptmpImg;
     }
     else
     {
         qDebug() << "Try another image, like this -> border%2=0";
-        return 1;
     }
 }
 
-void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
+/*void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
 {
-    /***/
+
 }
+*/
