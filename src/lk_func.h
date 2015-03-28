@@ -87,13 +87,16 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info);
 
 /*! Функция масштабирует изображения, на вход указатель массив яркостей
  * \brief resizeImage
- * \param [in] image − исходное изображение
- * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
- * \param [in] levelPyramid − Колличество уменьшиных копий изображения
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return изображение с нанесенным по верх векторным полем
  */
-void resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid);
+
+/*!
+ * \brief resizeImage
+ * \param [in] image − исходное изображение
+ * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
+ */
+void resizeImage(QImage image, int** arrGrayPrevious);
 
 /*! Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается.
  * \brief getMemoryForPyramid

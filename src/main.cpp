@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     /*info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
     outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
     joinImage(leftImg, rightImg, outImg, info);*/
-    resizeImage(leftImg, pToLeftImg, pToRightImg, 1 );
+    resizeImage(leftImg, pToLeftImg);
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
     return 0;

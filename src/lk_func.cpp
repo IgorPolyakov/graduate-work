@@ -5,7 +5,7 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
-
+#define kK 2
 int setSizeMatToInvers()
 {
     return 2;
@@ -224,38 +224,36 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     result.save("output/" + info + ".png");
 }
 
-void resizeImage(QImage image, int** arrGrayPrevious, int** arrGrayNext, int levelPyramid)
+void resizeImage(QImage image, int** arrGrayPrevious)
 {
-    if((image.width()%2 == 0)||(image.height()%2 == 0))
-    {
-        int newWidth = (image.width()/2);
-        int newHeight= (image.height()/2);
-        int newSize = newWidth * newHeight;
-        int count = 0;
-        uchar* ptmpImg = new uchar[newHeight * newWidth];
+    /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
 
-        for (int i = 0; i < image.width(); i++) {
-            for (int j = 0; j < image.height(); j++) {
-                if(count == newSize){
-                    break;
+    int newWidth = (image.width()/kK);
+    int newHeight= (image.height()/kK);
+    int tmp = 0;
+
+    int* ptmpImg = new int[newHeight * newWidth];
+    int** data = new int*[newHeight];
+
+    for(int i = 0; i < newHeight; ++i)
+        data[i] = ptmpImg + newWidth * i;
+
+    for (int i = 0; i < newWidth;i++) {
+        for (int j = 0; j < newHeight;j++) {
+            for (int ii = 0; ii < kK-1; ++ii) {
+                for (int jj = 0; jj < kK-1; ++jj) {
+                    tmp = arrGrayPrevious[kK * i + ii][ kK * j + jj];
                 }
-                else if((i%2 == 0)||(j%2 == 0))
-                {
-                    ptmpImg[count] = (uchar)((arrGrayPrevious[i][j] + arrGrayPrevious[i+1][j] + arrGrayPrevious[i][j+1] + arrGrayPrevious[i+1][j+1])/4);
-                    qDebug() << ptmpImg[count];
-                }
-                count++;
             }
+            data[i][j] = tmp;
+            tmp = 0;
         }
+    }
 
-        QImage result(ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
-        result.save("output/resize.png");
-        delete[] ptmpImg;
-    }
-    else
-    {
-        qDebug() << "Try another image, like this -> border%2=0";
-    }
+    QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_Mono);
+    result.save("output/resize.png");
+    //freeMemoryInt(ptmpImg, newWidth);
+
 }
 
 /*void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
