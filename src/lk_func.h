@@ -96,7 +96,7 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info);
  * \param [in] image − исходное изображение
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
  */
-void resizeImage(QImage image, int** arrGrayPrevious);
+void resizeImage(QImage image, int** arrGrayPrevious, int kK);
 
 /*! Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается.
  * \brief getMemoryForPyramid

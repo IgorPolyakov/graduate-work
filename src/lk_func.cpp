@@ -5,7 +5,6 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
-#define kK 2
 int setSizeMatToInvers()
 {
     return 2;
@@ -224,7 +223,7 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     result.save("output/" + info + ".png");
 }
 
-void resizeImage(QImage image, int** arrGrayPrevious)
+void resizeImage(QImage image, int** arrGrayPrevious, int kK)
 {
     /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
 
@@ -250,8 +249,9 @@ void resizeImage(QImage image, int** arrGrayPrevious)
         }
     }
 
-    QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_Mono);
-    result.save("output/resize.png");
+    QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
+    QString s = QString::number(kK);
+    result.save("output/resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
 
 }

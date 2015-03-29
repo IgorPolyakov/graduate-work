@@ -24,4 +24,13 @@ struct pointerToLvlPyramid {
     int* l2;            //!< Второй уровень
     int* l3;            //!< Третий уровень
 };
+/*!
+ * \brief The imageInform struct
+ * Хранение информации о размерах изображения
+ */
+struct imageInform {
+    int height;         //!< Размер изображения по высоте
+    int width;         //!< Размер изображения по ширине
+};
+
 #endif
