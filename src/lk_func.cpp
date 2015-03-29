@@ -5,7 +5,6 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
-
 int setSizeMatToInvers()
 {
     return 2;
@@ -213,21 +212,6 @@ void getImageInfo(QImage image, QString path)
     qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes" << image.size();
 }
 
-int** genrateData(int w, int h)
-{
-    int **E = new int *[w];
-
-    for (int i = 0; i < w; i++)
-        E[i] = new int [h];
-
-    for (int i = 0; i < w; i++) {
-        for (int j = 0; j < h; j++) {
-            E[i][j] = i + j + 10;
-        }
-    }
-    return E;
-}
-
 void joinImage(QImage img1, QImage img2, QImage img3, QString info)
 {
     QImage result(img1.width() + img2.width() + img3.width(), img1.height(), QImage::Format_ARGB32);
@@ -238,3 +222,42 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(img1.width() + img2.width(), 0, img3);
     result.save("output/" + info + ".png");
 }
+
+void resizeImage(QImage image, int** arrGrayPrevious, int kK)
+{
+    /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
+
+    int newWidth = (image.width()/kK);
+    int newHeight= (image.height()/kK);
+    int tmp = 0;
+
+    int* ptmpImg = new int[newHeight * newWidth];
+    int** data = new int*[newHeight];
+
+    for(int i = 0; i < newHeight; ++i)
+        data[i] = ptmpImg + newWidth * i;
+
+    for (int i = 0; i < newWidth;i++) {
+        for (int j = 0; j < newHeight;j++) {
+            for (int ii = 0; ii < kK-1; ++ii) {
+                for (int jj = 0; jj < kK-1; ++jj) {
+                    tmp = arrGrayPrevious[kK * i + ii][ kK * j + jj];
+                }
+            }
+            data[i][j] = tmp;
+            tmp = 0;
+        }
+    }
+
+    QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
+    QString s = QString::number(kK);
+    result.save("output/resize" + s + ".png");
+    //freeMemoryInt(ptmpImg, newWidth);
+
+}
+
+/*void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
+{
+
+}
+*/
