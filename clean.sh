@@ -2,7 +2,7 @@
 OK=" ..... ok"
 
 echo -ne " * delete all 'bin'"
-rm -rf 'lukas_kanade_qt'
+rm -rf 'bin/'
 echo $OK
 
 echo -ne " * delete all 'Makefile'"
@@ -13,6 +13,7 @@ echo -ne " * delete all '*.o'"
 find . -iname '*.o' -delete
 echo $OK
 
-echo -ne " * delete output file"
-rm -rf 'output'
+echo -ne " * delete doxygen documentation"
+rm -rf 'latex/'
+rm -rf 'html/'
 echo $OK

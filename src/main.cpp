@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include "lk_func.h"
 
+#define PROJECT_GIT_REF "@PROJECT_GIT_REF@"
+#define PROJECT_SOURCE_VERSION "@PROJECT_SOURCE_VERSION@"
+#define PROJECT_BUILD_DATE "@PROJECT_BUILD_DATE@"
+#define PROJECT_BUILD_TIME "@PROJECT_BUILD_TIME@"
+
 int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
@@ -44,7 +49,7 @@ int main(int argc, char *argv[])
             getImageInfo(rightImg, optarg);
             break;
         case 'v':
-            std::cout << "LukasKanadeQt version: " << GITHASH << "\n";
+            std::cout << "LukasKanadeQt version: " << PROJECT_SOURCE_VERSION << "\n";
             return (0);
         case 'h':
             std::cout << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./lukas_kanade_qt -l <First image> -r <Second image>\n";
