@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     g_sizeWindowSeach = 4;
     g_stepForGrid = 32;
     g_iteration = 1;
+    g_outputFolder = "output/";
     /*
      * end
      */
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:r:vhdi:w:g:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:r:vhdi:w:g:o:")) != -1) {
         switch (pr) {
         case 'l':
             if (!leftImg.load(optarg)) {
@@ -75,6 +76,10 @@ int main(int argc, char *argv[])
         case 'i':
             g_iteration = atoi(optarg);
             std::cout << "Count iteration: " << g_iteration << "\n";
+            break;
+        case 'o':
+            g_outputFolder = atoi(optarg);
+            std::cout << "Output directory: " << g_outputFolder.toStdString() << "\n";
             break;
         case 'd':
             std::cout << "Debug mode: ON" << "\n";
