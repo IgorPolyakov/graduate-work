@@ -1,0 +1,57 @@
+Changelog
+----------------------
+
+[current]
+ * the beginnig d! Qmake to cmake
+ * fix main.Cpp
+ * rewrite resize function
+ * func resize image -- still not work.
+ * fast
+ * fix comment, fix configure doxygen file
+ * config for doxygen system
+ * start docunetation code
+ * rewrite build script fix check border in loop mv files
+ * fix critical error
+ * move files, clean project folder
+ * rewrite run script trying fix nan error fix multiplicmtrxandvectr added comment
+ * check border escape
+ * added iteration for lk programm return join image in out folder
+ * tempory commit
+ * still does not work
+ * change name, work is not finish
+ * fast commit)
+ * defines replaced for the input arguments. Transmission is via the pointer coordinates. Freeing memory. Error when comparing the "nan" - fixed going beyond the boundaries images "computegrid" - fixed.
+ * corrected version of the program. Removed 3thpart.
+
+[1.1]
+ * fixed bug pointer. Added options: 1) size window search (3px by default) and 2) step for grid (5px by default).
+ * improved algorithm for drawing grid points calculation. Added search window size. Algorithm "lk" in working condition. Version 1.1
+ * all is work, but need some fix))
+ * add pointer
+ * fixed a bug run with empty parameters. Debug function - works. Heather added to global variables. Function "getimageinfo" updated.
+ * fixed rounding error. Debug function - does not work. Variable names are in order.
+ * fix int to double
+ * nothing
+ * all func in complite! Time to debug
+ * add matrixvectormultiplic, fix code.
+ * added struct sibsetsize, update imageinfo, fix image name in source
+ * added clean script, modify 1.Png
+ * the use of automatic code formatting -artistic style- http://
+ * transfer additional functions into a separate file "src/lk_funk.Cpp", added a header file. Fix gitignore.
+ * caclgrid is work -- grid draw on image, and save to output, "invers-
+ * rename app to lukas_kanade_qt
+ * fix option
+ * move png to input folder, fix app version from git describle.
+ * fix overflow error
+ * read image,  create array of bright, and show it
+ * func from matlab: coder
+ * added func invers matrix, from http://drobotenko.Com/code_rus.Html
+ * modify image
+ * project works, upload images, added options
+ * move files
+
+[1.0]
+ * remove file
+ * read & convert two image
+ * initial commit
+
