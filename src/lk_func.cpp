@@ -102,7 +102,12 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
         }
     }
     delete [] vectorOptFlw;
-    delete [] initialWindow;
+    delete initialWindow->radiusCode;
+    delete initialWindow->xCore;
+    delete initialWindow->yCore;
+    delete initialWindow->xMax;
+    delete initialWindow->yMax;
+    delete InitialWindow;
     return image;
 }
 
@@ -176,7 +181,7 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, setSizeMatToInvers());
     return shiftVectr;
-    //delete shiftVectr;
+    //delete [] shiftVectr;
 }
 void freeMemoryInt(int** trash, int size)
 {
