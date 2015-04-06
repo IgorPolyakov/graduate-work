@@ -228,10 +228,9 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     result.save(g_outputFolder + info + ".png");
 }
 
-void resizeImage(QImage image, int** arrGrayPrevious, int kK)
+int* resizeImage(QImage image, int** arrGrayPrevious, int kK)
 {
     /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
-
     int newWidth = (image.width()/kK);
     int newHeight= (image.height()/kK);
     int tmp = 0;
@@ -258,11 +257,13 @@ void resizeImage(QImage image, int** arrGrayPrevious, int kK)
     QString s = QString::number(kK);
     result.save(g_outputFolder + "resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
-
+    return ptmpImg;
 }
 
-/*void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
+void getMemoryForPyramid(QImage image, int** arrGrayPrevious, pointerToLvlPyramid pointToPyramid)
 {
-
+    pointToPyramid.l1 = resizeImage(image, arrGrayPrevious, 2);
+    pointToPyramid.l2 = resizeImage(image, arrGrayPrevious, 4);
+    pointToPyramid.l3 = resizeImage(image, arrGrayPrevious, 8);
 }
-*/
+

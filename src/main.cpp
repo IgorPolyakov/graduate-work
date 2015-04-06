@@ -100,10 +100,8 @@ int main(int argc, char *argv[])
     info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
     outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
     joinImage(leftImg, rightImg, outImg, info);
-    for(int i = 2; i <=1024; i=i*2){
-        //qDebug()<<i;
-        //resizeImage(leftImg, pToLeftImg, i);
-    }
+    pointerToLvlPyramid mem;
+    getMemoryForPyramid(leftImg, pToLeftImg, mem);
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
     return 0;

@@ -24,5 +24,6 @@ echo -ne " * delete CMake File"
 rm -rf 'CMakeFiles/'
 find . -iname '*.cmake' -delete
 find . -iname 'CMakeCache.txt' -delete
+find . -iname 'CMakeLists.txt.user' -delete
 find . -iname '*.pro.user' -delete
 echo $OK
