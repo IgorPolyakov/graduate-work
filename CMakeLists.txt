@@ -17,6 +17,44 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
     PROJECT_SOURCE_VERSION)
 endif()
 
+exec_program(
+    "git"
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ARGS "describe"
+    OUTPUT_VARIABLE VERSION )
+
+string( REGEX MATCH "-g.*$" VERSION_SHA1 ${VERSION} )
+string( REGEX REPLACE "[-g]" "" VERSION_SHA1 ${VERSION_SHA1} )
+
+# Store the build date
+if(WIN32)
+  execute_process(COMMAND "cmd" " /c date /t"
+    OUTPUT_VARIABLE DATE)
+  string(REGEX REPLACE "[^0-9]*(..).*" "\\1" MONTH "${DATE}")
+  set(MONTHS ""
+    "Jan" "Feb" "Mar" "Apr" "May" "Jun"
+    "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
+  list(GET MONTHS "${MONTH}" MONTH)
+  string(REGEX REPLACE "[^/]*/(..)/(....).*" "\\1 ${MONTH} \\2"
+    PROJECT_BUILD_DATE "${DATE}")
+  execute_process(COMMAND "cmd" " /c echo %TIME%"
+    OUTPUT_VARIABLE TIME)
+  string(REGEX REPLACE "[^0-9]*(..:..:..).*" "\\1"
+    PROJECT_BUILD_TIME "${TIME}")
+else()
+  execute_process(COMMAND "date" "+%d %b %Y/%H:%M:%S"
+    OUTPUT_VARIABLE DATE_TIME)
+  string(REGEX REPLACE "([^/]*)/.*" "\\1"
+    PROJECT_BUILD_DATE "${DATE_TIME}")
+  string(REGEX REPLACE "[^/]*/([0-9:]*).*" "\\1"
+    PROJECT_BUILD_TIME "${DATE_TIME}")
+endif()
+
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/version.h.in"
+  "${PROJECT_SOURCE_DIR}/src/version.h"
+  )
+
 find_package ( Qt4 REQUIRED )
 include ( ${QT_USE_FILE} )
 include_directories (

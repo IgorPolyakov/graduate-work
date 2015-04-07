@@ -1,51 +1,56 @@
-Changelog
+CHANGELOG
 ----------------------
 
-[current]
- * the beginnig d! Qmake to cmake
- * fix main.Cpp
- * rewrite resize function
- * func resize image -- still not work.
+[Current]
+ * change void to int* in resizeImage remove cmake tmp files add void getMemoryForPyramid start work on level mod
+ * Fix (error): Mismatching allocation and deallocation: initialWindow
+ * write autors
+ * write change log
+ * Added CMake in gitignore ReWrite clean.sh script Added new options - output folder
+ * THE BEGINNIG D! qmake to cmake
+ * fix main.cpp
+ * REWRITE RESIZE FUNCTION
+ * func Resize image -- still not work.
  * fast
- * fix comment, fix configure doxygen file
+ * Fix comment, fix configure doxygen file
  * config for doxygen system
  * start docunetation code
- * rewrite build script fix check border in loop mv files
+ * REWRITE BUILD SCRIPT FIX CHECK BORDER IN LOOP MV FILES
  * fix critical error
  * move files, clean project folder
- * rewrite run script trying fix nan error fix multiplicmtrxandvectr added comment
+ * rewrite run script trying fix NaN error fix multiplicMtrxAndVectr added comment
  * check border escape
- * added iteration for lk programm return join image in out folder
+ * Added iteration for LK Programm return join image in out folder
  * tempory commit
  * still does not work
  * change name, work is not finish
- * fast commit)
- * defines replaced for the input arguments. Transmission is via the pointer coordinates. Freeing memory. Error when comparing the "nan" - fixed going beyond the boundaries images "computegrid" - fixed.
- * corrected version of the program. Removed 3thpart.
+ * Fast commit)
+ * DEFINES replaced for the input arguments. Transmission is via the pointer coordinates. Freeing memory. Error when comparing the "NaN" - fixed Going beyond the boundaries images "computeGrid" - fixed.
+ * Corrected version of the program. Removed 3thpart.
 
 [1.1]
- * fixed bug pointer. Added options: 1) size window search (3px by default) and 2) step for grid (5px by default).
- * improved algorithm for drawing grid points calculation. Added search window size. Algorithm "lk" in working condition. Version 1.1
+ * Fixed bug pointer. Added options: 1) size window search (3px by default) and 2) step for grid (5px by default).
+ * Improved algorithm for drawing grid points calculation. Added search window size. Algorithm "LK" in working condition. Version 1.1
  * all is work, but need some fix))
  * add pointer
- * fixed a bug run with empty parameters. Debug function - works. Heather added to global variables. Function "getimageinfo" updated.
- * fixed rounding error. Debug function - does not work. Variable names are in order.
+ * Fixed a bug run with empty parameters. Debug function - works. Heather added to global variables. Function "getImageInfo" updated.
+ * fixed rounding error. debug function - does not work. variable names are in order.
  * fix int to double
  * nothing
- * all func in complite! Time to debug
- * add matrixvectormultiplic, fix code.
- * added struct sibsetsize, update imageinfo, fix image name in source
- * added clean script, modify 1.Png
- * the use of automatic code formatting -artistic style- http://
- * transfer additional functions into a separate file "src/lk_funk.Cpp", added a header file. Fix gitignore.
- * caclgrid is work -- grid draw on image, and save to output, "invers-
+ * all func in complite! time to DEBUG
+ * add matrixVectorMultiplic, fix code.
+ * added struct sibsetSize, update ImageInfo, fix image name in source
+ * added clean script, modify 1.png
+ * The use of automatic code formatting -Artistic Style- http://
+ * transfer additional functions into a separate file "src/lk_funk.cpp", added a header file. fix gitignore.
+ * CaclGrid is work -- grid draw on image, and save to output, "invers-
  * rename app to lukas_kanade_qt
  * fix option
- * move png to input folder, fix app version from git describle.
+ * Move PNG to input folder, fix app version from GIT DESCRIBLE.
  * fix overflow error
  * read image,  create array of bright, and show it
- * func from matlab: coder
- * added func invers matrix, from http://drobotenko.Com/code_rus.Html
+ * func from Matlab: Coder
+ * added func invers matrix, from http://drobotenko.com/code_rus.html
  * modify image
  * project works, upload images, added options
  * move files
@@ -53,5 +58,4 @@ Changelog
 [1.0]
  * remove file
  * read & convert two image
- * initial commit
-
+ * Initial commit

@@ -6,12 +6,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include "lk_func.h"
-
-#define PROJECT_GIT_REF "@PROJECT_GIT_REF@"
-#define PROJECT_SOURCE_VERSION "@PROJECT_SOURCE_VERSION@"
-#define PROJECT_BUILD_DATE "@PROJECT_BUILD_DATE@"
-#define PROJECT_BUILD_TIME "@PROJECT_BUILD_TIME@"
-
+#include "version.h"
 int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
@@ -50,7 +45,9 @@ int main(int argc, char *argv[])
             getImageInfo(rightImg, optarg);
             break;
         case 'v':
-            std::cout << "LukasKanadeQt version: " << PROJECT_SOURCE_VERSION << "\n";
+            std::cout << "LukasKanadeQt version: " << VERSION << "\n";
+            std::cout << "branch: " << PROJECT_GIT_REF << "\n";
+            std::cout << "build date: " << PROJECT_BUILD_DATE << " " << PROJECT_BUILD_TIME << "\n";
             return (0);
         case 'h':
             std::cout << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./lukas_kanade_qt -l <First image> -r <Second image>\n";
@@ -58,6 +55,7 @@ int main(int argc, char *argv[])
             std::cout << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             std::cout << "\n\t-l\t\t load left image";
             std::cout << "\n\t-r\t\t load right image";
+            std::cout << "\n\t-o\t\t output directory";
             std::cout << "\n\t-i\t\t count iteration (1 by default)";
             std::cout << "\n\t-w\t\t size window search (3px by default)";
             std::cout << "\n\t-g\t\t step for grid (5px by default)";
