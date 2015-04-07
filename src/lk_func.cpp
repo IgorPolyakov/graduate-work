@@ -102,7 +102,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
         }
     }
     delete [] vectorOptFlw;
-    delete [] initialWindow;
+    delete initialWindow;
     return image;
 }
 
@@ -175,8 +175,9 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
     }
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, setSizeMatToInvers());
+    delete[] b;
     return shiftVectr;
-    //delete shiftVectr;
+    //delete [] shiftVectr;
 }
 void freeMemoryInt(int** trash, int size)
 {
@@ -220,13 +221,12 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(0, 0, img1);
     paint.drawImage(img1.width(), 0, img2);
     paint.drawImage(img1.width() + img2.width(), 0, img3);
-    result.save("output/" + info + ".png");
+    result.save(g_outputFolder + info + ".png");
 }
 
-void resizeImage(QImage image, int** arrGrayPrevious, int kK)
+int* resizeImage(QImage image, int** arrGrayPrevious, int kK)
 {
     /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
-
     int newWidth = (image.width()/kK);
     int newHeight= (image.height()/kK);
     int tmp = 0;
@@ -251,13 +251,15 @@ void resizeImage(QImage image, int** arrGrayPrevious, int kK)
 
     QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
     QString s = QString::number(kK);
-    result.save("output/resize" + s + ".png");
+    result.save(g_outputFolder + "resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
-
+    return ptmpImg;
 }
 
-/*void getMemoryForPyramid(pointerToLvlPyramid pointToPyramid)
+void getMemoryForPyramid(QImage image, int** arrGrayPrevious, pointerToLvlPyramid pointToPyramid)
 {
-
+    pointToPyramid.l1 = resizeImage(image, arrGrayPrevious, 2);
+    pointToPyramid.l2 = resizeImage(image, arrGrayPrevious, 4);
+    pointToPyramid.l3 = resizeImage(image, arrGrayPrevious, 8);
 }
-*/
+

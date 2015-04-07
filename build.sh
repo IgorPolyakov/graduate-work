@@ -1,3 +1,4 @@
 #!/bin/bash
-qmake
+./generate_changelog.sh > ChangeLog
+cmake CMakeLists.txt
 make

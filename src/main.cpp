@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include "lk_func.h"
-
+#include "version.h"
 int main(int argc, char *argv[])
 {
     QImage leftImg, rightImg, outImg;
@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     g_sizeWindowSeach = 4;
     g_stepForGrid = 32;
     g_iteration = 1;
+    g_outputFolder = "output/";
     /*
      * end
      */
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:r:vhdi:w:g:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:r:vhdi:w:g:o:")) != -1) {
         switch (pr) {
         case 'l':
             if (!leftImg.load(optarg)) {
@@ -44,7 +45,9 @@ int main(int argc, char *argv[])
             getImageInfo(rightImg, optarg);
             break;
         case 'v':
-            std::cout << "LukasKanadeQt version: " << GITHASH << "\n";
+            std::cout << "LukasKanadeQt version: " << VERSION << "\n";
+            std::cout << "branch: " << PROJECT_GIT_REF << "\n";
+            std::cout << "build date: " << PROJECT_BUILD_DATE << " " << PROJECT_BUILD_TIME << "\n";
             return (0);
         case 'h':
             std::cout << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./lukas_kanade_qt -l <First image> -r <Second image>\n";
@@ -52,6 +55,7 @@ int main(int argc, char *argv[])
             std::cout << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             std::cout << "\n\t-l\t\t load left image";
             std::cout << "\n\t-r\t\t load right image";
+            std::cout << "\n\t-o\t\t output directory";
             std::cout << "\n\t-i\t\t count iteration (1 by default)";
             std::cout << "\n\t-w\t\t size window search (3px by default)";
             std::cout << "\n\t-g\t\t step for grid (5px by default)";
@@ -70,6 +74,10 @@ int main(int argc, char *argv[])
         case 'i':
             g_iteration = atoi(optarg);
             std::cout << "Count iteration: " << g_iteration << "\n";
+            break;
+        case 'o':
+            g_outputFolder = atoi(optarg);
+            std::cout << "Output directory: " << g_outputFolder.toStdString() << "\n";
             break;
         case 'd':
             std::cout << "Debug mode: ON" << "\n";
@@ -90,10 +98,8 @@ int main(int argc, char *argv[])
     info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
     outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
     joinImage(leftImg, rightImg, outImg, info);
-    for(int i = 2; i <=1024; i=i*2){
-        //qDebug()<<i;
-        //resizeImage(leftImg, pToLeftImg, i);
-    }
+    pointerToLvlPyramid mem;
+    getMemoryForPyramid(leftImg, pToLeftImg, mem);
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
     return 0;
