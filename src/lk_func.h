@@ -88,22 +88,17 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info);
 /*! Функция масштабирует изображения, на вход указатель массив яркостей
  * \brief resizeImage
  * \param [in] image − исходное изображение
- * \param [in] kK - коэфициент уменьшения изображения
+ * \param [in] kK − коэфициент уменьшения изображения
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
 * \return [out] указатель на масштабированное изображение
  */
 int *resizeImage(QImage image, int** arrGrayPrevious, int kK);
 
-/*!
- * \brief getMemoryForPyramid
- * \param [in] pointToPyramid
- */
-
 /*! Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается.
  * \brief getMemoryForPyramid
- * \param image
- * \param arrGrayPrevious
- * \param pointToPyramid
+ * \param [in] image − исходное изображение
+ * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
+ * \param [in] pointToPyramid − структура содержащая указатели на уровни пирамиды
  */
 void getMemoryForPyramid(QImage image, int** arrGrayPrevious, pointerToLvlPyramid pointToPyramid);
 

@@ -2,6 +2,9 @@ CHANGELOG
 ----------------------
 
 [Current]
+
+[1.2]
+ * added arg output dir to help page; fix (error) Memory leak: b; generate version.h under cmake; add changelog; fix free memory initialWindow;
  * change void to int* in resizeImage remove cmake tmp files add void getMemoryForPyramid start work on level mod
  * Fix (error): Mismatching allocation and deallocation: initialWindow
  * write autors
