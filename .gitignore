@@ -37,3 +37,4 @@ install_manifest.txt
 # Project files
 lukas_kanade_qt
 output/
+src/version.h

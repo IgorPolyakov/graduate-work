@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
+#define lvlPyramid 3
+#define RESIZE 5
 int setSizeMatToInvers()
 {
     return 2;
@@ -85,7 +87,7 @@ int **getArrBright(QImage image)
 
 QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
 {
-    SubSize* initialWindow = new SubSize;
+    subSize* initialWindow = new subSize;
     initialWindow->radiusCode = g_sizeWindowSeach;
     initialWindow->xMax = image.width();
     initialWindow->yMax = image.height();
@@ -106,7 +108,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
     return image;
 }
 
-double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
     double tmpX, tmpY, tmpT;
@@ -124,10 +126,10 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
 
     int* b = new int [setSizeMatToInvers()];
 
-    if (g_isDebug) qDebug() << "SubSize:X" << initialWindow->xCore << "Y:" << initialWindow->yCore << "R:" << initialWindow->radiusCode << "\n";
+    if (g_isDebug) qDebug() << "SubSize:X" << kernel->xCore << "Y:" << kernel->yCore << "R:" << kernel->radiusCode << "\n";
     for (int k = 0; k <= g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
-        for (int i = (initialWindow->xCore - initialWindow->radiusCode); i <= (initialWindow->xCore + initialWindow->radiusCode); i++) {
-            for (int j = (initialWindow->yCore - initialWindow->radiusCode); j <= (initialWindow->yCore + initialWindow->radiusCode); j++) {
+        for (int i = (kernel->xCore - kernel->radiusCode); i <= (kernel->xCore + kernel->radiusCode); i++) {
+            for (int j = (kernel->yCore - kernel->radiusCode); j <= (kernel->yCore + kernel->radiusCode); j++) {
                 tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
                 tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
                 iX  += tmpX * tmpX;
@@ -150,16 +152,16 @@ double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrG
         inversion(A, setSizeMatToInvers());
         shiftVectr = multiplicMtrxAndVectr(A, b);
 
-        if (initialWindow->xCore + shiftVectr[0] + initialWindow->radiusCode > initialWindow->xMax) {
+        if (kernel->xCore + shiftVectr[0] + kernel->radiusCode > kernel->xMax) {
             break;
         }
-        if (initialWindow->xCore + shiftVectr[0] - initialWindow->radiusCode < 0) {
+        if (kernel->xCore + shiftVectr[0] - kernel->radiusCode < 0) {
             break;
         }
-        if (initialWindow->yCore + shiftVectr[1] + initialWindow->radiusCode > initialWindow->yMax) {
+        if (kernel->yCore + shiftVectr[1] + kernel->radiusCode > kernel->yMax) {
             break;
         }
-        if (initialWindow->yCore + shiftVectr[1] - initialWindow->radiusCode < 0) {
+        if (kernel->yCore + shiftVectr[1] - kernel->radiusCode < 0) {
             break;
         }
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
@@ -207,10 +209,10 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
     return tmp;
 }
 
-void getImageInfo(QImage image, QString path)
+void getImageInfo(imageInform* image, QString path)
 {
     QFileInfo fileImage(path);
-    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes" << image.size();
+    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes. Size: " << image->height << "x" << image->width;
 }
 
 void joinImage(QImage img1, QImage img2, QImage img3, QString info)
@@ -224,11 +226,11 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     result.save(g_outputFolder + info + ".png");
 }
 
-int* resizeImage(QImage image, int** arrGrayPrevious, int kK)
+int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
 {
     /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
-    int newWidth = (image.width()/kK);
-    int newHeight= (image.height()/kK);
+    int newWidth = (image->width/kK);
+    int newHeight= (image->height/kK);
     int tmp = 0;
 
     int* ptmpImg = new int[newHeight * newWidth];
@@ -237,8 +239,8 @@ int* resizeImage(QImage image, int** arrGrayPrevious, int kK)
     for(int i = 0; i < newHeight; ++i)
         data[i] = ptmpImg + newWidth * i;
 
-    for (int i = 0; i < newWidth;i++) {
-        for (int j = 0; j < newHeight;j++) {
+    for (int i = 0; i < newWidth; i++) {
+        for (int j = 0; j < newHeight; j++) {
             for (int ii = 0; ii < kK-1; ++ii) {
                 for (int jj = 0; jj < kK-1; ++jj) {
                     tmp = arrGrayPrevious[kK * i + ii][ kK * j + jj];
@@ -256,10 +258,15 @@ int* resizeImage(QImage image, int** arrGrayPrevious, int kK)
     return ptmpImg;
 }
 
-void getMemoryForPyramid(QImage image, int** arrGrayPrevious, pointerToLvlPyramid pointToPyramid)
+int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
 {
-    pointToPyramid.l1 = resizeImage(image, arrGrayPrevious, 2);
-    pointToPyramid.l2 = resizeImage(image, arrGrayPrevious, 4);
-    pointToPyramid.l3 = resizeImage(image, arrGrayPrevious, 8);
+    int** pToPyramid = new int*[lvlPyramid];
+    for (int i = 0; i < lvlPyramid; ++i)
+        pToPyramid[i] = new int[(image->height * image->width)/RESIZE];
+
+    for (int i = 0; i < lvlPyramid; ++i) {
+        pToPyramid[i] = resizeImage(image, arrGrayPrevious, RESIZE);
+    }
+    return pToPyramid;
 }
 
