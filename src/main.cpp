@@ -35,14 +35,12 @@ int main(int argc, char *argv[])
                 std::cout << "Cannot load left picture\n";
                 return (-1);
             }
-            getImageInfo(leftImg, optarg);
             break;
         case 'r':
             if (!rightImg.load(optarg)) {
                 std::cout << "Cannot load right picture\n";
                 return (-1);
             }
-            getImageInfo(rightImg, optarg);
             break;
         case 'v':
             std::cout << "LukasKanadeQt version: " << VERSION << "\n";
@@ -91,6 +89,12 @@ int main(int argc, char *argv[])
     int** pToLeftImg = getArrBright(leftImg);
     int** pToRightImg = getArrBright(rightImg);
 
+    imageInform* image = new imageInform;
+    image->height = leftImg.height();
+    image->width  = leftImg.width();
+
+    getImageInfo(image, optarg);
+
     QDir outDir("output");
     if (!outDir.exists()) {
         outDir.mkpath(".");
@@ -98,8 +102,9 @@ int main(int argc, char *argv[])
     info = QString("iteration- %1 sizeWindowSeach- %2").arg(g_iteration).arg(g_sizeWindowSeach);
     outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
     joinImage(leftImg, rightImg, outImg, info);
-    pointerToLvlPyramid mem;
-    getMemoryForPyramid(leftImg, pToLeftImg, mem);
+    getMemoryForPyramid(image, pToLeftImg);
+    //memory, now you free!
+    delete image;
     freeMemoryInt(pToLeftImg, leftImg.width());
     freeMemoryInt(pToRightImg, rightImg.width());
     return 0;

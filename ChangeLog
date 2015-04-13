@@ -2,6 +2,8 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * Rewrite README
+ * nothing
 
 [1.2]
  * added arg output dir to help page; fix (error) Memory leak: b; generate version.h under cmake; add changelog; fix free memory initialWindow;

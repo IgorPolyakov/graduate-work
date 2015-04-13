@@ -30,7 +30,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext);
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return вектор оптического потока
  */
-double* computeOptFlow(SubSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext);
+double* computeOptFlow(subSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext);
 
 /*! Произведение матрицы на вектор.
  * \brief multiplicMtrxAndVectr
@@ -45,7 +45,7 @@ double* multiplicMtrxAndVectr(double **array, int* vector);
  * \param [in] image − исходное изображение
  * \return  *tmp − указатель на полученный массив
  */
-int** getArrBright(QImage image);
+int **getArrBright(QImage image);
 
 /*! Функцияя освобождения памяти для массивов типа float
 * \brief freeMemoryFloat
@@ -66,7 +66,7 @@ void freeMemoryInt(int** trash, int size);
  * \param [in] image − Изображение
  * \param [in] path − Путь к нему
  */
-void getImageInfo(QImage image, QString path);
+void getImageInfo(imageInform* image, QString path);
 
 /*! Нахождения обратной матрицы.
  * \brief inversion
@@ -92,7 +92,7 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info);
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
 * \return [out] указатель на масштабированное изображение
  */
-int *resizeImage(QImage image, int** arrGrayPrevious, int kK);
+int *resizeImage(imageInform* image, int** arrGrayPrevious, int kK);
 
 /*! Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается.
  * \brief getMemoryForPyramid
@@ -100,6 +100,6 @@ int *resizeImage(QImage image, int** arrGrayPrevious, int kK);
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
  * \param [in] pointToPyramid − структура содержащая указатели на уровни пирамиды
  */
-void getMemoryForPyramid(QImage image, int** arrGrayPrevious, pointerToLvlPyramid pointToPyramid);
+int **getMemoryForPyramid(imageInform* image, int** arrGrayPrevious);
 
 #endif

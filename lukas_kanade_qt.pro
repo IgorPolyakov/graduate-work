@@ -14,11 +14,8 @@ HEADERS +=  \
     src/lk_struct.h \
     src/global.h
 OTHER_FILES += \
-    INSTALL\
     README.md\
-    COPYING\
-    LICENSE\
-    NEWS
+    LICENSE
 
 DISTFILES += \
     AUTHORS
