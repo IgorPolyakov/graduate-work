@@ -30,7 +30,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext);
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return вектор оптического потока
  */
-double* computeOptFlow(subSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext);
+void computeOptFlow(double *shiftVectr, subSize* initialWindow, int** arrGrayPrevious, int** arrGrayNext);
 
 /*! Произведение матрицы на вектор.
  * \brief multiplicMtrxAndVectr
