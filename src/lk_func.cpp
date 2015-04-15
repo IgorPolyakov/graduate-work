@@ -5,12 +5,9 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
-#define lvlPyramid 3
+#define LVL_PYRAMID 3
 #define RESIZE 5
-int setSizeMatToInvers()
-{
-    return 2;
-}
+#define SIZE_MAT_INV 2
 
 void inversion(double **A, int N)
 {
@@ -91,43 +88,45 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
     initialWindow->radiusCode = g_sizeWindowSeach;
     initialWindow->xMax = image.width();
     initialWindow->yMax = image.height();
-    double* vectorOptFlw = new double[2];
+    double* vectorOptFlw = new double[SIZE_MAT_INV];
 
     QPainter painter(&image);
     painter.setPen(QPen(Qt::red));
-    for (int i = g_stepForGrid ; i < image.width() - g_stepForGrid; i = g_stepForGrid + i) {
-        for (int j = g_stepForGrid; j < image.height() - g_stepForGrid; j = g_stepForGrid + j) {
-            initialWindow->xCore = i;
+    for (int i = g_stepForGrid ; (i < (image.width()-g_stepForGrid)); i += g_stepForGrid) {
+        qDebug() << "iNew test"<< g_stepForGrid << i << image.width() - g_stepForGrid;
+        initialWindow->xCore = i;
+        for (int j = g_stepForGrid; (j < (image.height()-g_stepForGrid)); j += g_stepForGrid) {
+            qDebug() << "jNew test"<< g_stepForGrid << j << image.height() - g_stepForGrid;
             initialWindow->yCore = j;
-            vectorOptFlw = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
+            computeOptFlow(vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
             painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
         }
     }
-    delete [] vectorOptFlw;
+    delete[] vectorOptFlw;
     delete initialWindow;
     return image;
 }
 
-double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
+void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
     double tmpX, tmpY, tmpT;
-    double* shiftVectr = new double[2];
     for (int var = 0; var < 2; ++var) {
         shiftVectr = 0;
     }
     int deltaX = 0;
     int deltaY = 0;
 
-    double **A = new double *[setSizeMatToInvers()];
+    double **A = new double *[SIZE_MAT_INV];
 
-    for (int i = 0; i < setSizeMatToInvers(); i++)
-        A[i] = new double [setSizeMatToInvers()];
+    for (int i = 0; i < SIZE_MAT_INV; i++)
+        A[i] = new double [SIZE_MAT_INV];
 
-    int* b = new int [setSizeMatToInvers()];
+    int* b = new int [SIZE_MAT_INV];
 
     if (g_isDebug) qDebug() << "SubSize:X" << kernel->xCore << "Y:" << kernel->yCore << "R:" << kernel->radiusCode << "\n";
-    for (int k = 0; k <= g_iteration; ++k) {//Отсчитываем число итераций, для уточнения вектора
+    for (int k = 0; k <= g_iteration; ++k) {
+        //Отсчитываем число итераций, для уточнения вектора
         for (int i = (kernel->xCore - kernel->radiusCode); i <= (kernel->xCore + kernel->radiusCode); i++) {
             for (int j = (kernel->yCore - kernel->radiusCode); j <= (kernel->yCore + kernel->radiusCode); j++) {
                 tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
@@ -149,7 +148,7 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
         b[0] = -iTX;
         b[1] = -iTY;
 
-        inversion(A, setSizeMatToInvers());
+        inversion(A, SIZE_MAT_INV);
         shiftVectr = multiplicMtrxAndVectr(A, b);
 
         if (kernel->xCore + shiftVectr[0] + kernel->radiusCode > kernel->xMax) {
@@ -166,9 +165,7 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
         }
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
             deltaX = (int)floor(shiftVectr[0]);
-            deltaY = (int)floor(shiftVectr[1]);/*
-            deltaX = (int)floor(shiftVectr[0]);
-            deltaY = (int)floor(shiftVectr[1]);*/
+            deltaY = (int)floor(shiftVectr[1]);
         } else {
             qDebug() << "NaN Error";
             shiftVectr[0] = 0;
@@ -176,10 +173,8 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
         }
     }
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
-    freeMemoryFloat(A, setSizeMatToInvers());
+    freeMemoryFloat(A, SIZE_MAT_INV);
     delete[] b;
-    return shiftVectr;
-    //delete [] shiftVectr;
 }
 void freeMemoryInt(int** trash, int size)
 {
@@ -197,12 +192,12 @@ void freeMemoryFloat(double** trash, int size)
 
 double* multiplicMtrxAndVectr(double** array, int* vector)
 {
-    double* tmp = new double[setSizeMatToInvers()];
-    for (int cnt = 0; cnt < setSizeMatToInvers(); ++cnt) {
+    double* tmp = new double[SIZE_MAT_INV];
+    for (int cnt = 0; cnt < SIZE_MAT_INV; ++cnt) {
         tmp[cnt] = 0;
     }
-    for (int i = 0; i < setSizeMatToInvers(); i++) {
-        for (int j = 0; j < setSizeMatToInvers(); j++) {
+    for (int i = 0; i < SIZE_MAT_INV; i++) {
+        for (int j = 0; j < SIZE_MAT_INV; j++) {
             tmp[i] += array[i][j] * (double)vector[j];
         }
     }
@@ -255,16 +250,17 @@ int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
     QString s = QString::number(kK);
     result.save(g_outputFolder + "resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
+    delete[] data;
     return ptmpImg;
 }
 
 int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
 {
-    int** pToPyramid = new int*[lvlPyramid];
-    for (int i = 0; i < lvlPyramid; ++i)
+    int** pToPyramid = new int*[LVL_PYRAMID];
+    for (int i = 0; i < LVL_PYRAMID; ++i)
         pToPyramid[i] = new int[(image->height * image->width)/RESIZE];
 
-    for (int i = 0; i < lvlPyramid; ++i) {
+    for (int i = 0; i < LVL_PYRAMID; ++i) {
         pToPyramid[i] = resizeImage(image, arrGrayPrevious, RESIZE);
     }
     return pToPyramid;
