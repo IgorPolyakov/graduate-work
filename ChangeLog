@@ -2,6 +2,12 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * fix(error) Memory leak: data; fix(error) Memory leak: vectorOptFlw; rename defines;
+ * rewritten quick qml module to run progam
+ * change travis config file
+ * add build status to readme.md
+ * start work with travis
+ * rewrite getMemoryForPyramid - levels are stored in a dynamic array instead structure; remove other files; getMemoryForPyramid return int, instead void; struct pointerToLvlPyramid has been removed; struct imageInform instead QImage image;
  * Rewrite README
  * nothing
 

@@ -17,6 +17,8 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
     PROJECT_SOURCE_VERSION)
 endif()
 
+add_definitions ("-Wall")
+
 exec_program(
     "git"
     ${CMAKE_CURRENT_SOURCE_DIR}
