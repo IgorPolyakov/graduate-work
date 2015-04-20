@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
             qDebug() << "build date: " << PROJECT_BUILD_DATE << " " << PROJECT_BUILD_TIME ;
             return (0);
         case 'h':
-            qDebug() << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./lukas_kanade_qt -l <First image> -r <Second image>\n";
+            qDebug() << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
             qDebug() << "\nDESCRIPTION:";
             qDebug() << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             qDebug() << "\n\t-l\t\t load list path image";

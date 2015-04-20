@@ -23,11 +23,10 @@ $ make
 
 ### Run
 ```sh
-$ ./bin/lukas_kanade_qt  -l <First image> -r <Second image>
+$ ./bin/lukas_kanade_qt  -l <list_of_image>
 ```
 ### Options
- - l — load left image
- - r — load right image
+ - l — load list image
  - o — output directory
  - i — count iteration (1 by default)
  - w — size window search (3px by default)
@@ -37,9 +36,9 @@ $ ./bin/lukas_kanade_qt  -l <First image> -r <Second image>
  - d — debug mod on
 
 ### Todo's
-
+ - Added pyramid
+ - Integrate to DV library		
  - Write Tests
- - Rethink Github Save
  - Add Code Comments for doxygen
 
 License
