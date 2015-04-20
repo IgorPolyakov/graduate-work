@@ -2,6 +2,14 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * fix output arg, text was convert to int copy-paste error; fix output directory; upadete changelog; fix qml form;
+ * add chagelog; add high level warning compilator, for gcc; work on computeOptFlow;
+ * fix(error) Memory leak: data; fix(error) Memory leak: vectorOptFlw; rename defines;
+ * rewritten quick qml module to run progam
+ * change travis config file
+ * add build status to readme.md
+ * start work with travis
+ * rewrite getMemoryForPyramid - levels are stored in a dynamic array instead structure; remove other files; getMemoryForPyramid return int, instead void; struct pointerToLvlPyramid has been removed; struct imageInform instead QImage image;
  * Rewrite README
  * nothing
 

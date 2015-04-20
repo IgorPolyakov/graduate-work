@@ -89,16 +89,18 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
     initialWindow->xMax = image.width();
     initialWindow->yMax = image.height();
     double* vectorOptFlw = new double[SIZE_MAT_INV];
+    for (int i = 0; i < SIZE_MAT_INV; ++i) {
+        vectorOptFlw[i] = 1.0;
+    }
 
     QPainter painter(&image);
     painter.setPen(QPen(Qt::red));
     for (int i = g_stepForGrid ; (i < (image.width()-g_stepForGrid)); i += g_stepForGrid) {
-        qDebug() << "iNew test"<< g_stepForGrid << i << image.width() - g_stepForGrid;
         initialWindow->xCore = i;
         for (int j = g_stepForGrid; (j < (image.height()-g_stepForGrid)); j += g_stepForGrid) {
-            qDebug() << "jNew test"<< g_stepForGrid << j << image.height() - g_stepForGrid;
             initialWindow->yCore = j;
-            computeOptFlow(vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
+            vectorOptFlw = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
+            //computeOptFlow(&vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
             painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
         }
     }
@@ -107,12 +109,15 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
     return image;
 }
 
-void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
+//void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
 {
-    double iY = 0,   iX = 0,   iTX = 0, iTY = 0, iXY = 0;
+    double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX, tmpY, tmpT;
-    for (int var = 0; var < 2; ++var) {
-        shiftVectr = 0;
+    double* shiftVectr = new double[2];
+
+    for (int i = 0; i < 2; ++i) {
+        shiftVectr[i] = 2.0;
     }
     int deltaX = 0;
     int deltaY = 0;
@@ -167,14 +172,16 @@ void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, 
             deltaX = (int)floor(shiftVectr[0]);
             deltaY = (int)floor(shiftVectr[1]);
         } else {
-            qDebug() << "NaN Error";
-            shiftVectr[0] = 0;
-            shiftVectr[1] = 0;
+            if (g_isDebug)  qDebug() << "NaN Error";
+            shiftVectr[0] = 0.0;
+            shiftVectr[1] = 0.0;
         }
     }
+
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     freeMemoryFloat(A, SIZE_MAT_INV);
     delete[] b;
+    return shiftVectr;
 }
 void freeMemoryInt(int** trash, int size)
 {
@@ -218,7 +225,7 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(0, 0, img1);
     paint.drawImage(img1.width(), 0, img2);
     paint.drawImage(img1.width() + img2.width(), 0, img3);
-    result.save(g_outputFolder + info + ".png");
+    result.save(g_outputFolder + "/" + info + ".png");
 }
 
 int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
@@ -248,7 +255,7 @@ int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
 
     QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
     QString s = QString::number(kK);
-    result.save(g_outputFolder + "resize" + s + ".png");
+    result.save(g_outputFolder + "/resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
     delete[] data;
     return ptmpImg;
