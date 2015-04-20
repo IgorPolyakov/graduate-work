@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
      */
     g_isDebug = false;
     g_sizeWindowSeach = 4;
-    g_stepForGrid = 32;
+    g_stepForGrid = 10;
     g_iteration = 1;
     g_outputFolder = "output/";
     /*
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             std::cout << "Count iteration: " << g_iteration << "\n";
             break;
         case 'o':
-            g_outputFolder = atoi(optarg);
+            g_outputFolder = optarg;
             std::cout << "Output directory: " << g_outputFolder.toStdString() << "\n";
             break;
         case 'd':

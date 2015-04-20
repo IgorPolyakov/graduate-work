@@ -2,6 +2,7 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * add chagelog; add high level warning compilator, for gcc; work on computeOptFlow;
  * fix(error) Memory leak: data; fix(error) Memory leak: vectorOptFlw; rename defines;
  * rewritten quick qml module to run progam
  * change travis config file

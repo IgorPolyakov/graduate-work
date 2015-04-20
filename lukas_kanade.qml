@@ -78,6 +78,7 @@ Item {
 
     TextField {
         id: outDirField
+        objectName: "outDirField"
         x: 20
         y: 220
         placeholderText: qsTr("Output directory")
@@ -117,13 +118,13 @@ Item {
       [
         "-l", loadLeftImage.text,//load left image
         "-r", loadRightImage.text,//load right image
-        "-i", countIteration,//count iteration (1 by default)
+        "-o", outDirField.text,//output directory
+        /*"-i", countIteration,//count iteration (1 by default)
         "-w", windowSearch,//size window search (3px by default)
         "-g", stepGrid,//step for grid (5px by default)
-        "-v", //show version
         "-h", //show help
         "-d", debugModeON,//debug mod on
-        "-o", outDirField.text,//output directory
+        "-v" //show version*/
       ];
 
       return a;

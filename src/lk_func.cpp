@@ -225,7 +225,7 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(0, 0, img1);
     paint.drawImage(img1.width(), 0, img2);
     paint.drawImage(img1.width() + img2.width(), 0, img3);
-    result.save(g_outputFolder + info + ".png");
+    result.save(g_outputFolder + "/" + info + ".png");
 }
 
 int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
@@ -255,7 +255,7 @@ int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
 
     QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
     QString s = QString::number(kK);
-    result.save(g_outputFolder + "resize" + s + ".png");
+    result.save(g_outputFolder + "/resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
     delete[] data;
     return ptmpImg;
