@@ -5,9 +5,9 @@ fi
 app_name=./bin/lukas_kanade_qt
 
 file=list
-iteration=1
-size_grid=5
-size_window=8
+#iteration=1
+#size_grid=5
+#size_window=8
 
 img_2=input/frame00.png				#yosmite
 img_1=input/frame01.png				#yosmite

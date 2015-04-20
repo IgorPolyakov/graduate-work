@@ -92,7 +92,6 @@ int main(int argc, char *argv[])
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++)
     {
         std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
-        qDebug()<< imagelist.size()<<ocnt<<cnt<<i;
         if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
             qDebug() << "Cannot load " << cnt << "image file\n";
             return (-1);
@@ -101,7 +100,6 @@ int main(int argc, char *argv[])
             qDebug() << "Cannot load " << i << "image file\n";
             return (-1);
         }
-        qDebug()<<imagelist[cnt]<<imagelist[i];
         leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
         rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
 

@@ -172,7 +172,7 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
             deltaX = (int)floor(shiftVectr[0]);
             deltaY = (int)floor(shiftVectr[1]);
         } else {
-            qDebug() << "NaN Error";
+            if (g_isDebug)  qDebug() << "NaN Error";
             shiftVectr[0] = 0.0;
             shiftVectr[1] = 0.0;
         }
