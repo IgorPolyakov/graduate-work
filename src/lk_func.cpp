@@ -82,34 +82,34 @@ int **getArrBright(QImage image)
     return ary;
 }
 
-QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
+QImage computeGrid(Data2Db* leftImg, Data2Db* rightImg, Data2Db* out1Img, QImage outImg)
 {
     subSize* initialWindow = new subSize;
     initialWindow->radiusCode = g_sizeWindowSeach;
-    initialWindow->xMax = image.width();
-    initialWindow->yMax = image.height();
+    initialWindow->xMax = leftImg->cx();
+    initialWindow->yMax = leftImg->cy();
     double* vectorOptFlw = new double[SIZE_MAT_INV];
     for (int i = 0; i < SIZE_MAT_INV; ++i) {
         vectorOptFlw[i] = 1.0;
     }
 
-    QPainter painter(&image);
+    QPainter painter(&outImg);
     painter.setPen(QPen(Qt::red));
-    for (int i = g_stepForGrid ; (i < (image.width()-g_stepForGrid)); i += g_stepForGrid) {
+    for (int i = g_stepForGrid ; (i < (leftImg->cx()-g_stepForGrid)); i += g_stepForGrid) {
         initialWindow->xCore = i;
-        for (int j = g_stepForGrid; (j < (image.height()-g_stepForGrid)); j += g_stepForGrid) {
+        for (int j = g_stepForGrid; (j < (leftImg->cy()-g_stepForGrid)); j += g_stepForGrid) {
             initialWindow->yCore = j;
-            vectorOptFlw = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
+            vectorOptFlw = computeOptFlow(initialWindow, leftImg, rightImg);
             //computeOptFlow(&vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
             painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
         }
     }
     delete[] vectorOptFlw;
     delete initialWindow;
-    return image;
+    return outImg;
 }
 
-double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
+double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 //void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
@@ -117,7 +117,7 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
     double* shiftVectr = new double[2];
 
     for (int i = 0; i < 2; ++i) {
-        shiftVectr[i] = 2.0;
+        shiftVectr[i] = 0.0;
     }
     int deltaX = 0;
     int deltaY = 0;
@@ -134,13 +134,13 @@ double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext
         //Отсчитываем число итераций, для уточнения вектора
         for (int i = (kernel->xCore - kernel->radiusCode); i <= (kernel->xCore + kernel->radiusCode); i++) {
             for (int j = (kernel->yCore - kernel->radiusCode); j <= (kernel->yCore + kernel->radiusCode); j++) {
-                tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-                tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
+                tmpX = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
+                tmpY = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
                 iX  += tmpX * tmpX;
                 iY  += tmpY * tmpY;
                 iXY += tmpX * tmpY;
 
-                tmpT = ((double)arrGrayPrevious[i + deltaX][j + deltaY] - (double)arrGrayNext[i + deltaX][j + deltaY]) / 2;
+                tmpT = ((double)leftImg->lines()[i + deltaX][j + deltaY] - (double)rightImg->lines()[i + deltaX][j + deltaY]) / 2;
                 iTX += tmpX * tmpT;
                 iTY += tmpY * tmpT;
             }

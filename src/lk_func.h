@@ -3,6 +3,8 @@
 #include <QDebug>
 #include "lk_struct.h"
 #include "global.h"
+#include "dv.h"
+
 /*!
 \file
 \brief Заголовочный файл с описанием функций
@@ -21,7 +23,7 @@
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return изображение с нанесенным по верх векторным полем
  */
-QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext);
+QImage computeGrid(Data2Db* leftImg, Data2Db* rightImg, Data2Db* out1Img, QImage outImg);
 
 /*! Вычисление вектора оптического потока. Для одного пикселя!
  * \brief computeOptFlow
@@ -30,7 +32,7 @@ QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext);
  * \param [in] arrGrayNext − указатель на массив яркостей второго кадра
  * \return вектор оптического потока
  */
-double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext);
+double* computeOptFlow(subSize* kernel, Data2Db *leftImg, Data2Db *rightImg);
 
 /*! Произведение матрицы на вектор.
  * \brief multiplicMtrxAndVectr

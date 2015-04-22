@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include "lk_func.h"
+#include "dv.h"
 #include "version.h"
 int main(int argc, char *argv[])
 {
@@ -85,6 +86,11 @@ int main(int argc, char *argv[])
 
     QStringList imagelist;
     QTextStream in(&listfile);
+
+    static Data2Db *pLeftImg = 0;
+    static Data2Db *pRightImg = 0;
+    static Data2Db *pOutImg = 0;
+
     while (!in.atEnd())
         imagelist.append(in.readLine());
     listfile.close();
@@ -92,39 +98,47 @@ int main(int argc, char *argv[])
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++)
     {
         std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
-        if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
+        //pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
+        /*if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
             qDebug() << "Cannot load " << cnt << "image file\n";
             return (-1);
-        }
-        if (!rightImg.load(imagelist[i].toLocal8Bit().data())) {
+        }*/
+        //pRightImg = ReadImage(imagelist[i].toLocal8Bit().data());
+        /*if (!rightImg.load(imagelist[i].toLocal8Bit().data())) {
             qDebug() << "Cannot load " << i << "image file\n";
             return (-1);
-        }
+        }*/
+        /*
         leftImg = leftImg.convertToFormat(QImage::Format_ARGB32);
         rightImg = rightImg.convertToFormat(QImage::Format_ARGB32);
+        */
 
-        int** pToLeftImg = getArrBright(leftImg);
-        int** pToRightImg = getArrBright(rightImg);
+        /*int** pToLeftImg = getArrBright(leftImg);
+        int** pToRightImg = getArrBright(rightImg);*/
 
         imageInform* image = new imageInform;
-        image->height = leftImg.height();
-        image->width  = leftImg.width();
+        image->height = pLeftImg->cx();
+        image->width  = pRightImg->cy();
 
         //getImageInfo(image, optarg);
 
-        QDir outDir("output");
+        QDir outDir(g_outputFolder);
         if (!outDir.exists()) {
             outDir.mkpath(".");
         }
         std::cout << 15 << "," << (100*i)/imagelist.size() << "," << std::endl;
+
         info = QString("iteration - %1 sizeWindowSeach - %2 - %3 %4").arg(g_iteration).arg(g_sizeWindowSeach).arg(cnt).arg(i);
-        outImg = computeGrid(leftImg, pToLeftImg, pToRightImg);
+
+        outImg = computeGrid(pLeftImg, pRightImg, pOutImg, leftImg);
+
         std::cout << 75 << "," << (100*i)/imagelist.size() << "," << std::endl;
+
         joinImage(leftImg, rightImg, outImg, info);
         //memory, now you free!
         delete image;
-        freeMemoryInt(pToLeftImg, leftImg.width());
-        freeMemoryInt(pToRightImg, rightImg.width());
+        /*freeMemoryInt(pToLeftImg, leftImg.width());
+        freeMemoryInt(pToRightImg, rightImg.width());*/
         std::cout << 100 << "," << (100*i)/imagelist.size() << "," << std::endl;
     }
     std::cout << 100 << "," << 100 << "," << std::endl;

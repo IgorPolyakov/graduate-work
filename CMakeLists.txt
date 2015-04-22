@@ -52,6 +52,14 @@ else()
     PROJECT_BUILD_TIME "${DATE_TIME}")
 endif()
 
+include_directories(
+  "${CMAKE_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvio"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvtypes"
+)
+
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/version.h.in"
   "${PROJECT_SOURCE_DIR}/src/version.h"
