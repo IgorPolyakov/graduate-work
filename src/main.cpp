@@ -98,12 +98,12 @@ int main(int argc, char *argv[])
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++)
     {
         std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
-        //pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
+        pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
         /*if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
             qDebug() << "Cannot load " << cnt << "image file\n";
             return (-1);
         }*/
-        //pRightImg = ReadImage(imagelist[i].toLocal8Bit().data());
+        pRightImg = ReadImage(imagelist[i].toLocal8Bit().data());
         /*if (!rightImg.load(imagelist[i].toLocal8Bit().data())) {
             qDebug() << "Cannot load " << i << "image file\n";
             return (-1);
@@ -116,19 +116,11 @@ int main(int argc, char *argv[])
         /*int** pToLeftImg = getArrBright(leftImg);
         int** pToRightImg = getArrBright(rightImg);*/
 
-        imageInform* image = new imageInform;
-        image->height = pLeftImg->cx();
-        image->width  = pRightImg->cy();
-
-        //getImageInfo(image, optarg);
-
         QDir outDir(g_outputFolder);
         if (!outDir.exists()) {
             outDir.mkpath(".");
         }
         std::cout << 15 << "," << (100*i)/imagelist.size() << "," << std::endl;
-
-        info = QString("iteration - %1 sizeWindowSeach - %2 - %3 %4").arg(g_iteration).arg(g_sizeWindowSeach).arg(cnt).arg(i);
 
         outImg = computeGrid(pLeftImg, pRightImg, pOutImg, leftImg);
 
@@ -136,7 +128,6 @@ int main(int argc, char *argv[])
 
         joinImage(leftImg, rightImg, outImg, info);
         //memory, now you free!
-        delete image;
         /*freeMemoryInt(pToLeftImg, leftImg.width());
         freeMemoryInt(pToRightImg, rightImg.width());*/
         std::cout << 100 << "," << (100*i)/imagelist.size() << "," << std::endl;

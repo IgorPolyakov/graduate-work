@@ -84,28 +84,33 @@ int **getArrBright(QImage image)
 
 QImage computeGrid(Data2Db* leftImg, Data2Db* rightImg, Data2Db* out1Img, QImage outImg)
 {
-    subSize* initialWindow = new subSize;
-    initialWindow->radiusCode = g_sizeWindowSeach;
-    initialWindow->xMax = leftImg->cx();
-    initialWindow->yMax = leftImg->cy();
+    subSize* kernel = new subSize;
+
     double* vectorOptFlw = new double[SIZE_MAT_INV];
     for (int i = 0; i < SIZE_MAT_INV; ++i) {
         vectorOptFlw[i] = 1.0;
     }
 
+    kernel->rc = g_sizeWindowSeach;
+    kernel->step = g_stepForGrid;
+
+    int Vcx = (leftImg->cx()-(2*kernel->rc)-1)/g_stepForGrid;
+    int Vcy = (leftImg->cy()-(2*kernel->rc)-1)/g_stepForGrid;
+
     QPainter painter(&outImg);
     painter.setPen(QPen(Qt::red));
-    for (int i = g_stepForGrid ; (i < (leftImg->cx()-g_stepForGrid)); i += g_stepForGrid) {
-        initialWindow->xCore = i;
-        for (int j = g_stepForGrid; (j < (leftImg->cy()-g_stepForGrid)); j += g_stepForGrid) {
-            initialWindow->yCore = j;
-            vectorOptFlw = computeOptFlow(initialWindow, leftImg, rightImg);
+    for (int i = kernel->rc+1; i < (leftImg->cx()-kernel->rc); i += Vcy) {
+        kernel->cx = i;
+        for (int j = kernel->rc+1; (j < (leftImg->cy()-kernel->rc)); j += Vcx) {
+            kernel->cy = j;
+            vectorOptFlw = computeOptFlow(kernel, leftImg, rightImg);
             //computeOptFlow(&vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
-            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
+            painter.drawLine(kernel->cx, kernel->cy, kernel->cx + vectorOptFlw[0], kernel->cy + vectorOptFlw[1]);
         }
     }
     delete[] vectorOptFlw;
-    delete initialWindow;
+    delete kernel;
+    outImg.save(g_outputFolder + "/879897.png");
     return outImg;
 }
 
@@ -129,11 +134,11 @@ double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 
     int* b = new int [SIZE_MAT_INV];
 
-    if (g_isDebug) qDebug() << "SubSize:X" << kernel->xCore << "Y:" << kernel->yCore << "R:" << kernel->radiusCode << "\n";
+    if (g_isDebug) qDebug() << "SubSize:X" << kernel->cx << "Y:" << kernel->cy << "R:" << kernel->rc << "\n";
     for (int k = 0; k <= g_iteration; ++k) {
         //Отсчитываем число итераций, для уточнения вектора
-        for (int i = (kernel->xCore - kernel->radiusCode); i <= (kernel->xCore + kernel->radiusCode); i++) {
-            for (int j = (kernel->yCore - kernel->radiusCode); j <= (kernel->yCore + kernel->radiusCode); j++) {
+        for (int i = (kernel->cy - kernel->rc); i < (kernel->cy + kernel->rc); i++) {
+            for (int j = (kernel->cx - kernel->rc); j < (kernel->cx + kernel->rc); j++) {
                 tmpX = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
                 tmpY = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
                 iX  += tmpX * tmpX;
@@ -156,16 +161,16 @@ double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
         inversion(A, SIZE_MAT_INV);
         shiftVectr = multiplicMtrxAndVectr(A, b);
 
-        if (kernel->xCore + shiftVectr[0] + kernel->radiusCode > kernel->xMax) {
+        if (kernel->cx + shiftVectr[0] + kernel->rc > leftImg->cx()) {
             break;
         }
-        if (kernel->xCore + shiftVectr[0] - kernel->radiusCode < 0) {
+        if (kernel->cx + shiftVectr[0] - kernel->rc < 0) {
             break;
         }
-        if (kernel->yCore + shiftVectr[1] + kernel->radiusCode > kernel->yMax) {
+        if (kernel->cy + shiftVectr[1] + kernel->rc > leftImg->cy()) {
             break;
         }
-        if (kernel->yCore + shiftVectr[1] - kernel->radiusCode < 0) {
+        if (kernel->cy + shiftVectr[1] - kernel->rc < 0) {
             break;
         }
         if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
