@@ -11,7 +11,7 @@ struct subSize {
     int cx;             //!cx Координата пикселя по x
     int cy;             //!cy Координата пикселя по y
     int rc;             //!rc Радиус окна, т.е. если radiusCode = 2, то сетка 5х5
-    int step;           //!step - Шагмежду векторами
+    int step;           //!step - Шаг между векторами
 };
 
 /*!

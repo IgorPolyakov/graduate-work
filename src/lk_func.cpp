@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
+#include <deprecated/dvfile.h>
+
 #define LVL_PYRAMID 3
 #define RESIZE 5
 #define SIZE_MAT_INV 2
@@ -14,45 +16,45 @@
  * \param [in] **A − Указатель на массив
  * \param [in] N − Его размер
  */
-void inversion(double **A, int N)
+void inversion(Matx22d &A)
 {
     double temp;
-    double **E = new double *[N];
-    for (int i = 0; i < N; i++)
-        E[i] = new double [N];
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++) {
+    double **E = new double *[A.rows];
+    for (int i = 0; i < A.rows; i++)
+        E[i] = new double [A.rows];
+    for (int i = 0; i < A.rows; i++)
+        for (int j = 0; j < A.rows; j++) {
             E[i][j] = 0.0;
             if (i == j)
                 E[i][j] = 1.0;
         }
-    for (int k = 0; k < N; k++) {
-        temp = A[k][k];
-        for (int j = 0; j < N; j++) {
-            A[k][j] /= temp;
+    for (int k = 0; k < A.rows; k++) {
+        temp = A(k,k);
+        for (int j = 0; j < A.rows; j++) {
+            A(k,j) /= temp;
             E[k][j] /= temp;
         }
-        for (int i = k + 1; i < N; i++) {
-            temp = A[i][k];
-            for (int j = 0; j < N; j++) {
-                A[i][j] -= A[k][j] * temp;
+        for (int i = k + 1; i < A.rows; i++) {
+            temp = A(i,k);
+            for (int j = 0; j < A.rows; j++) {
+                A(i,j) -= A(k,j) * temp;
                 E[i][j] -= E[k][j] * temp;
             }
         }
     }
-    for (int k = N - 1; k > 0; k--) {
+    for (int k = A.rows - 1; k > 0; k--) {
         for (int i = k - 1; i >= 0; i--) {
-            temp = A[i][k];
-            for (int j = 0; j < N; j++) {
-                A[i][j] -= A[k][j] * temp;
+            temp = A(i,k);
+            for (int j = 0; j < A.rows; j++) {
+                A(i,j) -= A(k,j) * temp;
                 E[i][j] -= E[k][j] * temp;
             }
         }
     }
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++)
-            A[i][j] = E[i][j];
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < A.rows; i++)
+        for (int j = 0; j < A.rows; j++)
+            A(i,j) = E[i][j];
+    for (int i = 0; i < A.rows; i++)
         delete [] E[i];
     delete [] E;
 }
@@ -73,19 +75,30 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
     }*/
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
-    int Vcx = (leftImg->cx()-(2*kernel->rc)-1)/g_stepForGrid;
-    int Vcy = (leftImg->cy()-(2*kernel->rc)-1)/g_stepForGrid;
-    static VF2d *vf = new VF2d(Vcx, Vcy, 1,1,0,0, DV_ALIGNMENT);
+    int Vcx = (leftImg->cx()-(2*(kernel->rc+2))-1)/g_stepForGrid;
+    int Vcy = (leftImg->cy()-(2*(kernel->rc+2))-1)/g_stepForGrid;
+    VF2d *vf = new VF2d(Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
+    Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
+    vf->ad() = s_ptr<ProtoData2D>(state);
     /*
      *Data2D_(int cx, int cy, int gx=1, int gy=1, int ox=0, int oy=0, int align = DV_ALIGNMENT)
     : ProtoData2D(DataType<T_>::depth, DataType<T_>::fmt, DataType<T_>::channels, 0, "", cx, cy, gx, gy, ox, oy, align) {}
     */
-    for (int i = kernel->rc+1; i < (leftImg->cx()-kernel->rc); i += Vcy) {
+
+    /*for (int i = kernel->rc+1; i < (leftImg->cx()-kernel->rc); i += Vcy) {
         kernel->cx = i;
-        for (int j = kernel->rc+1; (j < (leftImg->cy()-kernel->rc));
-             j += Vcx) {
+        for (int j = kernel->rc+1; (j < (leftImg->cy()-kernel->rc)); j += Vcx) {
             kernel->cy = j;
             //vf = (VF2d)computeOptFlow(kernel, leftImg, rightImg);
+            vf;
+        }
+    }*/
+
+    for (int i = 0; i < Vcy; ++i) {
+        kernel->cy = (i * vf->grid().y) + vf->origin().y;
+        for (int j = 0; j < Vcx; ++j) {
+            kernel->cx = (j * vf->grid().x) + vf->origin().x;
+            vf->lines()[i][j] = computeOptFlow(kernel, leftImg, rightImg);
         }
     }
     delete kernel;
@@ -99,23 +112,16 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
  * \param [in] rightImg - указатель на массив яркостей второго кадра
  * \return вектор оптического потока
  */
-double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX, tmpY, tmpT;
-    double* shiftVectr = new double[2];
-    for (int i = 0; i < 2; ++i) {
-        shiftVectr[i] = 0.0;
-    }
+    Vec2d shiftVectr(0,0);
     int deltaX = 0;
     int deltaY = 0;
-    double **A = new double *[SIZE_MAT_INV];
-    for (int i = 0; i < SIZE_MAT_INV; i++)
-        A[i] = new double [SIZE_MAT_INV];
-    int* b = new int [SIZE_MAT_INV];
 
     if (g_isDebug) qDebug() << "SubSize:X" << kernel->cx << "Y:" << kernel->cy << "R:" << kernel->rc << "\n";
-    for (int k = 0; k <= g_iteration; ++k) {
+    for (int k = 0; k < g_iteration; ++k) {
         //Отсчитываем число итераций, для уточнения вектора
         for (int i = (kernel->cy - kernel->rc); i < (kernel->cy + kernel->rc); i++) {
             for (int j = (kernel->cx - kernel->rc); j < (kernel->cx + kernel->rc); j++) {
@@ -130,14 +136,13 @@ double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
                 iTY += tmpY * tmpT;
             }
         }
-        A[0][0] = iX;
-        A[0][1] = iXY;
-        A[1][0] = iXY;
-        A[1][1] = iY;
-        b[0] = -iTX;
-        b[1] = -iTY;
-        inversion(A, SIZE_MAT_INV);
-        shiftVectr = multiplicMtrxAndVectr(A, b);
+
+        Matx22d A(iX, iXY, iXY, iY);
+
+        Vec2d b(-iTX,-iTY);
+
+        inversion(A);
+        shiftVectr = A*b;
 
         if (kernel->cx + shiftVectr[0] + kernel->rc > leftImg->cx()) {
             break;
@@ -162,12 +167,6 @@ double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
         }
     }
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
-
-    for (int i = 0; i < SIZE_MAT_INV; ++i)
-        delete[] A[i];
-    delete [] A;
-
-    delete[] b;
     return shiftVectr;
 }
 
@@ -175,7 +174,7 @@ double* computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
  * \brief multiplicMtrxAndVectr - Произведение матрицы на вектор
  * \param [in] **array − указатель на массив
  * \param [in] *vector − указатель на вектор
- * \return  *tmp − результат произведения
+ * \return [out] tmp − результат произведения
  */
 double* multiplicMtrxAndVectr(double** array, int* vector)
 {
@@ -280,11 +279,11 @@ int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
  * \brief saveVfResult
  * \param vf
  */
-void saveVfResult(VF2d vf/*, Data2Db img*/)
+void saveVfResult(VF2d &vf)
 {
-    /*if (WriteVF(g_outputFolder + "/" + "info" + ".png", VF2d* vf) == 0) {
+    if (WriteVF(QString(g_outputFolder + "/" + "info" + ".vf").toLocal8Bit().data(), &vf) == 0) {
         qDebug() << "Correct write data";
     } else {
         qDebug() << "Error : can't write vf data";
-    }*/
+    }
 }

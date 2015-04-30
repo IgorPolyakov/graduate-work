@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "lk_func.h"
 #include "dv.h"
+#include "deprecated/dvfile.h"
 #include "version.h"
 int main(int argc, char *argv[])
 {
@@ -114,12 +115,10 @@ int main(int argc, char *argv[])
         std::cout << 15 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
         vf = computeGrid(pLeftImg, pRightImg);
+
         std::cout << 75 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
-        //joinImage(leftImg, rightImg, outImg, info);
-        //memory, now you free!
-        /*freeMemoryInt(pToLeftImg, leftImg.width());
-        freeMemoryInt(pToRightImg, rightImg.width());*/
+        saveVfResult(*vf);
         std::cout << 100 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
     }
