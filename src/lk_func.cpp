@@ -113,8 +113,13 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
                 iX  += tmpX * tmpX;
                 iY  += tmpY * tmpY;
                 iXY += tmpX * tmpY;
+                //Если мы выходим за рамки изображения, то обнуляем такое уточнение
+                if (i + deltaY < 0 || i + deltaY > kernel->cy ||j + deltaX < 0 || j + deltaX > kernel->cx) {
+                    tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2;
+                } else {
+                    tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2;
 
-                tmpT = ((double)leftImg->lines()[i + deltaX][j + deltaY] - (double)rightImg->lines()[i + deltaX][j + deltaY]) / 2;
+                }
                 iTX += tmpX * tmpT;
                 iTY += tmpY * tmpT;
             }
