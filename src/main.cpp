@@ -45,11 +45,9 @@ int main(int argc, char *argv[])
                      PROJECT_BUILD_TIME ;
             return (0);
         case 'h':
-            qDebug() <<
-                     "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
+            qDebug() << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
             qDebug() << "\nDESCRIPTION:";
-            qDebug() <<
-                     "\n\tApplication created in order to write a graduate work on specialty 220301\n";
+            qDebug() << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             qDebug() << "\n\t-l\t\t load list path image";
             qDebug() << "\n\t-o\t\t output directory";
             qDebug() << "\n\t-i\t\t count iteration (1 by default)";
@@ -83,14 +81,14 @@ int main(int argc, char *argv[])
     }
     QFile listfile(listfilename);
     if (!listfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Cannot load list image file\n";
+        qDebug() << "Cannot load image list file\n";
         return (-1);
     }
     QStringList imagelist;
     QTextStream in(&listfile);
-    static Data2Db *pLeftImg = 0;
-    static Data2Db *pRightImg = 0;
-    static VF2d *vf = 0;
+    Data2Db *pLeftImg = 0;
+    Data2Db *pRightImg = 0;
+    VF2d *vf = 0;
 
     while (!in.atEnd())
         imagelist.append(in.readLine());

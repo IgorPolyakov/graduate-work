@@ -12,9 +12,8 @@
 #define SIZE_MAT_INV 2
 
 /*!
- * \brief inversion - Нахождения обратной матрицы.
- * \param [in] **A − Указатель на массив
- * \param [in] N − Его размер
+ * \brief inversion − Нахождения обратной матрицы(2 x 2).
+ * \param [in] A − Ссылка на массив
  */
 void inversion(Matx22d &A)
 {
@@ -60,19 +59,16 @@ void inversion(Matx22d &A)
 }
 
 /*!
- * \brief computeGrid - Строит сетку по верх изображения, в точках
+ * \brief computeGrid − Строит сетку по верх изображения, в точках
  * пересечения ищется вектор оптического потока
- * \param [in] leftImg - указатель на массив яркостей первого кадра
- * \param [in] rightImg - указатель на массив яркостей второго кадра
+ * \param [in] leftImg − указатель на массив яркостей первого кадра
+ * \param [in] rightImg − указатель на массив яркостей второго кадра
  * \return двумерный массив содержащий векторное поле, в формате VF
  */
 VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
 {
     subSize* kernel = new subSize;
-    /*double* vf= new double[SIZE_MAT_INV];
-    for (int i = 0; i < SIZE_MAT_INV; ++i) {
-        vf[i] = 1.0;
-    }*/
+
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
     int Vcx = (leftImg->cx()-(2*(kernel->rc+2))-1)/g_stepForGrid;
@@ -80,20 +76,6 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
     VF2d *vf = new VF2d(Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
     Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
     vf->ad() = s_ptr<ProtoData2D>(state);
-    /*
-     *Data2D_(int cx, int cy, int gx=1, int gy=1, int ox=0, int oy=0, int align = DV_ALIGNMENT)
-    : ProtoData2D(DataType<T_>::depth, DataType<T_>::fmt, DataType<T_>::channels, 0, "", cx, cy, gx, gy, ox, oy, align) {}
-    */
-
-    /*for (int i = kernel->rc+1; i < (leftImg->cx()-kernel->rc); i += Vcy) {
-        kernel->cx = i;
-        for (int j = kernel->rc+1; (j < (leftImg->cy()-kernel->rc)); j += Vcx) {
-            kernel->cy = j;
-            //vf = (VF2d)computeOptFlow(kernel, leftImg, rightImg);
-            vf;
-        }
-    }*/
-
     for (int i = 0; i < Vcy; ++i) {
         kernel->cy = (i * vf->grid().y) + vf->origin().y;
         for (int j = 0; j < Vcx; ++j) {
@@ -106,11 +88,12 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
 }
 
 /*!
- * \brief computeOptFlow - Вычисление вектора оптического потока
- * \param [in] kernel - структура содержащая сведения о местонахождении пикселя, размерах окна поиска и прочего
- * \param [in] leftImg - указатель на массив яркостей первого кадра
- * \param [in] rightImg - указатель на массив яркостей второго кадра
- * \return вектор оптического потока
+ * \brief computeOptFlow − Вычисление вектора оптического потока
+ * \param [in] kernel − структура содержащая сведения о местонахождении
+ * пикселя, размерах окна поиска и прочего
+ * \param [in] leftImg − массив яркостей первого кадра
+ * \param [in] rightImg − массив яркостей второго кадра
+ * \return [out] vf − вектор оптического потока
  */
 Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 {
@@ -171,7 +154,7 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 }
 
 /*!
- * \brief multiplicMtrxAndVectr - Произведение матрицы на вектор
+ * \brief multiplicMtrxAndVectr − Произведение матрицы на вектор
  * \param [in] **array − указатель на массив
  * \param [in] *vector − указатель на вектор
  * \return [out] tmp − результат произведения
@@ -191,7 +174,7 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
 }
 
 /*!
- * \brief getImageInfo - Получение информации о входном изображении
+ * \brief getImageInfo − Получение информации о входном изображении
  * \param [in] image − Изображение
  * \param [in] path − Путь к нему
  */
@@ -204,7 +187,7 @@ void getImageInfo(imageInform* image, QString path)
 }
 
 /*!
- * \brief joinImage - Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
+ * \brief joinImage − Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
  * \param [in] img1 − Первое изображение
  * \param [in] img2 − Второе изображение
  * \param [in] img3 − Первого с нанесённым поверх векторным полем
@@ -223,15 +206,14 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
 }
 
 /*!
- * \brief resizeImage - Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
- * \param [in] image - структура содержащая сведения о размерах масштабируемого изображения
+ * \brief resizeImage − Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
+ * \param [in] image − структура содержащая сведения о размерах масштабируемого изображения
  * \param [in] arrGrayPrevious − Указатель на массив яркостей первого кадра
  * \param [in] kK − Коэффициент уменьшения изображения
- * \return [out] - указатель на массив масштабированных изображений
+ * \return [out] − указатель на массив масштабированных изображений
  */
 int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
 {
-    /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
     int newWidth = (image->width/kK);
     int newHeight= (image->height/kK);
     int tmp = 0;
@@ -260,7 +242,7 @@ int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
 }
 
 /*!
- * \brief getMemoryForPyramid - Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается
+ * \brief getMemoryForPyramid − Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается
  * \param [in] image − исходное изображение
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
  */
@@ -276,8 +258,8 @@ int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
 }
 
 /*!
- * \brief saveVfResult
- * \param vf
+ * \brief saveVfResult − Сохраниение векторного поля в формате VF. Просмотр возможен в программе df−cl
+ * \param [in] vf − Указатель на векторное поле.
  */
 void saveVfResult(VF2d &vf)
 {
