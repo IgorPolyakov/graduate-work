@@ -2,6 +2,10 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * fixed overrange the array in an iterative loop
+ * fix style; remove old code;
+ * 30.04.15
+ * fixed code documentation; save vector to vf field; train commit
  * fix
  * rewrite cmake list; integrate project to dv lib
  * add dv library; read image not work;
