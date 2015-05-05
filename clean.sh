@@ -8,8 +8,8 @@ rm -rf 'obj/'
 rm -rf 'dv/'
 echo $OK
 
-echo -ne " * delete all 'Makefile'"
-find . -iname 'Makefile' -delete
+echo -ne " * delete all 'Debug info'"
+find . -iname '*.cbp' -delete
 echo $OK
 
 echo -ne " * delete all '*.o'"
