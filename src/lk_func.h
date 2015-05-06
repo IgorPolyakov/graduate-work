@@ -11,13 +11,13 @@
 */
 #ifndef LK_FUNC_H
 #define LK_FUNC_H
-    Vec2d   computeOptFlow(subSize* kernel, Data2Db *leftImg,Data2Db *rightImg);
-    double* multiplicMtrxAndVectr(double **array, int* vector);
-    int**   getMemoryForPyramid(imageInform* image, int** arrGrayPrevious);
-    int*    resizeImage(imageInform* image, int** arrGrayPrevious, int kK);
-    VF2d*   computeGrid(Data2Db* leftImg, Data2Db* rightImg);
-    void    getImageInfo(imageInform* image, QString path);
-    void    inversion(Matx22d &A);
-    void    joinImage(QImage img1, QImage img2, QImage img3, QString info);
-    void    saveVfResult(VF2d &vf);
+Vec2d   computeOptFlow(subSize* kernel, Data2Db *leftImg,Data2Db *rightImg);
+double* multiplicMtrxAndVectr(double **array, int* vector);
+std::vector<Data2Db*> createPyramid_v2(Data2Db* img, int lvl_pyramid);
+Data2Db* resizeImage(Data2Db* image, int kK);
+VF2d*   computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d *prev);
+void    getImageInfo(imageInform* image, QString path);
+void    inversion(Matx22d &A);
+void    joinImage(QImage img1, QImage img2, QImage img3, QString info);
+void    saveVfResult(VF2d &vf);
 #endif

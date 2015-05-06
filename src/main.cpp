@@ -112,7 +112,29 @@ int main(int argc, char *argv[])
         }
         std::cout << 15 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
-        vf = computeGrid(pLeftImg, pRightImg);
+        int lvl_pyramid = 0;
+        if (pLeftImg->cx()>pLeftImg->cy()) {
+            int tmp = pLeftImg->cy();
+            while (tmp > (g_sizeWindowSeach + 1)*2 + 2) {
+                lvl_pyramid++;
+                tmp = tmp/2;
+            }
+        }
+        else {
+            int tmp = pLeftImg->cx();
+            while (tmp > (g_sizeWindowSeach + 1)*2 + 2) {
+                lvl_pyramid++;
+                tmp = tmp/2;
+            }
+        }
+
+        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
+        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);
+
+        VF2d* prevFiled = 0;
+        for (int i = lvl_pyramid; i >= 0; i--){
+            vf = prevFiled = computeGrid(listLeft[i], listRight[i], prevFiled);
+        }
 
         std::cout << 75 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;

@@ -6,8 +6,8 @@
 #include <iostream>
 #include <math.h>
 #include <deprecated/dvfile.h>
+#include <vector>
 
-#define LVL_PYRAMID 3
 #define RESIZE 5
 #define SIZE_MAT_INV 2
 
@@ -65,7 +65,7 @@ void inversion(Matx22d &A)
  * \param [in] rightImg − указатель на массив яркостей второго кадра
  * \return двумерный массив содержащий векторное поле, в формате VF
  */
-VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
+VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 {
     subSize* kernel = new subSize;
 
@@ -75,12 +75,25 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg)
     int Vcy = (leftImg->cy()-(2*(kernel->rc+2))-1)/g_stepForGrid;
     VF2d *vf = new VF2d(Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
     Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
+
     vf->ad() = s_ptr<ProtoData2D>(state);
+    if (prev)
+    {
+/*воот тут вот*/
+        for (int i = 0; i < vf->cy(); ++i) {
+            for (int j = 0; j < vf->cx(); ++j) {
+                vf->lines()[i][j] = prev;
+            }
+        }
+    }
+
     for (int i = 0; i < Vcy; ++i) {
-        kernel->cy = (i * vf->grid().y) + vf->origin().y;
+
         for (int j = 0; j < Vcx; ++j) {
-            kernel->cx = (j * vf->grid().x) + vf->origin().x;
+            kernel->cy = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
+            kernel->cx = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             vf->lines()[i][j] = computeOptFlow(kernel, leftImg, rightImg);
+            state->lines()[i][j] = 1;
         }
     }
     delete kernel;
@@ -114,11 +127,10 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
                 iY  += tmpY * tmpY;
                 iXY += tmpX * tmpY;
                 //Если мы выходим за рамки изображения, то обнуляем такое уточнение
-                if (i + deltaY < 0 || i + deltaY > kernel->cy ||j + deltaX < 0 || j + deltaX > kernel->cx) {
+                if ((i + deltaY) < 0 || (i + deltaY) > kernel->cy ||(j + deltaX) < 0 || (j + deltaX) > kernel->cx) {
                     tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2;
                 } else {
                     tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2;
-
                 }
                 iTX += tmpX * tmpT;
                 iTY += tmpY * tmpT;
@@ -145,7 +157,7 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
             break;
         }
         if ((shiftVectr[0] == shiftVectr[0])
-            || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
+                || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
             deltaX = (int)floor(shiftVectr[0]);
             deltaY = (int)floor(shiftVectr[1]);
         } else {
@@ -217,33 +229,26 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
  * \param [in] kK − Коэффициент уменьшения изображения
  * \return [out] − указатель на массив масштабированных изображений
  */
-int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
+Data2Db* resizeImage(Data2Db* image, int kK)
 {
-    int newWidth = (image->width/kK);
-    int newHeight= (image->height/kK);
+    int newWidth = (image->cx()/kK);
+    int newHeight= (image->cy()/kK);
     int tmp = 0;
-    int* ptmpImg = new int[newHeight * newWidth];
-    int** data = new int*[newHeight];
-    for(int i = 0; i < newHeight; ++i)
-        data[i] = ptmpImg + newWidth * i;
+
+    Data2Db* smallImg = new Data2Db(newWidth, newHeight);
     for (int i = 0; i < newWidth; i++) {
         for (int j = 0; j < newHeight; j++) {
             for (int ii = 0; ii < kK-1; ++ii) {
                 for (int jj = 0; jj < kK-1; ++jj) {
-                    tmp = arrGrayPrevious[kK * i + ii][ kK * j + jj];
+                    tmp = image->lines()[kK * i + ii][ kK * j + jj];
                 }
             }
-            data[i][j] = tmp;
+            smallImg->lines()[i][j] = tmp;
             tmp = 0;
         }
     }
-    QImage result((uchar*)ptmpImg, newWidth, newHeight,
-                  QImage::Format_RGB32);
-    QString s = QString::number(kK);
-    result.save(g_outputFolder + "/resize" + s + ".png");
     //freeMemoryInt(ptmpImg, newWidth);
-    delete[] data;
-    return ptmpImg;
+    return smallImg;
 }
 
 /*!
@@ -251,7 +256,7 @@ int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
  * \param [in] image − исходное изображение
  * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
  */
-int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
+/*int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
 {
     int** pToPyramid = new int*[LVL_PYRAMID];
     for (int i = 0; i < LVL_PYRAMID; ++i)
@@ -260,6 +265,19 @@ int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
         pToPyramid[i] = resizeImage(image, arrGrayPrevious, RESIZE);
     }
     return pToPyramid;
+}
+*/
+std::vector<Data2Db*> createPyramid_v2(Data2Db* img, int lvl_pyramid)
+{
+    r = 1;
+    std::vector<Data2Db*> *listImg = new std::vector<Data2Db*>;
+    listImg->push_back(img); //первый уровень(оригинал)
+    for (int i = 0; i < lvl_pyramid; i++) {
+        r = r + r;
+        //r = 1 << i;
+        listImg->push_back(resizeImage(img, r));
+    }
+    return listImg;
 }
 
 /*!
