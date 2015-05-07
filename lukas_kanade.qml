@@ -15,15 +15,17 @@ Item {
         id: windowSearch
         x: 200
         y: 80
-        minimumValue : 3
-        maximumValue : 10
+        minimumValue : 2
+        maximumValue : 1000
+        value : 16
     }
     SpinBox {
         id: stepGrid
         x: 200
         y: 120
-        minimumValue : 5
-        maximumValue : 30
+        minimumValue : 1
+        maximumValue : 500
+        value : 16
     }
 
     Label {
@@ -89,10 +91,10 @@ Item {
       [
         "-l", outDirField.text + "/list",//load list image
         "-o", outDirField.text,//output directory
-        /*"-i", countIteration,//count iteration (1 by default)
-        "-w", windowSearch,//size window search (3px by default)
-        "-g", stepGrid,//step for grid (5px by default)
-        "-h", //show help
+        "-i", countIteration.value,//count iteration (1 by default)
+        "-w", windowSearch.value,//size window search (3px by default)
+        "-g", stepGrid.value,//step for grid (5px by default)
+        /*"-h", //show help
         "-d", debugModeON,//debug mod on
         "-v" //show version*/
       ];
