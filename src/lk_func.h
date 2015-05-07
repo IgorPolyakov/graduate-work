@@ -13,7 +13,7 @@
 #define LK_FUNC_H
 Vec2d   computeOptFlow(subSize* kernel, Data2Db *leftImg,Data2Db *rightImg);
 double* multiplicMtrxAndVectr(double **array, int* vector);
-std::vector<Data2Db*> createPyramid_v2(Data2Db* img, int lvl_pyramid);
+std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid);
 Data2Db* resizeImage(Data2Db* image, int kK);
 VF2d*   computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d *prev);
 void    getImageInfo(imageInform* image, QString path);

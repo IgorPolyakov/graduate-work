@@ -79,10 +79,10 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
     vf->ad() = s_ptr<ProtoData2D>(state);
     if (prev)
     {
-/*воот тут вот*/
+        int tmpX = ((prev->cx())/vf->cx()), tmpY = (prev->cy())/(vf->cy());
         for (int i = 0; i < vf->cy(); ++i) {
             for (int j = 0; j < vf->cx(); ++j) {
-                vf->lines()[i][j] = prev;
+                vf->lines()[i][j] = prev->lines()[tmpX][tmpY];
             }
         }
     }
@@ -121,19 +121,26 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
         //Отсчитываем число итераций, для уточнения вектора
         for (int i = (kernel->cy - kernel->rc); i < (kernel->cy + kernel->rc); i++) {
             for (int j = (kernel->cx - kernel->rc); j < (kernel->cx + kernel->rc); j++) {
-                tmpX = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
-                tmpY = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
-                iX  += tmpX * tmpX;
-                iY  += tmpY * tmpY;
-                iXY += tmpX * tmpY;
-                //Если мы выходим за рамки изображения, то обнуляем такое уточнение
-                if ((i + deltaY) < 0 || (i + deltaY) > kernel->cy ||(j + deltaX) < 0 || (j + deltaX) > kernel->cx) {
-                    tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2;
-                } else {
-                    tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2;
+                if (((i - 1) > 0) && ((i + 1) < leftImg->cy()) && ((j - 1) > 0) && ((j + 1) < leftImg->cx())) {
+                //if (((i - 1) > 0)) {
+                    /*tmpX = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
+                    tmpY = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
+                    */
+                    tmpX = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
+                    tmpY = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
+
+                    iX  += tmpX * tmpX;
+                    iY  += tmpY * tmpY;
+                    iXY += tmpX * tmpY;
+                    //Если мы выходим за рамки изображения, то обнуляем такое уточнение
+                    if ((i + deltaY) < 0 || (i + deltaY) > kernel->cy ||(j + deltaX) < 0 || (j + deltaX) > kernel->cx) {
+                        tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2;
+                    } else {
+                        tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2;
+                    }
+                    iTX += tmpX * tmpT;
+                    iTY += tmpY * tmpT;
                 }
-                iTX += tmpX * tmpT;
-                iTY += tmpY * tmpT;
             }
         }
 
@@ -236,8 +243,8 @@ Data2Db* resizeImage(Data2Db* image, int kK)
     int tmp = 0;
 
     Data2Db* smallImg = new Data2Db(newWidth, newHeight);
-    for (int i = 0; i < newWidth; i++) {
-        for (int j = 0; j < newHeight; j++) {
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
             for (int ii = 0; ii < kK-1; ++ii) {
                 for (int jj = 0; jj < kK-1; ++jj) {
                     tmp = image->lines()[kK * i + ii][ kK * j + jj];
@@ -267,9 +274,9 @@ Data2Db* resizeImage(Data2Db* image, int kK)
     return pToPyramid;
 }
 */
-std::vector<Data2Db*> createPyramid_v2(Data2Db* img, int lvl_pyramid)
+std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
 {
-    r = 1;
+    int r = 1;
     std::vector<Data2Db*> *listImg = new std::vector<Data2Db*>;
     listImg->push_back(img); //первый уровень(оригинал)
     for (int i = 0; i < lvl_pyramid; i++) {
