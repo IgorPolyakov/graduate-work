@@ -139,13 +139,24 @@ int main(int argc, char *argv[])
         std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
         std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);
 
+        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
+            QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
+            WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
+        }
+
+        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
+            QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
+            WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
+        }
+
         for (int j = lvl_pyramid; j >= 0; j--){
             vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
+            saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
         }
 
         std::cout << 75 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
-        saveVfResult(*vf);
+        //saveVfResult(*vf, "result_lvl_" + QString("%1").arg(lvl_pyramid));
         std::cout << 100 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
     }
