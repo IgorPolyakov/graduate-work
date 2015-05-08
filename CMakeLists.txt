@@ -65,7 +65,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
     PROJECT_SOURCE_VERSION)
 endif()
 
-#add_definitions ("-Wall")
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/version.h.in"
+  "${PROJECT_SOURCE_DIR}/src/version.h"
+  )
 
 include("../dv/common.cmake")
 
