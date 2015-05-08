@@ -7,10 +7,7 @@
 #include <math.h>
 #include <deprecated/dvfile.h>
 #include <vector>
-
-#define RESIZE 5
 #define SIZE_MAT_INV 2
-
 /*!
  * \brief inversion − Нахождения обратной матрицы(2 x 2).
  * \param [in] A − Ссылка на массив
@@ -57,49 +54,47 @@ void inversion(Matx22d &A)
         delete [] E[i];
     delete [] E;
 }
-
 /*!
  * \brief computeGrid − Строит сетку по верх изображения, в точках
  * пересечения ищется вектор оптического потока
  * \param [in] leftImg − указатель на массив яркостей первого кадра
  * \param [in] rightImg − указатель на массив яркостей второго кадра
- * \return двумерный массив содержащий векторное поле, в формате VF
+ * \param [in] prev − указатель на векторное поле содержащий предыдущий уровень пирамиды
+ * \return [out] двумерный массив содержащий векторное поле, в формате VF
  */
 VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 {
     subSize* kernel = new subSize;
-
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
     int Vcx = (leftImg->cx()-(2*(kernel->rc+2))-1)/g_stepForGrid;
     int Vcy = (leftImg->cy()-(2*(kernel->rc+2))-1)/g_stepForGrid;
     VF2d *vf = new VF2d(Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
     Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
-
     vf->ad() = s_ptr<ProtoData2D>(state);
     if (prev)
     {
-        int tmpX = ((prev->cx())/vf->cx()), tmpY = (prev->cy())/(vf->cy());
         for (int i = 0; i < vf->cy(); ++i) {
             for (int j = 0; j < vf->cx(); ++j) {
-                vf->lines()[i][j] = prev->lines()[tmpX][tmpY];
+                int tmpX = (j *(prev->cx()-1))/(vf->cx()-1), tmpY = (i * (prev->cy()-1))/(vf->cy()-1);
+                vf->lines()[i][j] = prev->lines()[tmpX][tmpY] * 2;
             }
         }
     }
-
     for (int i = 0; i < Vcy; ++i) {
-
         for (int j = 0; j < Vcx; ++j) {
-            kernel->cy = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
-            kernel->cx = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
-            vf->lines()[i][j] = computeOptFlow(kernel, leftImg, rightImg);
+            kernel->y_1 = (i * vf->grid().y) + vf->origin().y;
+            kernel->x_1 = (j * vf->grid().x) + vf->origin().x;
+            kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
+            kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
+            /*TODO:  Cделать проверку выхода за границы*/
+            vf->lines()[i][j] += computeOptFlow(kernel, leftImg, rightImg);
             state->lines()[i][j] = 1;
         }
     }
     delete kernel;
     return vf;
 }
-
 /*!
  * \brief computeOptFlow − Вычисление вектора оптического потока
  * \param [in] kernel − структура содержащая сведения о местонахождении
@@ -111,56 +106,50 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
-    double tmpX, tmpY, tmpT;
+    double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
     Vec2d shiftVectr(0,0);
     int deltaX = 0;
     int deltaY = 0;
-
-    if (g_isDebug) qDebug() << "SubSize:X" << kernel->cx << "Y:" << kernel->cy << "R:" << kernel->rc << "\n";
+    if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
     for (int k = 0; k < g_iteration; ++k) {
         //Отсчитываем число итераций, для уточнения вектора
-        for (int i = (kernel->cy - kernel->rc); i < (kernel->cy + kernel->rc); i++) {
-            for (int j = (kernel->cx - kernel->rc); j < (kernel->cx + kernel->rc); j++) {
-                if (((i - 1) > 0) && ((i + 1) < leftImg->cy()) && ((j - 1) > 0) && ((j + 1) < leftImg->cx())) {
-                //if (((i - 1) > 0)) {
-                    /*tmpX = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
-                    tmpY = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
-                    */
-                    tmpX = ((double)leftImg->lines()[i][j - 1] - (double)leftImg->lines()[i][j + 1]) / 2;
-                    tmpY = ((double)leftImg->lines()[i - 1][j] - (double)leftImg->lines()[i + 1][j]) / 2;
-
+        for (int i = -kernel->rc; i <= kernel->rc; i++)
+        {
+            for (int j = -kernel->rc; j <= kernel->rc; j++)//(kernel->x_1 - kernel->rc); j < (kernel->x_1 + kernel->rc); j++)
+            {
+                if (((i - 1) > 0) && ((i + 1) < leftImg->cy()) && ((j - 1) > 0) && ((j + 1) < leftImg->cx()))
+                {
+                    tmpX = ((double)leftImg->lines()[kernel->y_1 + i][ kernel->x_1 + j - 1] - (double)leftImg->lines()[kernel->y_1 + i][kernel->x_1 + j + 1]) / 2.0;
+                    tmpY = ((double)leftImg->lines()[kernel->y_1 + i - 1][kernel->x_1 + j] - (double)leftImg->lines()[kernel->y_1 + i + 1][kernel->x_1 + j]) / 2.0;
                     iX  += tmpX * tmpX;
                     iY  += tmpY * tmpY;
                     iXY += tmpX * tmpY;
                     //Если мы выходим за рамки изображения, то обнуляем такое уточнение
-                    if ((i + deltaY) < 0 || (i + deltaY) > kernel->cy ||(j + deltaX) < 0 || (j + deltaX) > kernel->cx) {
-                        tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2;
+                    /*if ((i + deltaY) < 0 || (i + deltaY) > kernel->y_1 ||(j + deltaX) < 0 || (j + deltaX) > kernel->x_1) {
+                        tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2.0;
                     } else {
-                        tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2;
-                    }
+                        tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2.0;
+                    }*/
+                    tmpT = ((double)leftImg->lines()[kernel->y_2 + i - 1][kernel->x_2 + j] - (double)rightImg->lines()[kernel->y_2 + i + 1][kernel->x_2 + j]) / 2.0;
                     iTX += tmpX * tmpT;
                     iTY += tmpY * tmpT;
                 }
             }
         }
-
         Matx22d A(iX, iXY, iXY, iY);
-
         Vec2d b(-iTX,-iTY);
-
         inversion(A);
         shiftVectr = A*b;
-
-        if (kernel->cx + shiftVectr[0] + kernel->rc > leftImg->cx()) {
+        if (kernel->x_1 + shiftVectr[0] + kernel->rc > leftImg->cx()) {
             break;
         }
-        if (kernel->cx + shiftVectr[0] - kernel->rc < 0) {
+        if (kernel->x_1 + shiftVectr[0] - kernel->rc < 0) {
             break;
         }
-        if (kernel->cy + shiftVectr[1] + kernel->rc > leftImg->cy()) {
+        if (kernel->y_1 + shiftVectr[1] + kernel->rc > leftImg->cy()) {
             break;
         }
-        if (kernel->cy + shiftVectr[1] - kernel->rc < 0) {
+        if (kernel->y_1 + shiftVectr[1] - kernel->rc < 0) {
             break;
         }
         if ((shiftVectr[0] == shiftVectr[0])
@@ -176,7 +165,6 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
     if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
     return shiftVectr;
 }
-
 /*!
  * \brief multiplicMtrxAndVectr − Произведение матрицы на вектор
  * \param [in] **array − указатель на массив
@@ -196,7 +184,6 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
     }
     return tmp;
 }
-
 /*!
  * \brief getImageInfo − Получение информации о входном изображении
  * \param [in] image − Изображение
@@ -209,7 +196,6 @@ void getImageInfo(imageInform* image, QString path)
              << fileImage.size() << "bytes. Size: " << image->height << "x" <<
              image->width;
 }
-
 /*!
  * \brief joinImage − Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
  * \param [in] img1 − Первое изображение
@@ -228,11 +214,9 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(img1.width() + img2.width(), 0, img3);
     result.save(g_outputFolder + "/" + info + ".png");
 }
-
 /*!
  * \brief resizeImage − Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
  * \param [in] image − структура содержащая сведения о размерах масштабируемого изображения
- * \param [in] arrGrayPrevious − Указатель на массив яркостей первого кадра
  * \param [in] kK − Коэффициент уменьшения изображения
  * \return [out] − указатель на массив масштабированных изображений
  */
@@ -241,7 +225,6 @@ Data2Db* resizeImage(Data2Db* image, int kK)
     int newWidth = (image->cx()/kK);
     int newHeight= (image->cy()/kK);
     int tmp = 0;
-
     Data2Db* smallImg = new Data2Db(newWidth, newHeight);
     for (int i = 0; i < newHeight; i++) {
         for (int j = 0; j < newWidth; j++) {
@@ -254,26 +237,14 @@ Data2Db* resizeImage(Data2Db* image, int kK)
             tmp = 0;
         }
     }
-    //freeMemoryInt(ptmpImg, newWidth);
     return smallImg;
 }
-
 /*!
- * \brief getMemoryForPyramid − Для построения пирамиды, масштабированных изображений, нужно выделить память, чем эта функция и занимается
- * \param [in] image − исходное изображение
- * \param [in] arrGrayPrevious − указатель на массив яркостей первого кадра
+ * \brief createPyramid_v2 − Выделение памяти для пирамиды изображений
+ * \param [in] img − Указатель на оригинальное изображение
+ * \param [in] lvl_pyramid − Уровень пирамиды
+ * \return [out] Список изображений
  */
-/*int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
-{
-    int** pToPyramid = new int*[LVL_PYRAMID];
-    for (int i = 0; i < LVL_PYRAMID; ++i)
-        pToPyramid[i] = new int[(image->height * image->width)/RESIZE];
-    for (int i = 0; i < LVL_PYRAMID; ++i) {
-        pToPyramid[i] = resizeImage(image, arrGrayPrevious, RESIZE);
-    }
-    return pToPyramid;
-}
-*/
 std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
 {
     int r = 1;
@@ -286,14 +257,14 @@ std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
     }
     return listImg;
 }
-
 /*!
- * \brief saveVfResult − Сохраниение векторного поля в формате VF. Просмотр возможен в программе df−cl
- * \param [in] vf − Указатель на векторное поле.
+ * \brief saveVfResult − Сохранение векторного поля в формате VF. Просмотр возможен в программе df−cl
+ * \param [in] vf − Указатель на векторное поле
+ * \param [in] info - Имя сохраняемого файла
  */
-void saveVfResult(VF2d &vf)
+void saveVfResult(VF2d &vf, QString info)
 {
-    if (WriteVF(QString(g_outputFolder + "/" + "info" + ".vf").toLocal8Bit().data(), &vf) == 0) {
+    if (WriteVF(QString(g_outputFolder + "/" + info + ".vf").toLocal8Bit().data(), &vf) == 0) {
         qDebug() << "Correct write data";
     } else {
         qDebug() << "Error : can't write vf data";

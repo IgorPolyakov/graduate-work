@@ -19,5 +19,5 @@ VF2d*   computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d *prev);
 void    getImageInfo(imageInform* image, QString path);
 void    inversion(Matx22d &A);
 void    joinImage(QImage img1, QImage img2, QImage img3, QString info);
-void    saveVfResult(VF2d &vf);
+void    saveVfResult(VF2d &vf, QString info);
 #endif
