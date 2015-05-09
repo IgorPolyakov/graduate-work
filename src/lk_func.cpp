@@ -74,21 +74,25 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
     vf->ad() = s_ptr<ProtoData2D>(state);
     if (prev)
     {
-        for (int i = 0; i < vf->cy(); ++i) {
-            for (int j = 0; j < vf->cx(); ++j) {
+        for (int i = 0; i < vf->cy(); ++i)
+        {
+            for (int j = 0; j < vf->cx(); ++j)
+            {
                 int tmpX = (j *(prev->cx()-1))/(vf->cx()-1), tmpY = (i * (prev->cy()-1))/(vf->cy()-1);
-                vf->lines()[i][j] = prev->lines()[tmpX][tmpY] * 2;
+                vf->lines()[i][j] = prev->lines()[tmpX][tmpY] * 2.0;
             }
         }
     }
-    for (int i = 0; i < Vcy; ++i) {
-        for (int j = 0; j < Vcx; ++j) {
+    for (int i = 0; i < Vcy; ++i)
+    {
+        for (int j = 0; j < Vcx; ++j)
+        {
             kernel->y_1 = (i * vf->grid().y) + vf->origin().y;
             kernel->x_1 = (j * vf->grid().x) + vf->origin().x;
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            vf->lines()[i][j] += computeOptFlow(kernel, leftImg, rightImg);
+            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j]);
             state->lines()[i][j] = 1;
         }
     }
@@ -103,67 +107,103 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
  * \param [in] rightImg − массив яркостей второго кадра
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
-    Vec2d shiftVectr(0,0);
-    int deltaX = 0;
-    int deltaY = 0;
+    Vec2d delta(0,0);
+    double thdelta = 0.001;
+//    int deltaX = 0;
+//    int deltaY = 0;
+
     if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
-    for (int k = 0; k < g_iteration; ++k) {
-        //Отсчитываем число итераций, для уточнения вектора
+    for (int k = 0; k < g_iteration; ++k) //Отсчитываем число итераций, для уточнения вектора
+    {
+      double x2 = kernel->x_1 + dv[0];
+      double y2 = kernel->y_1 + dv[1];
+      kernel->x_2 = x2;
+      kernel->y_2 = y2;
+      x2 -= kernel->x_2;
+      y2 -= kernel->y_2;
+
+      // B-spline interpolation
+      Data2Dd rightBlock(kernel->rc*2+1, kernel->rc*2+1);
+      double RX[4] = {0};
+      double RY[4] = {0};
+      bicubic_bspline_coefs(RX, RY, x2, y2);
+      for (int ii = 0; ii < kernel->rc*2+1; ++ii)
+      {
+        for (int jj = 0; jj < kernel->rc*2+1; ++jj)
+        {
+          int xx = jj+kernel->x_2-kernel->rc;
+          int yy = ii+kernel->y_2-kernel->rc;
+
+          if (xx < 0) xx = 0;
+          if (xx > rightImg->cx()-2) xx = rightImg->cx()-2;
+          if (yy < 0) yy = 0;
+          if (yy > rightImg->cy()-2) yy = rightImg->cy()-2;
+
+          if (x2 < 0.0001 && y2 < 0.0001)
+            rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
+          else
+            rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
+        }
+      }
+      //
+
         for (int i = -kernel->rc; i <= kernel->rc; i++)
         {
-            for (int j = -kernel->rc; j <= kernel->rc; j++)//(kernel->x_1 - kernel->rc); j < (kernel->x_1 + kernel->rc); j++)
+            for (int j = -kernel->rc; j <= kernel->rc; j++)
             {
-                if (((i - 1) > 0) && ((i + 1) < leftImg->cy()) && ((j - 1) > 0) && ((j + 1) < leftImg->cx()))
-                {
-                    tmpX = ((double)leftImg->lines()[kernel->y_1 + i][ kernel->x_1 + j - 1] - (double)leftImg->lines()[kernel->y_1 + i][kernel->x_1 + j + 1]) / 2.0;
-                    tmpY = ((double)leftImg->lines()[kernel->y_1 + i - 1][kernel->x_1 + j] - (double)leftImg->lines()[kernel->y_1 + i + 1][kernel->x_1 + j]) / 2.0;
-                    iX  += tmpX * tmpX;
-                    iY  += tmpY * tmpY;
-                    iXY += tmpX * tmpY;
-                    //Если мы выходим за рамки изображения, то обнуляем такое уточнение
-                    /*if ((i + deltaY) < 0 || (i + deltaY) > kernel->y_1 ||(j + deltaX) < 0 || (j + deltaX) > kernel->x_1) {
-                        tmpT = ((double)leftImg->lines()[i][j] - (double)rightImg->lines()[i][j]) / 2.0;
-                    } else {
-                        tmpT = ((double)leftImg->lines()[i + deltaY][j + deltaX] - (double)rightImg->lines()[i + deltaY][j + deltaX]) / 2.0;
-                    }*/
-                    tmpT = ((double)leftImg->lines()[kernel->y_2 + i - 1][kernel->x_2 + j] - (double)rightImg->lines()[kernel->y_2 + i + 1][kernel->x_2 + j]) / 2.0;
-                    iTX += tmpX * tmpT;
-                    iTY += tmpY * tmpT;
-                }
+              int xx = kernel->x_1 + j;
+              int yy = kernel->y_1 + i;
+              if (xx<1) xx = 1;
+              if (xx+1>leftImg->cx()-1) xx = leftImg->cx()-2;
+              if (yy<1) yy = 1;
+              if (yy+1>leftImg->cy()-1) yy = leftImg->cy()-2;
+
+              tmpX = ((double)leftImg->lines()[yy][xx - 1] - (double)leftImg->lines()[yy][xx + 1]) / 2.0;
+              tmpY = ((double)leftImg->lines()[yy - 1][xx] - (double)leftImg->lines()[yy + 1][xx]) / 2.0;
+              iX  += tmpX * tmpX;
+              iY  += tmpY * tmpY;
+              iXY += tmpX * tmpY;
+
+              tmpT = ((double)leftImg->lines()[yy][xx] - (double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]);
+              iTX += tmpX * tmpT;
+              iTY += tmpY * tmpT;
             }
         }
         Matx22d A(iX, iXY, iXY, iY);
         Vec2d b(-iTX,-iTY);
         inversion(A);
-        shiftVectr = A*b;
-        if (kernel->x_1 + shiftVectr[0] + kernel->rc > leftImg->cx()) {
-            break;
-        }
-        if (kernel->x_1 + shiftVectr[0] - kernel->rc < 0) {
-            break;
-        }
-        if (kernel->y_1 + shiftVectr[1] + kernel->rc > leftImg->cy()) {
-            break;
-        }
-        if (kernel->y_1 + shiftVectr[1] - kernel->rc < 0) {
-            break;
-        }
-        if ((shiftVectr[0] == shiftVectr[0])
-                || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
-            deltaX = (int)floor(shiftVectr[0]);
-            deltaY = (int)floor(shiftVectr[1]);
-        } else {
-            if (g_isDebug)  qDebug() << "NaN Error";
-            shiftVectr[0] = 0.0;
-            shiftVectr[1] = 0.0;
-        }
+        delta = A*b;
+        dv += delta;
+
+        if (delta[0]*delta[0] + delta[1]*delta[1] < thdelta) break;
+//        if (kernel->x_1 + shiftVectr[0] + kernel->rc > leftImg->cx()) {
+//            break;
+//        }
+//        if (kernel->x_1 + shiftVectr[0] - kernel->rc < 0) {
+//            break;
+//        }
+//        if (kernel->y_1 + shiftVectr[1] + kernel->rc > leftImg->cy()) {
+//            break;
+//        }
+//        if (kernel->y_1 + shiftVectr[1] - kernel->rc < 0) {
+//            break;
+//        }
+//        if ((shiftVectr[0] == shiftVectr[0])
+//                || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
+//            deltaX = (int)floor(shiftVectr[0]);
+//            deltaY = (int)floor(shiftVectr[1]);
+//        } else {
+//            if (g_isDebug)  qDebug() << "NaN Error";
+//            shiftVectr[0] = 0.0;
+//            shiftVectr[1] = 0.0;
+//        }
     }
-    if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
-    return shiftVectr;
+    if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
+    return dv;
 }
 /*!
  * \brief multiplicMtrxAndVectr − Произведение матрицы на вектор
