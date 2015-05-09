@@ -13,12 +13,16 @@ You need install some packet:
 $ sudo apt-get install qt-sdk 
 $ sudo apt-get install libarchive-dev libqt5webkit5-dev
 ```
+#### CMAKE
+```sh
+$ sudo apt-get install cmake
+```
 #### HDF5 Software
 ```sh
-cmake
 $ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.14.tar
 $ tar -xvf hdf5-1.8.14.tar
-$ cmake CMakeList.txt
+$ cd hdf5-1.8.14
+$ cmake CMakeLists.txt
 $ make
 $ sudo make install
 ```
@@ -27,7 +31,7 @@ $ sudo make install
 $ cp /media/flash_card/dv.zip
 $ unzip dv.zip
 $ cd dv/df-cl
-$ cmake CMakeList.txt
+$ cmake CMakeLists.txt
 $ make
 ```
 
@@ -35,7 +39,7 @@ $ make
 ```sh
 $ git clone git@github.com:IgorPolyakov/graduate-work.git
 $ cd graduate-work
-$ cmake CMakeList.txt
+$ cmake CMakeLists.txt
 $ make
 ```
 
