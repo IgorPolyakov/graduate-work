@@ -38,3 +38,6 @@ install_manifest.txt
 lukas_kanade_qt
 output/
 src/version.h
+input/list
+*.cbp
+*.orig

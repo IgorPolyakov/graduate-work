@@ -5,198 +5,212 @@
 #include <QFileInfo>
 #include <iostream>
 #include <math.h>
-#define LVL_PYRAMID 3
-#define RESIZE 5
+#include <deprecated/dvfile.h>
+#include <vector>
 #define SIZE_MAT_INV 2
-
-void inversion(double **A, int N)
+/*!
+ * \brief inversion − Нахождения обратной матрицы(2 x 2).
+ * \param [in] A − Ссылка на массив
+ */
+void inversion(Matx22d &A)
 {
     double temp;
-
-    double **E = new double *[N];
-
-    for (int i = 0; i < N; i++)
-        E[i] = new double [N];
-
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++) {
+    double **E = new double *[A.rows];
+    for (int i = 0; i < A.rows; i++)
+        E[i] = new double [A.rows];
+    for (int i = 0; i < A.rows; i++)
+        for (int j = 0; j < A.rows; j++) {
             E[i][j] = 0.0;
-
             if (i == j)
                 E[i][j] = 1.0;
         }
-
-    for (int k = 0; k < N; k++) {
-        temp = A[k][k];
-
-        for (int j = 0; j < N; j++) {
-            A[k][j] /= temp;
+    for (int k = 0; k < A.rows; k++) {
+        temp = A(k,k);
+        for (int j = 0; j < A.rows; j++) {
+            A(k,j) /= temp;
             E[k][j] /= temp;
         }
-
-        for (int i = k + 1; i < N; i++) {
-            temp = A[i][k];
-
-            for (int j = 0; j < N; j++) {
-                A[i][j] -= A[k][j] * temp;
+        for (int i = k + 1; i < A.rows; i++) {
+            temp = A(i,k);
+            for (int j = 0; j < A.rows; j++) {
+                A(i,j) -= A(k,j) * temp;
                 E[i][j] -= E[k][j] * temp;
             }
         }
     }
-
-    for (int k = N - 1; k > 0; k--) {
+    for (int k = A.rows - 1; k > 0; k--) {
         for (int i = k - 1; i >= 0; i--) {
-            temp = A[i][k];
-
-            for (int j = 0; j < N; j++) {
-                A[i][j] -= A[k][j] * temp;
+            temp = A(i,k);
+            for (int j = 0; j < A.rows; j++) {
+                A(i,j) -= A(k,j) * temp;
                 E[i][j] -= E[k][j] * temp;
             }
         }
     }
-
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++)
-            A[i][j] = E[i][j];
-
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < A.rows; i++)
+        for (int j = 0; j < A.rows; j++)
+            A(i,j) = E[i][j];
+    for (int i = 0; i < A.rows; i++)
         delete [] E[i];
-
     delete [] E;
 }
-
-int **getArrBright(QImage image)
+/*!
+ * \brief computeGrid − Строит сетку по верх изображения, в точках
+ * пересечения ищется вектор оптического потока
+ * \param [in] leftImg − указатель на массив яркостей первого кадра
+ * \param [in] rightImg − указатель на массив яркостей второго кадра
+ * \param [in] prev − указатель на векторное поле содержащий предыдущий уровень пирамиды
+ * \return [out] двумерный массив содержащий векторное поле, в формате VF
+ */
+VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 {
-    int gray;
-    //get some space for array of bright
-    int** ary = new int*[image.width()];
-    for (int i = 0; i < image.width(); ++i)
-        ary[i] = new int[image.height()];
-    //convert color image to grayscale
-    for (int i = 0; i < image.width(); i++) {
-        for (int j = 0; j < image.height(); j++) {
-            gray = qGray(image.pixel(i, j));
-            ary[i][j] = gray;
-        }
-    }
-    return ary;
-}
-
-QImage computeGrid(QImage image, int** arrGrayPrevious, int** arrGrayNext)
-{
-    subSize* initialWindow = new subSize;
-    initialWindow->radiusCode = g_sizeWindowSeach;
-    initialWindow->xMax = image.width();
-    initialWindow->yMax = image.height();
-    double* vectorOptFlw = new double[SIZE_MAT_INV];
-    for (int i = 0; i < SIZE_MAT_INV; ++i) {
-        vectorOptFlw[i] = 1.0;
-    }
-
-    QPainter painter(&image);
-    painter.setPen(QPen(Qt::red));
-    for (int i = g_stepForGrid ; (i < (image.width()-g_stepForGrid)); i += g_stepForGrid) {
-        initialWindow->xCore = i;
-        for (int j = g_stepForGrid; (j < (image.height()-g_stepForGrid)); j += g_stepForGrid) {
-            initialWindow->yCore = j;
-            vectorOptFlw = computeOptFlow(initialWindow, arrGrayPrevious, arrGrayNext);
-            //computeOptFlow(&vectorOptFlw, initialWindow, arrGrayPrevious, arrGrayNext);
-            painter.drawLine(initialWindow->xCore, initialWindow->yCore, initialWindow->xCore + vectorOptFlw[0], initialWindow->yCore + vectorOptFlw[1]);
-        }
-    }
-    delete[] vectorOptFlw;
-    delete initialWindow;
-    return image;
-}
-
-double* computeOptFlow(subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
-//void computeOptFlow(double* shiftVectr, subSize* kernel, int** arrGrayPrevious, int** arrGrayNext)
-{
-    double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
-    double tmpX, tmpY, tmpT;
-    double* shiftVectr = new double[2];
-
-    for (int i = 0; i < 2; ++i) {
-        shiftVectr[i] = 2.0;
-    }
-    int deltaX = 0;
-    int deltaY = 0;
-
-    double **A = new double *[SIZE_MAT_INV];
-
-    for (int i = 0; i < SIZE_MAT_INV; i++)
-        A[i] = new double [SIZE_MAT_INV];
-
-    int* b = new int [SIZE_MAT_INV];
-
-    if (g_isDebug) qDebug() << "SubSize:X" << kernel->xCore << "Y:" << kernel->yCore << "R:" << kernel->radiusCode << "\n";
-    for (int k = 0; k <= g_iteration; ++k) {
-        //Отсчитываем число итераций, для уточнения вектора
-        for (int i = (kernel->xCore - kernel->radiusCode); i <= (kernel->xCore + kernel->radiusCode); i++) {
-            for (int j = (kernel->yCore - kernel->radiusCode); j <= (kernel->yCore + kernel->radiusCode); j++) {
-                tmpX = ((double)arrGrayPrevious[i - 1][j] - (double)arrGrayPrevious[i + 1][j]) / 2;
-                tmpY = ((double)arrGrayPrevious[i][j - 1] - (double)arrGrayPrevious[i][j + 1]) / 2;
-                iX  += tmpX * tmpX;
-                iY  += tmpY * tmpY;
-                iXY += tmpX * tmpY;
-
-                tmpT = ((double)arrGrayPrevious[i + deltaX][j + deltaY] - (double)arrGrayNext[i + deltaX][j + deltaY]) / 2;
-                iTX += tmpX * tmpT;
-                iTY += tmpY * tmpT;
+    subSize* kernel = new subSize;
+    kernel->rc = g_sizeWindowSeach;
+    kernel->step = g_stepForGrid;
+    int Vcx = (leftImg->cx()-(2*(kernel->rc+2))-1)/g_stepForGrid;
+    int Vcy = (leftImg->cy()-(2*(kernel->rc+2))-1)/g_stepForGrid;
+    VF2d *vf = new VF2d(Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
+    Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
+    vf->ad() = s_ptr<ProtoData2D>(state);
+    if (prev)
+    {
+        for (int i = 0; i < vf->cy(); ++i)
+        {
+            for (int j = 0; j < vf->cx(); ++j)
+            {
+                int tmpX = (j *(prev->cx()-1))/(vf->cx()-1), tmpY = (i * (prev->cy()-1))/(vf->cy()-1);
+                vf->lines()[i][j] = prev->lines()[tmpX][tmpY] * 2.0;
             }
         }
-        A[0][0] = iX;
-        A[0][1] = iXY;
-        A[1][0] = iXY;
-        A[1][1] = iY;
-
-        b[0] = -iTX;
-        b[1] = -iTY;
-
-        inversion(A, SIZE_MAT_INV);
-        shiftVectr = multiplicMtrxAndVectr(A, b);
-
-        if (kernel->xCore + shiftVectr[0] + kernel->radiusCode > kernel->xMax) {
-            break;
-        }
-        if (kernel->xCore + shiftVectr[0] - kernel->radiusCode < 0) {
-            break;
-        }
-        if (kernel->yCore + shiftVectr[1] + kernel->radiusCode > kernel->yMax) {
-            break;
-        }
-        if (kernel->yCore + shiftVectr[1] - kernel->radiusCode < 0) {
-            break;
-        }
-        if ((shiftVectr[0] == shiftVectr[0]) || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
-            deltaX = (int)floor(shiftVectr[0]);
-            deltaY = (int)floor(shiftVectr[1]);
-        } else {
-            if (g_isDebug)  qDebug() << "NaN Error";
-            shiftVectr[0] = 0.0;
-            shiftVectr[1] = 0.0;
+    }
+    for (int i = 0; i < Vcy; ++i)
+    {
+        for (int j = 0; j < Vcx; ++j)
+        {
+            kernel->y_1 = (i * vf->grid().y) + vf->origin().y;
+            kernel->x_1 = (j * vf->grid().x) + vf->origin().x;
+            kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
+            kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
+            /*TODO:  Cделать проверку выхода за границы*/
+            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j]);
+            state->lines()[i][j] = 1;
         }
     }
-
-    if (g_isDebug) qDebug() << shiftVectr[0] << shiftVectr[1] << "return";
-    freeMemoryFloat(A, SIZE_MAT_INV);
-    delete[] b;
-    return shiftVectr;
+    delete kernel;
+    return vf;
 }
-void freeMemoryInt(int** trash, int size)
+/*!
+ * \brief computeOptFlow − Вычисление вектора оптического потока
+ * \param [in] kernel − структура содержащая сведения о местонахождении
+ * пикселя, размерах окна поиска и прочего
+ * \param [in] leftImg − массив яркостей первого кадра
+ * \param [in] rightImg − массив яркостей второго кадра
+ * \return [out] vf − вектор оптического потока
+ */
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv)
 {
-    for (int i = 0; i < size; ++i)
-        delete[] trash[i];
-    delete [] trash;
-}
+    double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
+    double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
+    Vec2d delta(0,0);
+    double thdelta = 0.001;
+//    int deltaX = 0;
+//    int deltaY = 0;
 
-void freeMemoryFloat(double** trash, int size)
-{
-    for (int i = 0; i < size; ++i)
-        delete[] trash[i];
-    delete [] trash;
-}
+    if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
+    for (int k = 0; k < g_iteration; ++k) //Отсчитываем число итераций, для уточнения вектора
+    {
+      double x2 = kernel->x_1 + dv[0];
+      double y2 = kernel->y_1 + dv[1];
+      kernel->x_2 = x2;
+      kernel->y_2 = y2;
+      x2 -= kernel->x_2;
+      y2 -= kernel->y_2;
 
+      // B-spline interpolation
+      Data2Dd rightBlock(kernel->rc*2+1, kernel->rc*2+1);
+      double RX[4] = {0};
+      double RY[4] = {0};
+      bicubic_bspline_coefs(RX, RY, x2, y2);
+      for (int ii = 0; ii < kernel->rc*2+1; ++ii)
+      {
+        for (int jj = 0; jj < kernel->rc*2+1; ++jj)
+        {
+          int xx = jj+kernel->x_2-kernel->rc;
+          int yy = ii+kernel->y_2-kernel->rc;
+
+          if (xx < 0) xx = 0;
+          if (xx > rightImg->cx()-2) xx = rightImg->cx()-2;
+          if (yy < 0) yy = 0;
+          if (yy > rightImg->cy()-2) yy = rightImg->cy()-2;
+
+          if (x2 < 0.0001 && y2 < 0.0001)
+            rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
+          else
+            rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
+        }
+      }
+      //
+
+        for (int i = -kernel->rc; i <= kernel->rc; i++)
+        {
+            for (int j = -kernel->rc; j <= kernel->rc; j++)
+            {
+              int xx = kernel->x_1 + j;
+              int yy = kernel->y_1 + i;
+              if (xx<1) xx = 1;
+              if (xx+1>leftImg->cx()-1) xx = leftImg->cx()-2;
+              if (yy<1) yy = 1;
+              if (yy+1>leftImg->cy()-1) yy = leftImg->cy()-2;
+
+              tmpX = ((double)leftImg->lines()[yy][xx - 1] - (double)leftImg->lines()[yy][xx + 1]) / 2.0;
+              tmpY = ((double)leftImg->lines()[yy - 1][xx] - (double)leftImg->lines()[yy + 1][xx]) / 2.0;
+              iX  += tmpX * tmpX;
+              iY  += tmpY * tmpY;
+              iXY += tmpX * tmpY;
+
+              tmpT = ((double)leftImg->lines()[yy][xx] - (double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]);
+              iTX += tmpX * tmpT;
+              iTY += tmpY * tmpT;
+            }
+        }
+        Matx22d A(iX, iXY, iXY, iY);
+        Vec2d b(-iTX,-iTY);
+        inversion(A);
+        delta = A*b;
+        dv += delta;
+
+        if (delta[0]*delta[0] + delta[1]*delta[1] < thdelta) break;
+//        if (kernel->x_1 + shiftVectr[0] + kernel->rc > leftImg->cx()) {
+//            break;
+//        }
+//        if (kernel->x_1 + shiftVectr[0] - kernel->rc < 0) {
+//            break;
+//        }
+//        if (kernel->y_1 + shiftVectr[1] + kernel->rc > leftImg->cy()) {
+//            break;
+//        }
+//        if (kernel->y_1 + shiftVectr[1] - kernel->rc < 0) {
+//            break;
+//        }
+//        if ((shiftVectr[0] == shiftVectr[0])
+//                || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
+//            deltaX = (int)floor(shiftVectr[0]);
+//            deltaY = (int)floor(shiftVectr[1]);
+//        } else {
+//            if (g_isDebug)  qDebug() << "NaN Error";
+//            shiftVectr[0] = 0.0;
+//            shiftVectr[1] = 0.0;
+//        }
+    }
+    if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
+    return dv;
+}
+/*!
+ * \brief multiplicMtrxAndVectr − Произведение матрицы на вектор
+ * \param [in] **array − указатель на массив
+ * \param [in] *vector − указатель на вектор
+ * \return [out] tmp − результат произведения
+ */
 double* multiplicMtrxAndVectr(double** array, int* vector)
 {
     double* tmp = new double[SIZE_MAT_INV];
@@ -210,16 +224,29 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
     }
     return tmp;
 }
-
+/*!
+ * \brief getImageInfo − Получение информации о входном изображении
+ * \param [in] image − Изображение
+ * \param [in] path − Путь к нему
+ */
 void getImageInfo(imageInform* image, QString path)
 {
     QFileInfo fileImage(path);
-    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:" << fileImage.size() << "bytes. Size: " << image->height << "x" << image->width;
+    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:"
+             << fileImage.size() << "bytes. Size: " << image->height << "x" <<
+             image->width;
 }
-
+/*!
+ * \brief joinImage − Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
+ * \param [in] img1 − Первое изображение
+ * \param [in] img2 − Второе изображение
+ * \param [in] img3 − Первого с нанесённым поверх векторным полем
+ * \param [in] info − Имя сохраняемого файла
+ */
 void joinImage(QImage img1, QImage img2, QImage img3, QString info)
 {
-    QImage result(img1.width() + img2.width() + img3.width(), img1.height(), QImage::Format_ARGB32);
+    QImage result(img1.width() + img2.width() + img3.width(),
+                  img1.height(), QImage::Format_ARGB32);
     QPainter paint;
     paint.begin(&result);
     paint.drawImage(0, 0, img1);
@@ -227,49 +254,59 @@ void joinImage(QImage img1, QImage img2, QImage img3, QString info)
     paint.drawImage(img1.width() + img2.width(), 0, img3);
     result.save(g_outputFolder + "/" + info + ".png");
 }
-
-int* resizeImage(imageInform* image, int** arrGrayPrevious, int kK)
+/*!
+ * \brief resizeImage − Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
+ * \param [in] image − структура содержащая сведения о размерах масштабируемого изображения
+ * \param [in] kK − Коэффициент уменьшения изображения
+ * \return [out] − указатель на массив масштабированных изображений
+ */
+Data2Db* resizeImage(Data2Db* image, int kK)
 {
-    /*if((image.width()%2 == 0)||(image.height()%2 == 0))*/
-    int newWidth = (image->width/kK);
-    int newHeight= (image->height/kK);
+    int newWidth = (image->cx()/kK);
+    int newHeight= (image->cy()/kK);
     int tmp = 0;
-
-    int* ptmpImg = new int[newHeight * newWidth];
-    int** data = new int*[newHeight];
-
-    for(int i = 0; i < newHeight; ++i)
-        data[i] = ptmpImg + newWidth * i;
-
-    for (int i = 0; i < newWidth; i++) {
-        for (int j = 0; j < newHeight; j++) {
+    Data2Db* smallImg = new Data2Db(newWidth, newHeight);
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
             for (int ii = 0; ii < kK-1; ++ii) {
                 for (int jj = 0; jj < kK-1; ++jj) {
-                    tmp = arrGrayPrevious[kK * i + ii][ kK * j + jj];
+                    tmp = image->lines()[kK * i + ii][ kK * j + jj];
                 }
             }
-            data[i][j] = tmp;
+            smallImg->lines()[i][j] = tmp;
             tmp = 0;
         }
     }
-
-    QImage result((uchar*)ptmpImg, newWidth, newHeight, QImage::Format_RGB32);
-    QString s = QString::number(kK);
-    result.save(g_outputFolder + "/resize" + s + ".png");
-    //freeMemoryInt(ptmpImg, newWidth);
-    delete[] data;
-    return ptmpImg;
+    return smallImg;
 }
-
-int** getMemoryForPyramid(imageInform* image, int** arrGrayPrevious)
+/*!
+ * \brief createPyramid_v2 − Выделение памяти для пирамиды изображений
+ * \param [in] img − Указатель на оригинальное изображение
+ * \param [in] lvl_pyramid − Уровень пирамиды
+ * \return [out] Список изображений
+ */
+std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
 {
-    int** pToPyramid = new int*[LVL_PYRAMID];
-    for (int i = 0; i < LVL_PYRAMID; ++i)
-        pToPyramid[i] = new int[(image->height * image->width)/RESIZE];
-
-    for (int i = 0; i < LVL_PYRAMID; ++i) {
-        pToPyramid[i] = resizeImage(image, arrGrayPrevious, RESIZE);
+    int r = 1;
+    std::vector<Data2Db*> *listImg = new std::vector<Data2Db*>;
+    listImg->push_back(img); //первый уровень(оригинал)
+    for (int i = 0; i < lvl_pyramid; i++) {
+        r = r + r;
+        //r = 1 << i;
+        listImg->push_back(resizeImage(img, r));
     }
-    return pToPyramid;
+    return listImg;
 }
-
+/*!
+ * \brief saveVfResult − Сохранение векторного поля в формате VF. Просмотр возможен в программе df−cl
+ * \param [in] vf − Указатель на векторное поле
+ * \param [in] info - Имя сохраняемого файла
+ */
+void saveVfResult(VF2d &vf, QString info)
+{
+    if (WriteVF(QString(g_outputFolder + "/" + info + ".vf").toLocal8Bit().data(), &vf) == 0) {
+        qDebug() << "Correct write data";
+    } else {
+        qDebug() << "Error : can't write vf data";
+    }
+}

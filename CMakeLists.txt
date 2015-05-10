@@ -1,23 +1,19 @@
-project( lukas_kanade_qt )
-cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Debug )
-add_definitions ( -Wall )
 # Store the git hash of the current head
 
-if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
-  file(READ "${PROJECT_SOURCE_DIR}/.git/HEAD"
-    PROJECT_SOURCE_VERSION)
-  if("${PROJECT_SOURCE_VERSION}" MATCHES "^ref:")
-    string(REGEX REPLACE "^ref: *([^ \n\r]*).*" "\\1"
-      PROJECT_GIT_REF "${PROJECT_SOURCE_VERSION}")
-    file(READ "${PROJECT_SOURCE_DIR}/.git/${PROJECT_GIT_REF}"
-      PROJECT_SOURCE_VERSION)
-  endif()
-  string(STRIP "${PROJECT_SOURCE_VERSION}"
-    PROJECT_SOURCE_VERSION)
-endif()
+# lukas_kanade_qt project
+#
+# CMAKE_BUILD_TYPE     { Debug | Release }
+# INC_BUILD            { TRUE | FALSE }
+# CMAKE_TOOLCHAIN_FILE filename
+# CONTACT              { NONE | BISS }
+# example:
+# cmake -DCMAKE_BUILD_TYPE=Release -DINC_BUILD=TRUE -DCMAKE_TOOLCHAIN_FILE=~/opt/Qt/5.2.1/x86_64-w64-mingw32/bin/x86_64-w64-mingw32.toolchain
+#
 
-add_definitions ("-Wall")
+cmake_minimum_required(VERSION 2.8.3)
+project(lukas_kanade_qt)
+
+
 
 exec_program(
     "git"
@@ -27,6 +23,9 @@ exec_program(
 
 string( REGEX MATCH "-g.*$" VERSION_SHA1 ${VERSION} )
 string( REGEX REPLACE "[-g]" "" VERSION_SHA1 ${VERSION_SHA1} )
+
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/obj)
 
 # Store the build date
 if(WIN32)
@@ -52,32 +51,92 @@ else()
     PROJECT_BUILD_TIME "${DATE_TIME}")
 endif()
 
+
+if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
+  file(READ "${PROJECT_SOURCE_DIR}/.git/HEAD"
+    PROJECT_SOURCE_VERSION)
+  if("${PROJECT_SOURCE_VERSION}" MATCHES "^ref:")
+    string(REGEX REPLACE "^ref: *([^ \n\r]*).*" "\\1"
+      PROJECT_GIT_REF "${PROJECT_SOURCE_VERSION}")
+    file(READ "${PROJECT_SOURCE_DIR}/.git/${PROJECT_GIT_REF}"
+      PROJECT_SOURCE_VERSION)
+  endif()
+  string(STRIP "${PROJECT_SOURCE_VERSION}"
+    PROJECT_SOURCE_VERSION)
+endif()
+
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/version.h.in"
   "${PROJECT_SOURCE_DIR}/src/version.h"
   )
 
-find_package ( Qt4 REQUIRED )
-include ( ${QT_USE_FILE} )
-include_directories (
-	${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-	${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR}
-	)
+include("../dv/common.cmake")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/obj)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
+cmake_policy(SET CMP0020 NEW)
+
+if(NOT INC_BUILD)
+ set(INC_BUILD FALSE)
+endif(NOT INC_BUILD)
+
+find_package(Qt5Widgets)
+
+include_directories(
+  "${CMAKE_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvio"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvtypes"
+)
+
+set(INSTALL_LIB_PATH .)
+set(COMPONENT_NAME BIN)
+add_subdirectory("../dv/"
+                 "${CMAKE_CURRENT_BINARY_DIR}/dv")
 
 set(SOURCES
-	src/lk_func.cpp
-	src/main.cpp
-	src/global.cpp
+  src/lk_func.cpp
+  src/main.cpp
+  src/global.cpp
 )
 
 set(HEADERS
-	src/lk_func.h
-	src/lk_struct.h
-	src/global.h
+  src/lk_func.h
+  src/lk_struct.h
+  src/global.h
 )
 
-add_executable ( lukas_kanade_qt ${SOURCES} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-target_link_libraries ( lukas_kanade_qt  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} )
+# Build the app!
+
+add_definitions(-DQT5) # -fPIC)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+add_executable(${PROJECT_NAME}
+  MACOSX_BUNDLE
+  WIN32
+# source files that are actually built direclty
+  ${SOURCES}
+
+# items included so they show up in your IDE
+  ${HEADERS}
+)
+
+# Link the app!
+
+target_link_libraries(${PROJECT_NAME} dv)
+
+qt5_use_modules(${PROJECT_NAME} Core Widgets)
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME
+        DESTINATION ${INSTALL_LIB_PATH}
+        COMPONENT ${COMPONENT_NAME})
+
+# Include CPack to introduce the appropriate targets
+include(CPack)
+
+
+#add_executable ( lukas_kanade_qt ${SOURCES} ${UIS} ${RSCS} ${TRS} ${MOCS} )
+#target_link_libraries ( lukas_kanade_qt  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} dv )

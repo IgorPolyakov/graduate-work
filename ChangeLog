@@ -2,6 +2,19 @@ CHANGELOG
 ----------------------
 
 [Current]
+ * fixed overrange the array in an iterative loop
+ * fix style; remove old code;
+ * 30.04.15
+ * fixed code documentation; save vector to vf field; train commit
+ * fix
+ * rewrite cmake list; integrate project to dv lib
+ * add dv library; read image not work;
+ * upadte information
+ * clean output console; fix run script
+ * add run script
+ * progress bar work correctly
+ * rewrite run script for milty upload image
+ * rewite system load image; image load from file now; remove image button on qml form;
  * fix output arg, text was convert to int copy-paste error; fix output directory; upadete changelog; fix qml form;
  * add chagelog; add high level warning compilator, for gcc; work on computeOptFlow;
  * fix(error) Memory leak: data; fix(error) Memory leak: vectorOptFlw; rename defines;
