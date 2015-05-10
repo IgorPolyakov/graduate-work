@@ -21,8 +21,8 @@ exec_program(
     ARGS "describe"
     OUTPUT_VARIABLE VERSION )
 
-#string( REGEX MATCH "-g.*$" VERSION_SHA1 ${VERSION} )
-#string( REGEX REPLACE "[-g]" "" VERSION_SHA1 ${VERSION_SHA1} )
+string( REGEX MATCH "-g.*$" VERSION_SHA1 ${VERSION} )
+string( REGEX REPLACE "[-g]" "" VERSION_SHA1 ${VERSION_SHA1} )
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/obj)
@@ -70,7 +70,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/src/version.h"
   )
 
-include("../dv/dv/common.cmake")
+include("../dv/common.cmake")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
@@ -86,14 +86,14 @@ find_package(Qt5Widgets)
 include_directories(
   "${CMAKE_BINARY_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}/"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dv/"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dv/dvio"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dv/dvtypes"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvio"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../dv/dvtypes"
 )
 
 set(INSTALL_LIB_PATH .)
 set(COMPONENT_NAME BIN)
-add_subdirectory("../dv/dv"
+add_subdirectory("../dv/"
                  "${CMAKE_CURRENT_BINARY_DIR}/dv")
 
 set(SOURCES
