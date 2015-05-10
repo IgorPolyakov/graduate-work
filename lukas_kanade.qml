@@ -4,16 +4,29 @@ import QtQuick.Controls 1.3
 Item {
     width: 300
     height: 240
+    ComboBox {
+        id: comboBox1
+        x: 150
+        y: 0
+        model: [ "B-spline", "Bilinear" ]
+    }   
+    Label {
+        id: countInterpolation
+        x: 20
+        y: 5
+        text: qsTr("Interpolation")
+    } 
     SpinBox {
         id: countIteration
-        x: 200
+        x: 150
         y: 40
         minimumValue : 1
-        maximumValue : 10
+        maximumValue : 20
+        value : 10
     }
     SpinBox {
         id: windowSearch
-        x: 200
+        x: 150
         y: 80
         minimumValue : 2
         maximumValue : 1000
@@ -21,7 +34,7 @@ Item {
     }
     SpinBox {
         id: stepGrid
-        x: 200
+        x: 150
         y: 120
         minimumValue : 1
         maximumValue : 500
@@ -59,14 +72,14 @@ Item {
 
     Button {
         id: buttonOutDirField
-        x: 200
+        x: 150
         y: 160
         text: qsTr("Browse")
     }
 
     CheckBox {
         id: checkBox1
-        x: 200
+        x: 150
         y: 200
         text: qsTr("")
         checked: false
@@ -78,7 +91,6 @@ Item {
         y: 200
         text: qsTr("Debug mode ON")
     }
-
 
     function getcmd()
     {
@@ -94,6 +106,7 @@ Item {
         "-i", countIteration.value,//count iteration (1 by default)
         "-w", windowSearch.value,//size window search (3px by default)
         "-g", stepGrid.value,//step for grid (5px by default)
+        "-b", comboBox1.currentIndex,
         /*"-h", //show help
         "-d", debugModeON,//debug mod on
         "-v" //show version*/
