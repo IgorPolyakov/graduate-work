@@ -8,6 +8,7 @@
 #include <deprecated/dvfile.h>
 #include <vector>
 #define SIZE_MAT_INV 2
+
 /*!
  * \brief inversion − Нахождения обратной матрицы(2 x 2).
  * \param [in] A − Ссылка на массив
@@ -54,6 +55,32 @@ void inversion(Matx22d &A)
         delete [] E[i];
     delete [] E;
 }
+
+/*!
+ * \brief bilinearInterpolation
+ * \param x   - Смещение по х
+ * \param y   - Смещение по у
+ * \param q11 - Значение функции в левом верхнем углу
+ * \param q12 - Значение функции в левом нижнем углу
+ * \param q21 - Значение функции в правом верхнем углу
+ * \param q22 - Значение функции в правом нижнем углу
+ * \param x1  - Координата верхнего левого угла по х
+ * \param y1  - Координата верхнего левого угла по у
+ * \return
+ */
+double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uchar q21, uchar q22, int x1, int y1)
+{
+    int x2 = x1 + 1;
+    int y2 = y1 + 1;
+    double x = x1 + delx;
+    double y = y1 + dely;
+
+    double r1 = (((x2 - x)/(x2 - x1)) * q11) + (((x - x1)/(x2 - x1)) * q21);
+    double r2 = (((x2 - x)/(x2 - x1)) * q12) + (((x - x1)/(x2 - x1)) * q22);
+    double ri = (((y2 - y)/(y2 - y1)) *  r1) + (((y - y1)/(y2 - y1)) *  r2);
+    return ri;
+}
+
 /*!
  * \brief computeGrid − Строит сетку по верх изображения, в точках
  * пересечения ищется вектор оптического потока
@@ -119,58 +146,68 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
     if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
     for (int k = 0; k < g_iteration; ++k) //Отсчитываем число итераций, для уточнения вектора
     {
-      double x2 = kernel->x_1 + dv[0];
-      double y2 = kernel->y_1 + dv[1];
-      kernel->x_2 = x2;
-      kernel->y_2 = y2;
-      x2 -= kernel->x_2;
-      y2 -= kernel->y_2;
+        double x2 = kernel->x_1 + dv[0];
+        double y2 = kernel->y_1 + dv[1];
+        kernel->x_2 = x2;
+        kernel->y_2 = y2;
+        x2 -= kernel->x_2;
+        y2 -= kernel->y_2;
 
-      // B-spline interpolation
-      Data2Dd rightBlock(kernel->rc*2+1, kernel->rc*2+1);
-      double RX[4] = {0};
-      double RY[4] = {0};
-      bicubic_bspline_coefs(RX, RY, x2, y2);
-      for (int ii = 0; ii < kernel->rc*2+1; ++ii)
-      {
-        for (int jj = 0; jj < kernel->rc*2+1; ++jj)
+        /*!
+         * B-spline interpolation
+         *  or
+         * Bilinear interpolation
+         */
+        Data2Dd rightBlock(kernel->rc*2+1, kernel->rc*2+1);
+        double RX[4] = {0};
+        double RY[4] = {0};
+        bicubic_bspline_coefs(RX, RY, x2, y2);
+        for (int ii = 0; ii < kernel->rc*2+1; ++ii)
         {
-          int xx = jj+kernel->x_2-kernel->rc;
-          int yy = ii+kernel->y_2-kernel->rc;
+            for (int jj = 0; jj < kernel->rc*2+1; ++jj)
+            {
+                int xx = jj+kernel->x_2-kernel->rc;
+                int yy = ii+kernel->y_2-kernel->rc;
 
-          if (xx < 0) xx = 0;
-          if (xx > rightImg->cx()-2) xx = rightImg->cx()-2;
-          if (yy < 0) yy = 0;
-          if (yy > rightImg->cy()-2) yy = rightImg->cy()-2;
+                if (xx < 0) xx = 0;
+                if (xx > rightImg->cx()-2) xx = rightImg->cx()-2;
+                if (yy < 0) yy = 0;
+                if (yy > rightImg->cy()-2) yy = rightImg->cy()-2;
 
-          if (x2 < 0.0001 && y2 < 0.0001)
-            rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
-          else
-            rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
+                if (x2 < 0.0001 && y2 < 0.0001)
+                    rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
+                else
+                    switch (g_interpolation) {
+                    case 1:
+                        rightBlock.lines()[ii][jj] = (uchar)bilinearInterpolation(x2, y2, rightImg->lines()[yy][xx], rightImg->lines()[yy][xx+1], rightImg->lines()[yy+1][xx], rightImg->lines()[yy+1][xx+1], xx, yy);
+                        break;
+                    default:
+                        rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
+                        break;
+                    }
+            }
         }
-      }
-      //
 
         for (int i = -kernel->rc; i <= kernel->rc; i++)
         {
             for (int j = -kernel->rc; j <= kernel->rc; j++)
             {
-              int xx = kernel->x_1 + j;
-              int yy = kernel->y_1 + i;
-              if (xx<1) xx = 1;
-              if (xx+1>leftImg->cx()-1) xx = leftImg->cx()-2;
-              if (yy<1) yy = 1;
-              if (yy+1>leftImg->cy()-1) yy = leftImg->cy()-2;
+                int xx = kernel->x_1 + j;
+                int yy = kernel->y_1 + i;
+                if (xx<1) xx = 1;
+                if (xx+1>leftImg->cx()-1) xx = leftImg->cx()-2;
+                if (yy<1) yy = 1;
+                if (yy+1>leftImg->cy()-1) yy = leftImg->cy()-2;
 
-              tmpX = ((double)leftImg->lines()[yy][xx - 1] - (double)leftImg->lines()[yy][xx + 1]) / 2.0;
-              tmpY = ((double)leftImg->lines()[yy - 1][xx] - (double)leftImg->lines()[yy + 1][xx]) / 2.0;
-              iX  += tmpX * tmpX;
-              iY  += tmpY * tmpY;
-              iXY += tmpX * tmpY;
+                tmpX = ((double)leftImg->lines()[yy][xx - 1] - (double)leftImg->lines()[yy][xx + 1]) / 2.0;
+                tmpY = ((double)leftImg->lines()[yy - 1][xx] - (double)leftImg->lines()[yy + 1][xx]) / 2.0;
+                iX  += tmpX * tmpX;
+                iY  += tmpY * tmpY;
+                iXY += tmpX * tmpY;
 
-              tmpT = ((double)leftImg->lines()[yy][xx] - (double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]);
-              iTX += tmpX * tmpT;
-              iTY += tmpY * tmpT;
+                tmpT = ((double)leftImg->lines()[yy][xx] - (double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]);
+                iTX += tmpX * tmpT;
+                iTY += tmpY * tmpT;
             }
         }
         Matx22d A(iX, iXY, iXY, iY);
@@ -224,18 +261,7 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
     }
     return tmp;
 }
-/*!
- * \brief getImageInfo − Получение информации о входном изображении
- * \param [in] image − Изображение
- * \param [in] path − Путь к нему
- */
-void getImageInfo(imageInform* image, QString path)
-{
-    QFileInfo fileImage(path);
-    qDebug() << "About image " << fileImage.fileName() << " :: FileSize:"
-             << fileImage.size() << "bytes. Size: " << image->height << "x" <<
-             image->width;
-}
+
 /*!
  * \brief joinImage − Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
  * \param [in] img1 − Первое изображение

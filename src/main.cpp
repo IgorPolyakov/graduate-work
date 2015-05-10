@@ -13,18 +13,17 @@
 #include "version.h"
 int main(int argc, char *argv[])
 {
-    //QImage leftImg, rightImg, outImg;
-    QString info, listfilename;
-    /*
-     * Default opt'arg
-     * Begin
+    QString listfilename;
+    /*!
+     * Default opt'arg:Begin
      */
     g_isDebug = false;
     g_sizeWindowSeach = 10;
     g_stepForGrid = 10;
-    g_iteration = 1;
+    g_iteration = 0;
     g_outputFolder = "output/";
-    /*
+    g_interpolation = 1;
+    /*!
      * end
      */
     if (argc <= 1) {
@@ -33,7 +32,7 @@ int main(int argc, char *argv[])
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:vhdi:w:g:o:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:vhdi:w:g:o:b:")) != -1) {
         switch (pr) {
         case 'l':
             listfilename = optarg;
@@ -54,12 +53,17 @@ int main(int argc, char *argv[])
             qDebug() << "\n\t-w\t\t size window search (3px by default)";
             qDebug() << "\n\t-g\t\t step for grid (5px by default)";
             qDebug() << "\n\t-v\t\t show version";
+            qDebug() << "\n\t-b\t\t use interpolation method (1 - B-spline, 2 - Bilinear), 1 by default";
             qDebug() << "\n\t-h\t\t show help";
             qDebug() << "\n\t-d\t\t debug mod on\n";
             return (0);
         case 'w':
             g_sizeWindowSeach = atoi(optarg);
             qDebug() << "Size window search: " << g_sizeWindowSeach;
+            break;
+        case 'b':
+            g_interpolation= atoi(optarg);
+            qDebug() << "Interpolation method: " << g_interpolation;
             break;
         case 'g':
             g_stepForGrid = atoi(optarg);
@@ -117,7 +121,6 @@ int main(int argc, char *argv[])
 
         if (pLeftImg->cx()>pLeftImg->cy()) {
             int tmp = pLeftImg->cy();
-//            while (tmp > (g_sizeWindowSeach + 1)*2 + 2)
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
                 lvl_pyramid++;
@@ -128,7 +131,6 @@ int main(int argc, char *argv[])
             int tmp = pLeftImg->cx();
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
-                //while (tmp > (g_sizeWindowSeach + 1)*2 + 2) {
                 lvl_pyramid++;
                 tmp = tmp/2;
             }
