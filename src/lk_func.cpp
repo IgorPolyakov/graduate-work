@@ -178,6 +178,9 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
                     rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
                 else
                     switch (g_interpolation) {
+                    case 0:
+                        rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
+                        break;
                     case 1:
                         rightBlock.lines()[ii][jj] = (uchar)bilinearInterpolation(x2, y2, rightImg->lines()[yy][xx], rightImg->lines()[yy][xx+1], rightImg->lines()[yy+1][xx], rightImg->lines()[yy+1][xx+1], xx, yy);
                         break;
