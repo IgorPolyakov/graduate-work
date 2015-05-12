@@ -20,9 +20,10 @@ int main(int argc, char *argv[])
     g_isDebug = false;
     g_sizeWindowSeach = 10;
     g_stepForGrid = 10;
-    g_iteration = 0;
+    g_iteration = 10;
     g_outputFolder = "output/";
     g_interpolation = 1;
+    g_isPyramid = 1;
     /*!
      * end
      */
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:vhdi:w:g:o:b:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:vhdpi:w:g:o:b:")) != -1) {
         switch (pr) {
         case 'l':
             listfilename = optarg;
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
             qDebug() << "\n\t-i\t\t count iteration (1 by default)";
             qDebug() << "\n\t-w\t\t size window search (3px by default)";
             qDebug() << "\n\t-g\t\t step for grid (5px by default)";
+            qDebug() << "\n\t-p\t\t pyramid mod (enable by default)";
             qDebug() << "\n\t-v\t\t show version";
             qDebug() << "\n\t-b\t\t use interpolation method (1 - B-spline, 2 - Bilinear), 1 by default";
             qDebug() << "\n\t-h\t\t show help";
@@ -81,6 +83,10 @@ int main(int argc, char *argv[])
             qDebug() << "Debug mode: ON" ;
             g_isDebug = true;
             break;
+        case 'p':
+            qDebug() << "Pyramid mode: ON" ;
+            g_isPyramid = true;
+            break;
         }
     }
     QFile listfile(listfilename);
@@ -101,15 +107,15 @@ int main(int argc, char *argv[])
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++) {
         std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
         pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
-        /*if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
+        if (pLeftImg==NULL) {
             qDebug() << "Cannot load " << cnt << "image file\n";
             return (-1);
-        }*/
+        }
         pRightImg = ReadImage(imagelist[i].toLocal8Bit().data());
-        /*if (!rightImg.load(imagelist[i].toLocal8Bit().data())) {
+        if (pRightImg==NULL) {
             qDebug() << "Cannot load " << i << "image file\n";
             return (-1);
-        }*/
+        }
 
         QDir outDir(g_outputFolder);
         if (!outDir.exists()) {
@@ -117,26 +123,8 @@ int main(int argc, char *argv[])
         }
         std::cout << 15 << "," << (100*i)/imagelist.size() << "," <<
                   std::endl;
-        int lvl_pyramid = 0;
 
-        if (pLeftImg->cx()>pLeftImg->cy()) {
-            int tmp = pLeftImg->cy();
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                lvl_pyramid++;
-                tmp = tmp/2;
-            }
-        }
-        else {
-            int tmp = pLeftImg->cx();
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                lvl_pyramid++;
-                tmp = tmp/2;
-            }
-        }
-
-        lvl_pyramid--;
+        int lvl_pyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy());
 
         std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
         std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);

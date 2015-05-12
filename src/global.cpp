@@ -1,5 +1,6 @@
 #include <QString>
 bool g_isDebug;
+bool g_isPyramid;
 int g_sizeWindowSeach;
 int g_stepForGrid;
 int g_iteration;

@@ -3,6 +3,7 @@
 #include <QImage>
 #include <QDebug>
 #include <QFileInfo>
+#include <QFile>
 #include <iostream>
 #include <math.h>
 #include <deprecated/dvfile.h>
@@ -81,6 +82,34 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
     return ri;
 }
 
+int calcLvlPyramid(int cx, int cy)
+{
+    int lvl_pyramid = 0;
+    if (g_isPyramid)
+    {
+        if (cx > cy) {
+            int tmp = cy;
+            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
+            {
+                lvl_pyramid++;
+                tmp = tmp/2;
+            }
+        }
+        else {
+            int tmp = cx;
+            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
+            {
+                lvl_pyramid++;
+                tmp = tmp/2;
+            }
+        }
+        lvl_pyramid--;
+    }
+    else
+        lvl_pyramid = 0;
+    return lvl_pyramid;
+}
+
 /*!
  * \brief computeGrid − Строит сетку по верх изображения, в точках
  * пересечения ищется вектор оптического потока
@@ -91,6 +120,13 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
  */
 VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 {
+    QFile writeDelta(g_outputFolder + "//delta.txt");
+    QFile writeVector(g_outputFolder + "//vector.txt");
+    writeDelta.open(QIODevice::WriteOnly);
+    writeVector.open(QIODevice::WriteOnly);
+    QTextStream wD(&writeDelta);
+    QTextStream wV(&writeVector);
+
     subSize* kernel = new subSize;
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
@@ -106,7 +142,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
             for (int j = 0; j < vf->cx(); ++j)
             {
                 int tmpX = (j *(prev->cx()-1))/(vf->cx()-1), tmpY = (i * (prev->cy()-1))/(vf->cy()-1);
-                vf->lines()[i][j] = prev->lines()[tmpX][tmpY] * 2.0;
+                vf->lines()[i][j] = prev->lines()[tmpY][tmpX] * 2.0;
             }
         }
     }
@@ -119,10 +155,12 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j]);
+            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j]);//, wD, wV);
             state->lines()[i][j] = 1;
         }
     }
+    writeDelta.close();
+    writeVector.close();
     delete kernel;
     return vf;
 }
@@ -134,15 +172,12 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
  * \param [in] rightImg − массив яркостей второго кадра
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv)//, QTextStream &wD, QTextStream &wV)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
     Vec2d delta(0,0);
     double thdelta = 0.001;
-//    int deltaX = 0;
-//    int deltaY = 0;
-
     if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
     for (int k = 0; k < g_iteration; ++k) //Отсчитываем число итераций, для уточнения вектора
     {
@@ -188,6 +223,7 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
                         rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
                         break;
                     }
+                    /* TODO: Добавить биленейную интерполяцию и интерполяцию на основе разложения в ряд Тейлора*/
             }
         }
 
@@ -219,28 +255,11 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         delta = A*b;
         dv += delta;
 
-        if (delta[0]*delta[0] + delta[1]*delta[1] < thdelta) break;
-//        if (kernel->x_1 + shiftVectr[0] + kernel->rc > leftImg->cx()) {
-//            break;
-//        }
-//        if (kernel->x_1 + shiftVectr[0] - kernel->rc < 0) {
-//            break;
-//        }
-//        if (kernel->y_1 + shiftVectr[1] + kernel->rc > leftImg->cy()) {
-//            break;
-//        }
-//        if (kernel->y_1 + shiftVectr[1] - kernel->rc < 0) {
-//            break;
-//        }
-//        if ((shiftVectr[0] == shiftVectr[0])
-//                || (shiftVectr[1] == shiftVectr[1])) { //NaN Checking
-//            deltaX = (int)floor(shiftVectr[0]);
-//            deltaY = (int)floor(shiftVectr[1]);
-//        } else {
-//            if (g_isDebug)  qDebug() << "NaN Error";
-//            shiftVectr[0] = 0.0;
-//            shiftVectr[1] = 0.0;
-//        }
+        //wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
+        //wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
+
+        if (delta[0]*delta[0] < thdelta && delta[1]*delta[1] < thdelta) break;
+        //if (delta[0]*delta[0] + delta[1]*delta[1] < thdelta) break;
     }
     if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
     return dv;

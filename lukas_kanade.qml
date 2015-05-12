@@ -2,7 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 
 Item {
-    width: 300
+    width: 400
     height: 240
     ComboBox {
         id: comboBox1
@@ -21,7 +21,7 @@ Item {
         x: 150
         y: 40
         minimumValue : 1
-        maximumValue : 20
+        maximumValue : 100
         value : 10
     }
     SpinBox {
@@ -78,18 +78,19 @@ Item {
     }
 
     CheckBox {
-        id: checkBox1
-        x: 150
+        id: debugCheckBox
+        x: 20
         y: 200
-        text: qsTr("")
+        text: qsTr("Use Debug")
         checked: false
     }
 
-    Label {
-        id: debugModeON
-        x: 20
+    CheckBox {
+        id: pyramidCheckBox
+        x: 150
         y: 200
-        text: qsTr("Debug mode ON")
+        text: qsTr("Use pyramod")
+        checked: true
     }
 
     function getcmd()
@@ -107,8 +108,8 @@ Item {
         "-w", windowSearch.value,//size window search (3px by default)
         "-g", stepGrid.value,//step for grid (5px by default)
         "-b", comboBox1.currentIndex,
+        "-d", debugCheckBox.,//debug mod on
         /*"-h", //show help
-        "-d", debugModeON,//debug mod on
         "-v" //show version*/
       ];
 
