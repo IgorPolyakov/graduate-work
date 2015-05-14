@@ -132,6 +132,11 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
     writeVector.open(QIODevice::WriteOnly);
     QTextStream wD(&writeDelta);
     QTextStream wV(&writeVector);
+    double *f_tmp_D = new double[g_iteration];
+    double *f_tmp_V = new double[g_iteration];
+    for (int f_var = 0; f_var < g_iteration; ++f_var) {
+        f_tmp_D[f_var] = f_tmp_V[f_var] = 0;
+    }
 
     subSize* kernel = new subSize;
     kernel->rc = g_sizeWindowSeach;
@@ -161,12 +166,22 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], wD, wV);
+            computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], f_tmp_D, f_tmp_V);
             state->lines()[i][j] = 1;
+        }
+    }
+    if(g_isDebug)
+    {
+        for (int i_i = 0; i_i < g_iteration; ++i_i)
+        {
+            /*WARNING: Проверить корректность сохраняемость данных*/
+            wD << (f_tmp_D[i_i]/(g_stepForGrid*g_stepForGrid)) << "\t" << (f_tmp_V[i_i]/(g_stepForGrid*g_stepForGrid)) << "\t" << i_i << "\n";
         }
     }
     writeDelta.close();
     writeVector.close();
+    delete f_tmp_D;
+    delete f_tmp_V;
     delete kernel;
     return vf;
 }
@@ -178,7 +193,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
  * \param [in] rightImg − массив яркостей второго кадра
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, QTextStream &wD, QTextStream &wV)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* ara_1, double* ara_2)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
@@ -263,8 +278,10 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
 
         if(g_isDebug)
         {
-            wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
-            wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
+            //wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
+            //wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
+            ara_1[k] += delta[0];
+            ara_2[k] += delta[1];
         }
         if (fabs(delta[0]) < thdelta && fabs(delta[1]) < thdelta) break;
     }
@@ -347,7 +364,6 @@ std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
     listImg->push_back(img); //первый уровень(оригинал)
     for (int i = 0; i < lvl_pyramid; i++) {
         r = r + r;
-        //r = 1 << i;
         listImg->push_back(resizeImage(img, r));
     }
     return listImg;
