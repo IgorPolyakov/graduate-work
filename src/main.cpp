@@ -130,24 +130,25 @@ int main(int argc, char *argv[])
 
         printProgressBar(20, (100*i)/imagelist.size());
 
-        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-            QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
-            WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
-        }
+        if(g_isDebug)
+        {
+            for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
+                QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
+                WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
+            }
 
-        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-            QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
-            WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
+            for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
+                QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
+                WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
+            }
         }
-
-        for (int j = lvl_pyramid; j >= 0; j--){
-            printProgressBar(20+(lvl_pyramid-j), (100*i)/imagelist.size());
-            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
-            saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
-        }
-
+            for (int j = lvl_pyramid; j >= 0; j--){
+                printProgressBar(20+(lvl_pyramid-j), (100*i)/imagelist.size());
+                vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
+                if(g_isDebug)saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
+            }
         printProgressBar(75, (100*i)/imagelist.size());
-        //saveVfResult(*vf, "result_lvl_" + QString("%1").arg(lvl_pyramid));
+        saveVfResult(*vf, "vector_field_lvl-" + QString("%1").arg(lvl_pyramid));
     }
     printProgressBar(100,100);
     return 0;

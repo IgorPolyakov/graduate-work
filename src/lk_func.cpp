@@ -261,9 +261,11 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         delta = A*b;
         dv += delta;
 
-        wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
-        wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
-
+        if(g_isDebug)
+        {
+            wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
+            wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
+        }
         if (fabs(delta[0]) < thdelta && fabs(delta[1]) < thdelta) break;
     }
     if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
