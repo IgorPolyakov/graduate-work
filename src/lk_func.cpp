@@ -82,13 +82,19 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
     return ri;
 }
 
-int calcLvlPyramid(int cx, int cy)
+/*!
+ * \brief calcLvlPyramid - Автоматическое вычисление колличества уровней пирамиды для обрабатываемого изображения
+ * \param [in] cx - Ширина
+ * \param [in] cy - Высота
+ * \return [out] - Колличество уровней пирамиды
+ */
+int calcLvlPyramid(int cx, int cy, bool isPyramid)
 {
-    int lvl_pyramid = 0;
-    if (g_isPyramid)
+    int lvl_pyramid = 0, tmp = 0;
+    if (isPyramid)
     {
         if (cx > cy) {
-            int tmp = cy;
+            tmp = cy;
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
                 lvl_pyramid++;
@@ -96,7 +102,7 @@ int calcLvlPyramid(int cx, int cy)
             }
         }
         else {
-            int tmp = cx;
+            tmp = cx;
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
                 lvl_pyramid++;
@@ -155,7 +161,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j]);//, wD, wV);
+            /*vf->lines()[i][j] += */computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], wD, wV);
             state->lines()[i][j] = 1;
         }
     }
@@ -172,7 +178,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
  * \param [in] rightImg − массив яркостей второго кадра
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv)//, QTextStream &wD, QTextStream &wV)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, QTextStream &wD, QTextStream &wV)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
@@ -255,11 +261,10 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         delta = A*b;
         dv += delta;
 
-        //wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
-        //wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
+        wD << delta[0] << "\t" << delta[1] << "\t" << k << "\n";
+        wV << dv[0] << "\t" << dv[1] << "\t" << k << "\n";
 
-        if (delta[0]*delta[0] < thdelta && delta[1]*delta[1] < thdelta) break;
-        //if (delta[0]*delta[0] + delta[1]*delta[1] < thdelta) break;
+        if (fabs(delta[0]) < thdelta && fabs(delta[1]) < thdelta) break;
     }
     if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
     return dv;
@@ -357,4 +362,9 @@ void saveVfResult(VF2d &vf, QString info)
     } else {
         qDebug() << "Error : can't write vf data";
     }
+}
+
+void printProgressBar(int fast, int slow)
+{
+    std::cout << fast << "," << slow << "," << std::endl;
 }

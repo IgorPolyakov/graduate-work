@@ -18,12 +18,12 @@ int main(int argc, char *argv[])
      * Default opt'arg:Begin
      */
     g_isDebug = false;
-    g_sizeWindowSeach = 10;
-    g_stepForGrid = 10;
+    g_sizeWindowSeach = 24;
+    g_stepForGrid = 16;
     g_iteration = 10;
     g_outputFolder = "output/";
     g_interpolation = 1;
-    g_isPyramid = 1;
+    bool isPyramid = false;
     /*!
      * end
      */
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             break;
         case 'p':
             qDebug() << "Pyramid mode: ON" ;
-            g_isPyramid = true;
+            isPyramid = true;
             break;
         }
     }
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
         imagelist.append(in.readLine());
     listfile.close();
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++) {
-        std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
+        printProgressBar(0, (100*i)/imagelist.size());
         pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
         if (pLeftImg==NULL) {
             qDebug() << "Cannot load " << cnt << "image file\n";
@@ -121,13 +121,14 @@ int main(int argc, char *argv[])
         if (!outDir.exists()) {
             outDir.mkpath(".");
         }
-        std::cout << 15 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
+        printProgressBar(15, (100*i)/imagelist.size());
 
-        int lvl_pyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy());
+        int lvl_pyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy(),isPyramid);
 
         std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
         std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);
+
+        printProgressBar(20, (100*i)/imagelist.size());
 
         for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
             QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
@@ -140,16 +141,14 @@ int main(int argc, char *argv[])
         }
 
         for (int j = lvl_pyramid; j >= 0; j--){
+            printProgressBar(20+(lvl_pyramid-j), (100*i)/imagelist.size());
             vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
             saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
         }
 
-        std::cout << 75 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
+        printProgressBar(75, (100*i)/imagelist.size());
         //saveVfResult(*vf, "result_lvl_" + QString("%1").arg(lvl_pyramid));
-        std::cout << 100 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
     }
-    std::cout << 100 << "," << 100 << "," << std::endl;
+    printProgressBar(100,100);
     return 0;
 }//End of Main
