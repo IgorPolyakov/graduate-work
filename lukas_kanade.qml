@@ -108,7 +108,8 @@ Item {
         "-w", windowSearch.value,//size window search (3px by default)
         "-g", stepGrid.value,//step for grid (5px by default)
         "-b", comboBox1.currentIndex,
-        "-d", debugCheckBox.,//debug mod on
+        pyramidCheckBox.checked ? "-p" : "",
+        debugCheckBox.checked ? "-d" : "",
         /*"-h", //show help
         "-v" //show version*/
       ];
