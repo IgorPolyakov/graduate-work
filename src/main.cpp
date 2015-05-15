@@ -142,13 +142,13 @@ int main(int argc, char *argv[])
                 WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
             }
         }
-            for (int j = lvl_pyramid; j >= 0; j--){
-                printProgressBar(20+(lvl_pyramid-j), (100*i)/imagelist.size());
-                vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
-                if(g_isDebug)saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
-            }
+        for (int j = lvl_pyramid; j >= 0; j--){
+            printProgressBar(20+(lvl_pyramid-j), (100*i)/imagelist.size());
+            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
+            if(g_isDebug)saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
+        }
         printProgressBar(75, (100*i)/imagelist.size());
-        saveVfResult(*vf, "vector_field_lvl-" + QString("%1").arg(lvl_pyramid));
+        if(!g_isDebug)saveVfResult(*vf, "vector_field");
     }
     printProgressBar(100,100);
     return 0;

@@ -81,7 +81,7 @@ Item {
         id: debugCheckBox
         x: 20
         y: 200
-        text: qsTr("Use Debug")
+        text: qsTr("More log")
         checked: false
     }
 
@@ -89,7 +89,7 @@ Item {
         id: pyramidCheckBox
         x: 150
         y: 200
-        text: qsTr("Use pyramod")
+        text: qsTr("Use pyramid")
         checked: true
     }
 
