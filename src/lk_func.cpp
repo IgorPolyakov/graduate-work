@@ -82,6 +82,28 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
     return ri;
 }
 
+double cubicInterpolate (double p[4], double x) {
+    return p[1] + 0.5 * x*(p[2] - p[0] + x*(2.0*p[0] - 5.0*p[1] + 4.0*p[2] - p[3] + x*(3.0*(p[1] - p[2]) + p[3] - p[0])));
+}
+
+double bicubicInterpolate (double p[4][4], double x, double y) {
+    double arr[4];
+    arr[0] = cubicInterpolate(p[0], y);
+    arr[1] = cubicInterpolate(p[1], y);
+    arr[2] = cubicInterpolate(p[2], y);
+    arr[3] = cubicInterpolate(p[3], y);
+    return cubicInterpolate(arr, x);
+}
+
+double tricubicInterpolate (double p[4][4][4], double x, double y, double z) {
+    double arr[4];
+    arr[0] = bicubicInterpolate(p[0], y, z);
+    arr[1] = bicubicInterpolate(p[1], y, z);
+    arr[2] = bicubicInterpolate(p[2], y, z);
+    arr[3] = bicubicInterpolate(p[3], y, z);
+    return cubicInterpolate(arr, x);
+}
+
 /*!
  * \brief calcLvlPyramid - Автоматическое вычисление колличества уровней пирамиды для обрабатываемого изображения
  * \param [in] cx - Ширина
@@ -126,6 +148,7 @@ int calcLvlPyramid(int cx, int cy, bool isPyramid)
  */
 VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 {
+    /* WARNING: Переделать по нормальному, структура или т.п*/
     double *d_mid_x = new double[g_iteration];
     double *d_mid_y = new double[g_iteration];
     double *d_max_x = new double[g_iteration];
@@ -137,10 +160,25 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 
     for (int f_var = 0; f_var < g_iteration; ++f_var) {
         d_mid_x[f_var] = d_mid_y[f_var] = d_abs_x[f_var] = d_abs_y[f_var] = 0;
-        d_min_x[f_var] = d_min_y[f_var] = -1000.00;
-        d_max_x[f_var] = d_max_y[f_var] = 1000.00;
+        d_min_x[f_var] = d_min_y[f_var] = 1000.00;
+        d_max_x[f_var] = d_max_y[f_var] = -1000.00;
 
     }
+
+    double *v_mid_x = new double[g_iteration];
+    double *v_mid_y = new double[g_iteration];
+    double *v_max_x = new double[g_iteration];
+    double *v_min_x = new double[g_iteration];
+    double *v_max_y = new double[g_iteration];
+    double *v_min_y = new double[g_iteration];
+
+    for (int f_var = 0; f_var < g_iteration; ++f_var) {
+        v_mid_x[f_var] = v_mid_y[f_var] = 0;
+        v_min_x[f_var] = v_min_y[f_var] = 1000.00;
+        v_max_x[f_var] = v_max_y[f_var] = -1000.00;
+
+    }
+
 
     subSize* kernel = new subSize;
     kernel->rc = g_sizeWindowSeach;
@@ -165,51 +203,65 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
     {
         for (int j = 0; j < Vcx; ++j)
         {
+            g_fastProgBar += (Vcx * Vcy)/50;//((50 * ((i*Vcx)+j))/(Vcy*Vcx));
+            printProgressBar();
             kernel->y_1 = (i * vf->grid().y) + vf->origin().y;
             kernel->x_1 = (j * vf->grid().x) + vf->origin().x;
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], d_mid_x, d_mid_y, d_max_x, d_min_x, d_min_y, d_max_y, d_abs_x, d_abs_y);
+            computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], d_mid_x,  d_mid_y,  d_max_x,  d_min_x,  d_min_y,  d_max_y,  d_abs_x,  d_abs_y,  v_mid_x,  v_mid_y,  v_max_x,  v_min_x,  v_min_y,  v_max_y);
             state->lines()[i][j] = 1;
         }
     }
 
-    if(g_isDebug)
+        QFile writeDeltaX(g_outputFolder + "//deltaX.txt");
+        QFile writeDeltaY(g_outputFolder + "//deltaY.txt");
+        writeDeltaX.open(QIODevice::WriteOnly);
+        writeDeltaY.open(QIODevice::WriteOnly);
+        QTextStream deltXtext(&writeDeltaX);
+        QTextStream deltYtext(&writeDeltaY);
+
+        QFile writeVectorX(g_outputFolder + "//vectorX.txt");
+        QFile writeVectorY(g_outputFolder + "//vectorY.txt");
+        writeVectorX.open(QIODevice::WriteOnly);
+        writeVectorY.open(QIODevice::WriteOnly);
+        QTextStream vectXtext(&writeVectorX);
+        QTextStream vectYtext(&writeVectorY);
+
+    if (g_isDebug)
     {
-        QFile writeDelta(g_outputFolder + "//delta.txt");
-        QFile writeVector(g_outputFolder + "//vector.txt");
-        writeDelta.open(QIODevice::WriteOnly);
-        writeVector.open(QIODevice::WriteOnly);
-        QTextStream deltXtext(&writeDelta);
-        QTextStream deltYtext(&writeVector);
-
-
-        if(g_isDebug)
+        double deli = Vcx * Vcx;
+        for (int m = 0; m < g_iteration; ++m)
         {
-            int deli = Vcx * Vcx;
-            for (int m = 0; m < g_iteration; ++m)
-            {
-                /*WARNING: Проверить корректность сохраняемость данных*/
-                deltXtext << m << "\t" << (d_mid_x[m]/deli) << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
-                deltYtext << m << "\t" << (d_mid_y[m]/deli) << "\t" << (d_abs_y[m]/deli) << "\t" << d_max_y[m] << "\t" << d_min_y[m] << "\n";
-            }
+            deltXtext << m << "\t" << (d_mid_x[m]/deli) << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
+            deltYtext << m << "\t" << (d_mid_y[m]/deli) << "\t" << (d_abs_y[m]/deli) << "\t" << d_max_y[m] << "\t" << d_min_y[m] << "\n";
+            vectXtext << m << "\t" << v_mid_x[m]/deli << "\t" << v_min_x[m] << "\t" << v_max_x[m] << "\n";
+            vectYtext << m << "\t" << v_mid_y[m]/deli << "\t" << v_min_y[m] << "\t" << v_max_y[m] << "\n";
         }
+    }
 
-        writeDelta.close();
-        writeVector.close();
-    }
-    if(g_isDebug)
-    {
-        delete d_mid_x;
-        delete d_mid_y;
-        delete d_max_x;
-        delete d_min_x;
-        delete d_max_y;
-        delete d_min_y;
-        delete d_abs_y;
-        delete d_abs_x;
-    }
+    writeDeltaX.close();
+    writeDeltaY.close();
+    writeVectorX.close();
+    writeVectorY.close();
+
+    delete d_mid_x;
+    delete d_mid_y;
+    delete d_max_x;
+    delete d_min_x;
+    delete d_max_y;
+    delete d_min_y;
+    delete d_abs_y;
+    delete d_abs_x;
+
+    delete v_mid_x;
+    delete v_mid_y;
+    delete v_max_x;
+    delete v_min_x;
+    delete v_max_y;
+    delete v_min_y;
+
     delete kernel;
     return vf;
 }
@@ -221,13 +273,12 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
  * \param [in] rightImg − массив яркостей второго кадра
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* d_mid_x, double* d_mid_y, double* d_max_x, double* d_min_x, double* d_min_y, double* d_max_y, double* d_avg_x, double* d_avg_y)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* d_mid_x, double* d_mid_y, double* d_max_x, double* d_min_x, double* d_min_y, double* d_max_y, double* d_avg_x, double* d_avg_y, double* v_mid_x, double* v_mid_y, double* v_max_x, double* v_min_x, double* v_min_y, double* v_max_y)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
     Vec2d delta(0,0);
     double thdelta = 0.001;
-    if (g_isDebug) qDebug() << "SubSize:X" << kernel->x_1 << "Y:" << kernel->y_1 << "R:" << kernel->rc << "\n";
     for (int k = 0; k < g_iteration; ++k) //Отсчитываем число итераций, для уточнения вектора
     {
         double x2 = kernel->x_1 + dv[0];
@@ -304,37 +355,43 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         delta = A*b;
         dv += delta;
 
-        if(g_isDebug)
-        {
-            d_mid_x[k] += delta[0];
-            d_mid_y[k] += delta[1];
+        /* start */
+        d_mid_x[k] += delta[0];
+        d_mid_y[k] += delta[1];
 
-            d_avg_x[k] += fabs(delta[0]);
-            d_avg_y[k] += fabs(delta[1]);
+        d_avg_x[k] += fabs(delta[0]);
+        d_avg_y[k] += fabs(delta[1]);
 
-            if(delta[0] < d_max_x[k])
-            {
-                d_max_x[k] = delta[0];
-            }
+        if(delta[0] >  d_max_x[k])
+            d_max_x[k] = delta[0];
 
-            if(delta[1] < d_max_y[k])
-            {
-                d_max_y[k] = delta[1];
-            }
+        if(delta[1] > d_max_y[k])
+            d_max_y[k] = delta[1];
 
-            if(delta[0] > d_min_x[k])
-            {
-                d_min_x[k] = delta[0];
-            }
+        if(delta[0] < d_min_x[k])
+            d_min_x[k] = delta[0];
 
-            if(delta[1] > d_min_y[k])
-            {
-                d_min_y[k] = delta[1];
-            }
-        }
+        if(delta[1] < d_min_y[k])
+            d_min_y[k] = delta[1];
+
+        v_mid_x[k] += dv[0];
+        v_mid_y[k] += dv[1];
+
+        if(dv[0] > v_max_x[k])
+            v_max_x[k] = dv[0];
+
+        if(dv[1] > v_max_y[k])
+            v_max_y[k] = dv[1];
+
+        if(delta[0] < v_min_x[k])
+            v_min_x[k] = dv[0];
+
+        if(delta[1] < v_min_y[k])
+            v_min_y[k] = dv[1];
+        /* end */
+
         if (fabs(delta[0]) < thdelta && fabs(delta[1]) < thdelta) break;
     }
-    if (g_isDebug) qDebug() << dv[0] << dv[1] << "return";
     return dv;
 }
 /*!
@@ -414,7 +471,12 @@ std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
     for (int i = 0; i < lvl_pyramid; i++) {
         r = r + r;
         listImg->push_back(resizeImage(img, r));
+        g_fastProgBar += (int)((i*10)/lvl_pyramid);
+        printProgressBar();
     }
+    if(lvl_pyramid==0)
+        g_fastProgBar += 10;
+    printProgressBar();
     return listImg;
 }
 /*!
@@ -431,7 +493,7 @@ void saveVfResult(VF2d &vf, QString info)
     }
 }
 
-void printProgressBar(int fast, int slow)
+void printProgressBar()
 {
-    std::cout << fast << "," << slow << "," << std::endl;
+    std::cout << g_fastProgBar << "," << g_slowProgBar << "," << std::endl;
 }
