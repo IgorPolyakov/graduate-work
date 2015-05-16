@@ -8,7 +8,7 @@ Item {
         id: comboBox1
         x: 150
         y: 0
-        model: [ "B-spline", "Bilinear" ]
+        model: [ "B-spline", "Bilinear", "Bicubic" ]
     }   
     Label {
         id: countInterpolation

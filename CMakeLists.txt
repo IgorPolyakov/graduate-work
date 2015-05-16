@@ -100,12 +100,14 @@ set(SOURCES
   src/lk_func.cpp
   src/main.cpp
   src/global.cpp
+  src/lk_interpolation.cpp
 )
 
 set(HEADERS
   src/lk_func.h
   src/lk_struct.h
   src/global.h
+  src/lk_interpolation.h
 )
 
 # Build the app!

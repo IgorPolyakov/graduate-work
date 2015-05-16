@@ -1,13 +1,4 @@
 #include "lk_func.h"
-#include <QPainter>
-#include <QImage>
-#include <QDebug>
-#include <QFileInfo>
-#include <QFile>
-#include <iostream>
-#include <math.h>
-#include <deprecated/dvfile.h>
-#include <vector>
 #define SIZE_MAT_INV 2
 
 /*!
@@ -57,52 +48,6 @@ void inversion(Matx22d &A)
     delete [] E;
 }
 
-/*!
- * \brief bilinearInterpolation
- * \param x   - Смещение по х
- * \param y   - Смещение по у
- * \param q11 - Значение функции в левом верхнем углу
- * \param q12 - Значение функции в левом нижнем углу
- * \param q21 - Значение функции в правом верхнем углу
- * \param q22 - Значение функции в правом нижнем углу
- * \param x1  - Координата верхнего левого угла по х
- * \param y1  - Координата верхнего левого угла по у
- * \return
- */
-double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uchar q21, uchar q22, int x1, int y1)
-{
-    int x2 = x1 + 1;
-    int y2 = y1 + 1;
-    double x = x1 + delx;
-    double y = y1 + dely;
-
-    double r1 = (((x2 - x)/(x2 - x1)) * q11) + (((x - x1)/(x2 - x1)) * q21);
-    double r2 = (((x2 - x)/(x2 - x1)) * q12) + (((x - x1)/(x2 - x1)) * q22);
-    double ri = (((y2 - y)/(y2 - y1)) *  r1) + (((y - y1)/(y2 - y1)) *  r2);
-    return ri;
-}
-
-double cubicInterpolate (double p[4], double x) {
-    return p[1] + 0.5 * x*(p[2] - p[0] + x*(2.0*p[0] - 5.0*p[1] + 4.0*p[2] - p[3] + x*(3.0*(p[1] - p[2]) + p[3] - p[0])));
-}
-
-double bicubicInterpolate (double p[4][4], double x, double y) {
-    double arr[4];
-    arr[0] = cubicInterpolate(p[0], y);
-    arr[1] = cubicInterpolate(p[1], y);
-    arr[2] = cubicInterpolate(p[2], y);
-    arr[3] = cubicInterpolate(p[3], y);
-    return cubicInterpolate(arr, x);
-}
-
-double tricubicInterpolate (double p[4][4][4], double x, double y, double z) {
-    double arr[4];
-    arr[0] = bicubicInterpolate(p[0], y, z);
-    arr[1] = bicubicInterpolate(p[1], y, z);
-    arr[2] = bicubicInterpolate(p[2], y, z);
-    arr[3] = bicubicInterpolate(p[3], y, z);
-    return cubicInterpolate(arr, x);
-}
 
 /*!
  * \brief calcLvlPyramid - Автоматическое вычисление колличества уровней пирамиды для обрабатываемого изображения
@@ -215,19 +160,19 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
         }
     }
 
-        QFile writeDeltaX(g_outputFolder + "//deltaX.txt");
-        QFile writeDeltaY(g_outputFolder + "//deltaY.txt");
-        writeDeltaX.open(QIODevice::WriteOnly);
-        writeDeltaY.open(QIODevice::WriteOnly);
-        QTextStream deltXtext(&writeDeltaX);
-        QTextStream deltYtext(&writeDeltaY);
+    QFile writeDeltaX(g_outputFolder + "//deltaX.txt");
+    QFile writeDeltaY(g_outputFolder + "//deltaY.txt");
+    writeDeltaX.open(QIODevice::WriteOnly);
+    writeDeltaY.open(QIODevice::WriteOnly);
+    QTextStream deltXtext(&writeDeltaX);
+    QTextStream deltYtext(&writeDeltaY);
 
-        QFile writeVectorX(g_outputFolder + "//vectorX.txt");
-        QFile writeVectorY(g_outputFolder + "//vectorY.txt");
-        writeVectorX.open(QIODevice::WriteOnly);
-        writeVectorY.open(QIODevice::WriteOnly);
-        QTextStream vectXtext(&writeVectorX);
-        QTextStream vectYtext(&writeVectorY);
+    QFile writeVectorX(g_outputFolder + "//vectorX.txt");
+    QFile writeVectorY(g_outputFolder + "//vectorY.txt");
+    writeVectorX.open(QIODevice::WriteOnly);
+    writeVectorY.open(QIODevice::WriteOnly);
+    QTextStream vectXtext(&writeVectorX);
+    QTextStream vectYtext(&writeVectorY);
 
     if (g_isDebug)
     {
@@ -304,10 +249,10 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
                 int xx = jj+kernel->x_2-kernel->rc;
                 int yy = ii+kernel->y_2-kernel->rc;
 
-                if (xx < 0) xx = 0;
-                if (xx > rightImg->cx()-2) xx = rightImg->cx()-2;
-                if (yy < 0) yy = 0;
-                if (yy > rightImg->cy()-2) yy = rightImg->cy()-2;
+                if (xx < 1) xx = 1;
+                if (xx > rightImg->cx()-3) xx = rightImg->cx()-3;
+                if (yy < 1) yy = 1;
+                if (yy > rightImg->cy()-3) yy = rightImg->cy()-3;
 
                 if (x2 < 0.0001 && y2 < 0.0001)
                     rightBlock.lines()[ii][jj] = rightImg->lines()[yy][xx];
@@ -319,11 +264,20 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
                     case 1:
                         rightBlock.lines()[ii][jj] = (uchar)bilinearInterpolation(x2, y2, rightImg->lines()[yy][xx], rightImg->lines()[yy][xx+1], rightImg->lines()[yy+1][xx], rightImg->lines()[yy+1][xx+1], xx, yy);
                         break;
+                    case 2:
+                        double arr[4][4];
+                        for (int iii = 0; iii < 4; ++iii) {
+                            for (int jjj = 0; jjj < 4; ++jjj) {
+                                arr[iii][jjj]= rightImg->lines()[yy+iii-1][xx+jjj-1];
+                            }
+                        }
+                        rightBlock.lines()[ii][jj] = (uchar)bicubicInterpolate(arr,x2,y2);
+                        break;
                     default:
                         rightBlock.lines()[ii][jj] = BicubicBspline2d<uchar>(rightImg->lines(), rightImg->cx(), rightImg->cy(), xx, yy, x2, y2, RX, RY);
                         break;
                     }
-                    /* TODO: Добавить биленейную интерполяцию и интерполяцию на основе разложения в ряд Тейлора*/
+                /* TODO: Добавить интерполяцию на основе разложения в ряд Тейлора*/
             }
         }
 
@@ -415,24 +369,6 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
 }
 
 /*!
- * \brief joinImage − Объединение трёх изображений(первого, второго и первого с нанесённым поверх векторным полем)
- * \param [in] img1 − Первое изображение
- * \param [in] img2 − Второе изображение
- * \param [in] img3 − Первого с нанесённым поверх векторным полем
- * \param [in] info − Имя сохраняемого файла
- */
-void joinImage(QImage img1, QImage img2, QImage img3, QString info)
-{
-    QImage result(img1.width() + img2.width() + img3.width(),
-                  img1.height(), QImage::Format_ARGB32);
-    QPainter paint;
-    paint.begin(&result);
-    paint.drawImage(0, 0, img1);
-    paint.drawImage(img1.width(), 0, img2);
-    paint.drawImage(img1.width() + img2.width(), 0, img3);
-    result.save(g_outputFolder + "/" + info + ".png");
-}
-/*!
  * \brief resizeImage − Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
  * \param [in] image − структура содержащая сведения о размерах масштабируемого изображения
  * \param [in] kK − Коэффициент уменьшения изображения
@@ -495,5 +431,5 @@ void saveVfResult(VF2d &vf, QString info)
 
 void printProgressBar()
 {
-    std::cout << g_fastProgBar << "," << g_slowProgBar << "," << std::endl;
+    //std::cout << g_fastProgBar << "," << g_slowProgBar << "," << std::endl;
 }

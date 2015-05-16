@@ -1,9 +1,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QImage>
 #include <QTextStream>
-#include <qmath.h>
 #include <iostream>
 #include <getopt.h>
 #include <stdlib.h>
@@ -22,7 +20,7 @@ int main(int argc, char *argv[])
     g_stepForGrid = 16;
     g_iteration = 10;
     g_outputFolder = "output/";
-    g_interpolation = 1;
+    g_interpolation = 0;
     g_fastProgBar = 0;
     g_slowProgBar = 0;
     bool isPyramid = false;
@@ -146,7 +144,7 @@ int main(int argc, char *argv[])
                 WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
             }
         }
-        for (int j = lvl_pyramid; j >= 0; j--){
+        for (int j = lvl_pyramid; j >= 0; j--) {
             g_fastProgBar += (lvl_pyramid-j);
             printProgressBar();
             vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
