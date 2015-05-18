@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     Data2Db *pLeftImg = 0;
     Data2Db *pRightImg = 0;
     VF2d *vf = 0;
-    VF2d* prevFiled = 0;
+    VF2d *prevFiled = 0;
 
     while (!in.atEnd())
         imagelist.append(in.readLine());
@@ -127,32 +127,36 @@ int main(int argc, char *argv[])
 
         int lvl_pyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy(),isPyramid);
 
-        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
-        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);
+        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid, "left");
+        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid, "right");
 
         printProgressBar();
+        QString outfilename = "out";
 
         if (g_isDebug)
         {
             for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
                 QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
                 WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
+                writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listLeft)[i_cnt], i_cnt == 0 ? true : false);
             }
 
             for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
                 QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
                 WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
+                writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listRight)[i_cnt], false);
             }
         }
         for (int j = lvl_pyramid; j >= 0; j--) {
             g_fastProgBar += (lvl_pyramid-j);
             printProgressBar();
             vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
-            if(g_isDebug)saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
+            vf->set_name(QString("vf_%1").arg(j).toLocal8Bit().data());
+            /*if(g_isDebug)saveVfResult(*vf, outfilename);// + QString("%1").arg(j));*/
         }
         printProgressBar();
-        if(!g_isDebug)saveVfResult(*vf, "vector_field");
-        if(g_isDebug)derivativeVectorField(*vf, "deform_image");
+        if(g_isDebug)saveVfResult(*vf, outfilename);
+        if(g_isDebug)derivativeVectorField(*vf, outfilename);
     }
     printProgressBar();
     return 0;
