@@ -25,4 +25,5 @@ void    getImageInfo(imageInform* image, QString path);
 void    inversion(Matx22d &A);
 void    printProgressBar();
 void    saveVfResult(VF2d &vf, QString info);
+void derivativeVectorField(VF2d &vf, QString info);
 #endif

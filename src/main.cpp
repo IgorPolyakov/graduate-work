@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
         }
         printProgressBar();
         if(!g_isDebug)saveVfResult(*vf, "vector_field");
+        if(g_isDebug)derivativeVectorField(*vf, "deform_image");
     }
     printProgressBar();
     return 0;

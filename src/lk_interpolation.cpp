@@ -1,4 +1,5 @@
 #include <deprecated/dvfile.h>
+#include "lk_interpolation.h"
 
 /*!
  * \brief bilinearInterpolation

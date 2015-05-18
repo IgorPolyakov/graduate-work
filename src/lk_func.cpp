@@ -50,21 +50,21 @@ void inversion(Matx22d &A)
 
 
 /*!
- * \brief calcLvlPyramid - Автоматическое вычисление колличества уровней пирамиды для обрабатываемого изображения
- * \param [in] cx - Ширина
- * \param [in] cy - Высота
- * \return [out] - Колличество уровней пирамиды
+ * \brief calcLvlPyramid − Автоматическое вычисление колличества уровней пирамиды на основе размеров изображения
+ * \param [in] cx − Ширина изображения
+ * \param [in] cy − Высота изображения
+ * \return [out] − Колличество уровней пирамиды
  */
 int calcLvlPyramid(int cx, int cy, bool isPyramid)
 {
-    int lvl_pyramid = 0, tmp = 0;
+    int lvlPyramid = 0, tmp = 0;
     if (isPyramid)
     {
         if (cx > cy) {
             tmp = cy;
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
-                lvl_pyramid++;
+                lvlPyramid++;
                 tmp = tmp/2;
             }
         }
@@ -72,15 +72,15 @@ int calcLvlPyramid(int cx, int cy, bool isPyramid)
             tmp = cx;
             while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
             {
-                lvl_pyramid++;
+                lvlPyramid++;
                 tmp = tmp/2;
             }
         }
-        lvl_pyramid--;
+        lvlPyramid--;
     }
     else
-        lvl_pyramid = 0;
-    return lvl_pyramid;
+        lvlPyramid = 0;
+    return lvlPyramid;
 }
 
 /*!
@@ -418,12 +418,12 @@ std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid)
 /*!
  * \brief saveVfResult − Сохранение векторного поля в формате VF. Просмотр возможен в программе df−cl
  * \param [in] vf − Указатель на векторное поле
- * \param [in] info - Имя сохраняемого файла
+ * \param [in] info − Имя сохраняемого файла
  */
 void saveVfResult(VF2d &vf, QString info)
 {
     if (WriteVF(QString(g_outputFolder + "/" + info + ".vf").toLocal8Bit().data(), &vf) == 0) {
-        qDebug() << "Correct write data";
+        qDebug() << "Correct \""<< info << "\" write data";
     } else {
         qDebug() << "Error : can't write vf data";
     }
@@ -432,4 +432,21 @@ void saveVfResult(VF2d &vf, QString info)
 void printProgressBar()
 {
     //std::cout << g_fastProgBar << "," << g_slowProgBar << "," << std::endl;
+}
+
+void derivativeVectorField(VF2d &vf, QString info)
+{
+    Data2Db* deformationImg = new Data2Db(vf.cx(), vf.cy());
+    double e_xx = 0.0, e_yy = 0.0, e_xy = 0.0, g_i = 0.0, w_z = 0.0;
+    for (int i = 1; i < vf.cy()-1; ++i) {
+        for (int j = 1; j < vf.cx()-1; ++j) {
+            e_xx = (vf.lines()[i-1][j][0] - vf.lines()[i+1][j][0])/2.0;
+            e_yy = (vf.lines()[i][j-1][1] - vf.lines()[i][j+1][1])/2.0;
+            e_xy = 0.5*((vf.lines()[i][j-1][0] - vf.lines()[i][j+1][0])/2.0 + (vf.lines()[i-1][j][1] - vf.lines()[i+1][j][1])/2.0);
+            w_z  = 0.5*((vf.lines()[i-1][j][1] - vf.lines()[i+1][j][1])/2.0 + (vf.lines()[i][j-1][0] - vf.lines()[i][j+1][0])/2.0);
+            g_i = sqrt(0.66666666666) * sqrt(pow((e_xx - e_yy),2) + pow((e_xx),2) + pow(e_yy ,2) + (3.0/2.0)*(pow(e_xy, 2)));
+            deformationImg->lines()[i][j] = 150;
+        }
+    }
+    WriteImage(QString(g_outputFolder + "/" + info + ".png").toLocal8Bit().data(), deformationImg);
 }
