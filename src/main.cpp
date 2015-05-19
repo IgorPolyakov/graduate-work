@@ -46,13 +46,13 @@ int main(int argc, char *argv[])
                      PROJECT_BUILD_TIME ;
             return (0);
         case 'h':
-            qDebug() << "\nNAME: \n\Lucas-Kanade \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
+            qDebug() << "\nNAME: \nLucas-Kanade \n\tUsage to EXEC ./bin/lucas_kanade  -l <list_of_image>";
             qDebug() << "\nDESCRIPTION:";
             qDebug() << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             qDebug() << "\n\t-l\t\t load list path image";
             qDebug() << "\n\t-o\t\t output directory";
             qDebug() << "\n\t-i\t\t count iteration (10 by default)";
-            qDebug() << "\n\t-w\t\t size window search (16 by default)";
+            qDebug() << "\n\t-w\t\t size window search (24 by default)";
             qDebug() << "\n\t-g\t\t step for grid (16 by default)";
             qDebug() << "\n\t-p\t\t pyramid mod (enable by default)";
             qDebug() << "\n\t-v\t\t show version";
@@ -153,11 +153,11 @@ int main(int argc, char *argv[])
             printProgressBar();
             vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
             vf->set_name(QString("vf_%1").arg(j).toLocal8Bit().data());
-            /*if(g_isDebug)saveVfResult(*vf, outfilename);// + QString("%1").arg(j));*/
+            /*if (g_isDebug)saveVfResult(*vf, outfilename);// + QString("%1").arg(j));*/
         }
         printProgressBar();
-        if(g_isDebug)saveVfResult(*vf, outfilename);
-        if(g_isDebug)derivativeVectorField(*vf, outfilename);
+        if (g_isDebug)saveVfResult(*vf, outfilename);
+        if (g_isDebug)derivativeVectorField(*vf, outfilename);
     }
     printProgressBar();
     return 0;
