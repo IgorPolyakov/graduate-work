@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
      */
     if (argc <= 1) {
         qDebug() <<
-                 "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
+                 "Lucas-Kanade: пропущены операнды, задающие входные файлы\nПо команде «lucas_kanade -h» можно получить дополнительную информацию.\n";
         return (0);
     }
     int pr = 0;
@@ -39,25 +39,26 @@ int main(int argc, char *argv[])
             listfilename = optarg;
             break;
         case 'v':
-            qDebug() << "LukasKanadeQt version: " << VERSION ;
-            qDebug() << "branch: " << PROJECT_GIT_REF ;
-            qDebug() << "build date: " << PROJECT_BUILD_DATE << " " <<
+            qDebug() << "Lucas-Kanade";
+            qDebug() << " * Version:\t" << VERSION ;
+            qDebug() << " * Branch:\t\t" << PROJECT_GIT_REF ;
+            qDebug() << " * Build date:\t" << PROJECT_BUILD_DATE << " " <<
                      PROJECT_BUILD_TIME ;
             return (0);
         case 'h':
-            qDebug() << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
+            qDebug() << "\nNAME: \n\Lucas-Kanade \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
             qDebug() << "\nDESCRIPTION:";
             qDebug() << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             qDebug() << "\n\t-l\t\t load list path image";
             qDebug() << "\n\t-o\t\t output directory";
-            qDebug() << "\n\t-i\t\t count iteration (1 by default)";
-            qDebug() << "\n\t-w\t\t size window search (3px by default)";
-            qDebug() << "\n\t-g\t\t step for grid (5px by default)";
+            qDebug() << "\n\t-i\t\t count iteration (10 by default)";
+            qDebug() << "\n\t-w\t\t size window search (16 by default)";
+            qDebug() << "\n\t-g\t\t step for grid (16 by default)";
             qDebug() << "\n\t-p\t\t pyramid mod (enable by default)";
             qDebug() << "\n\t-v\t\t show version";
-            qDebug() << "\n\t-b\t\t use interpolation method (1 - B-spline, 2 - Bilinear), 1 by default";
+            qDebug() << "\n\t-b\t\t use interpolation method (0 - B-spline, 1 - Bilinear, 2 - Bicubic), 0 by default";
             qDebug() << "\n\t-h\t\t show help";
-            qDebug() << "\n\t-d\t\t debug mod on\n";
+            qDebug() << "\n\t-d\t\t create more log (disable by default)\n";
             return (0);
         case 'w':
             g_sizeWindowSeach = atoi(optarg);

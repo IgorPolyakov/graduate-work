@@ -1,6 +1,6 @@
 # Store the git hash of the current head
 
-# lukas_kanade_qt project
+# lucas_kanade project
 #
 # CMAKE_BUILD_TYPE     { Debug | Release }
 # INC_BUILD            { TRUE | FALSE }
@@ -11,7 +11,7 @@
 #
 
 cmake_minimum_required(VERSION 2.8.3)
-project(lukas_kanade_qt)
+project(lucas_kanade)
 
 
 
@@ -140,5 +140,5 @@ install(TARGETS ${PROJECT_NAME}
 include(CPack)
 
 
-#add_executable ( lukas_kanade_qt ${SOURCES} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-#target_link_libraries ( lukas_kanade_qt  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} dv )
+#add_executable ( lucas_kanade ${SOURCES} ${UIS} ${RSCS} ${TRS} ${MOCS} )
+#target_link_libraries ( lucas_kanade  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} dv )
