@@ -4,6 +4,6 @@ int g_sizeWindowSeach;
 int g_stepForGrid;
 int g_iteration;
 int g_interpolation;
-int g_fastProgBar;
-int g_slowProgBar;
+double g_fastProgBar;
+double g_slowProgBar;
 QString g_outputFolder;

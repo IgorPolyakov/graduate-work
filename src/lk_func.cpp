@@ -60,22 +60,14 @@ int calcLvlPyramid(int cx, int cy, bool isPyramid)
     int lvlPyramid = 0, tmp = 0;
     if (isPyramid)
     {
-        if (cx > cy) {
-            tmp = cy;
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                lvlPyramid++;
-                tmp = tmp/2;
-            }
+        (cx > cy) ? tmp = cy : tmp = cx;
+
+        while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
+        {
+            lvlPyramid++;
+            tmp = tmp/2;
         }
-        else {
-            tmp = cx;
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                lvlPyramid++;
-                tmp = tmp/2;
-            }
-        }
+
         lvlPyramid--;
     }
     else
@@ -91,7 +83,7 @@ int calcLvlPyramid(int cx, int cy, bool isPyramid)
  * \param [in] prev − указатель на векторное поле содержащий предыдущий уровень пирамиды
  * \return [out] двумерный массив содержащий векторное поле, в формате VF
  */
-VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
+VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
 {
     /* WARNING: Переделать по нормальному, структура или т.п*/
     double *d_mid_x = new double[g_iteration];
@@ -124,14 +116,13 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 
     }
 
-
     subSize* kernel = new subSize;
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
     int Vcx = (leftImg->cx()-(2*(kernel->rc+2))-1)/g_stepForGrid;
     int Vcy = (leftImg->cy()-(2*(kernel->rc+2))-1)/g_stepForGrid;
-    VF2d *vf = new VF2d("vf",Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
-    Data2Db *state = new Data2Db("state",vf->cx(),vf->cy());
+    VF2d *vf = new VF2d("Vector_Field",Vcx, Vcy, g_stepForGrid, g_stepForGrid, g_sizeWindowSeach+1, g_sizeWindowSeach+1, DV_ALIGNMENT);
+    Data2Db *state = new Data2Db("Vector_State",vf->cx(),vf->cy());
     vf->ad() = s_ptr<ProtoData2D>(state);
     if (prev)
     {
@@ -148,8 +139,9 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
     {
         for (int j = 0; j < Vcx; ++j)
         {
-            g_fastProgBar += (Vcx * Vcy)/50;//((50 * ((i*Vcx)+j))/(Vcy*Vcx));
-            printProgressBar();
+            double progDelt= (89.0/(Vcy * Vcx));
+            printProgressBar(progDelt, 0);
+
             kernel->y_1 = (i * vf->grid().y) + vf->origin().y;
             kernel->x_1 = (j * vf->grid().x) + vf->origin().x;
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
@@ -160,15 +152,15 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
         }
     }
 
-    QFile writeDeltaX(g_outputFolder + "//deltaX.txt");
-    QFile writeDeltaY(g_outputFolder + "//deltaY.txt");
+    QFile writeDeltaX(g_outputFolder + "/dX_"+ info + ".txt");
+    QFile writeDeltaY(g_outputFolder + "/dY_"+ info + ".txt");
     writeDeltaX.open(QIODevice::WriteOnly);
     writeDeltaY.open(QIODevice::WriteOnly);
     QTextStream deltXtext(&writeDeltaX);
     QTextStream deltYtext(&writeDeltaY);
 
-    QFile writeVectorX(g_outputFolder + "//vectorX.txt");
-    QFile writeVectorY(g_outputFolder + "//vectorY.txt");
+    QFile writeVectorX(g_outputFolder + "/vX_" + info + "txt");
+    QFile writeVectorY(g_outputFolder + "/VY_" + info + "txt");
     writeVectorX.open(QIODevice::WriteOnly);
     writeVectorY.open(QIODevice::WriteOnly);
     QTextStream vectXtext(&writeVectorX);
@@ -176,7 +168,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev)
 
     if (g_isDebug)
     {
-        double deli = Vcx * Vcx;
+        double deli = Vcx * Vcy;
         for (int m = 0; m < g_iteration; ++m)
         {
             deltXtext << m << "\t" << (d_mid_x[m]/deli) << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
@@ -239,8 +231,8 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
          * Bilinear interpolation
          */
         Data2Dd rightBlock(kernel->rc*2+1, kernel->rc*2+1);
-        double RX[4] = {0};
-        double RY[4] = {0};
+        double RX[4] = {0.0};
+        double RY[4] = {0.0};
         bicubic_bspline_coefs(RX, RY, x2, y2);
         for (int ii = 0; ii < kernel->rc*2+1; ++ii)
         {
@@ -292,13 +284,13 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
                 if (yy<1) yy = 1;
                 if (yy+1>leftImg->cy()-1) yy = leftImg->cy()-2;
 
-                tmpX = ((double)leftImg->lines()[yy][xx - 1] - (double)leftImg->lines()[yy][xx + 1]) / 2.0;
-                tmpY = ((double)leftImg->lines()[yy - 1][xx] - (double)leftImg->lines()[yy + 1][xx]) / 2.0;
+                tmpX = ((double)leftImg->lines()[yy][xx + 1] - (double)leftImg->lines()[yy][xx - 1]) / 2.0;
+                tmpY = ((double)leftImg->lines()[yy + 1][xx] - (double)leftImg->lines()[yy - 1][xx]) / 2.0;
                 iX  += tmpX * tmpX;
                 iY  += tmpY * tmpY;
                 iXY += tmpX * tmpY;
 
-                tmpT = ((double)leftImg->lines()[yy][xx] - (double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]);
+                tmpT = ((double)rightBlock.lines()[kernel->rc + i][kernel->rc + j]) - ((double)leftImg->lines()[yy][xx]);
                 iTX += tmpX * tmpT;
                 iTY += tmpY * tmpT;
             }
@@ -316,31 +308,31 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         d_avg_x[k] += fabs(delta[0]);
         d_avg_y[k] += fabs(delta[1]);
 
-        if(delta[0] >  d_max_x[k])
+        if (delta[0] >  d_max_x[k])
             d_max_x[k] = delta[0];
 
-        if(delta[1] > d_max_y[k])
+        if (delta[1] > d_max_y[k])
             d_max_y[k] = delta[1];
 
-        if(delta[0] < d_min_x[k])
+        if (delta[0] < d_min_x[k])
             d_min_x[k] = delta[0];
 
-        if(delta[1] < d_min_y[k])
+        if (delta[1] < d_min_y[k])
             d_min_y[k] = delta[1];
 
         v_mid_x[k] += dv[0];
         v_mid_y[k] += dv[1];
 
-        if(dv[0] > v_max_x[k])
+        if (dv[0] > v_max_x[k])
             v_max_x[k] = dv[0];
 
-        if(dv[1] > v_max_y[k])
+        if (dv[1] > v_max_y[k])
             v_max_y[k] = dv[1];
 
-        if(delta[0] < v_min_x[k])
+        if (delta[0] < v_min_x[k])
             v_min_x[k] = dv[0];
 
-        if(delta[1] < v_min_y[k])
+        if (delta[1] < v_min_y[k])
             v_min_y[k] = dv[1];
         /* end */
 
@@ -408,12 +400,7 @@ std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid, QString p
     for (int i = 0; i < lvl_pyramid; i++) {
         r = r + r;
         listImg->push_back(resizeImage(img, r, pref));
-        g_fastProgBar += (int)((i*10)/lvl_pyramid);
-        printProgressBar();
     }
-    if(lvl_pyramid==0)
-        g_fastProgBar += 10;
-    printProgressBar();
     return listImg;
 }
 /*!
@@ -439,8 +426,6 @@ void writeHdf5File(QString filename, ProtoData2D &layer, bool writeMode)
         Group group( firstgroup.createGroup( "Data" ));
 
         WriteProtoData2D(group, layer);
-        //riteProtoData2D(group, img2);
-        //WriteProtoData2D(group, vf);
 
         group.close();
         firstgroup.close();
@@ -452,49 +437,66 @@ void writeHdf5File(QString filename, ProtoData2D &layer, bool writeMode)
         Group group( firstgroup.openGroup( "Data" ));
 
         WriteProtoData2D(group, layer);
-        //riteProtoData2D(group, img2);
-        //WriteProtoData2D(group, vf);
 
         group.close();
         firstgroup.close();
         file.close();
     }
-
-
 }
 
-void printProgressBar()
+void printProgressBar(double fastProgBar, double slowProgBar)
 {
-    //std::cout << g_fastProgBar << "," << g_slowProgBar << "," << std::endl;
+    g_fastProgBar += fastProgBar;
+    g_slowProgBar += slowProgBar;
+    std::cout << round(g_fastProgBar) << "," << round(g_slowProgBar) << "," << std::endl;
 }
 
 void derivativeVectorField(VF2d &vf, QString info)
 {
-    Data2Dd defor_e_xx("Exx", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
-    Data2Dd defor_e_yy("Eyy", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
-    Data2Dd defor_e_xy("Exy", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
-    Data2Dd defor_g_z("SSI", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
-    Data2Dd defor_w_z("Wz", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    Data2Dd e_xx_tmp("Defom_Exx", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    Data2Dd e_yy_tmp("Defom_Eyy", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    Data2Dd e_xy_tmp("Defom_Exy", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    Data2Dd  g_z_tmp("Defom_SSI", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    Data2Dd   w_z_tmp("Defom_Wz", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
 
     double e_xx = 0.0, e_yy = 0.0, e_xy = 0.0, g_i = 0.0, w_z = 0.0;
-    for (int i = 1; i < vf.cy()-1; ++i) {
-        for (int j = 1; j < vf.cx()-1; ++j) {
-            e_xx = (vf.lines()[i][j-1][0] - vf.lines()[i][j+1][0])/2.0;
-            e_yy = (vf.lines()[i-1][j][1] - vf.lines()[i+1][j][1])/2.0;
-            e_xy = 0.5*((vf.lines()[i-1][j][0] - vf.lines()[i+1][j][0])/2.0 + (vf.lines()[i][j-1][1] - vf.lines()[i][j+1][1])/2.0);
-            w_z  = 0.5*((vf.lines()[i][j-1][1] - vf.lines()[i][j+1][1])/2.0 - (vf.lines()[i-1][j][0] - vf.lines()[i+1][j][0])/2.0);
-            g_i = sqrt(0.66666666666) * sqrt(pow((e_xx - e_yy),2) + pow((e_xx),2) + pow(e_yy ,2) + (3.0/2.0)*(pow(e_xy, 2)));
-            defor_e_xx.lines()[i][j] = e_xx;
-            defor_e_yy.lines()[i][j] = e_yy;
-            defor_e_xy.lines()[i][j] = e_xy;
-            defor_g_z.lines()[i][j]  = g_i;
-            defor_w_z.lines()[i][j]  = w_z;
+    for (int i = 0; i < vf.cy(); ++i)
+    {
+        for (int j = 0; j < vf.cx(); ++j)
+        {
+            int i_p1 = i + 1 < vf.cy() ? i + 1 : i;
+            int i_m1 = i - 1 >= 0 ? i - 1 : i;
+            int j_p1 = j + 1 < vf.cx() ? j + 1 : j;
+            int j_m1 = j - 1 >= 0 ? j - 1 : j;
+
+            e_xx = (vf.lines()[i][j_p1][0] - vf.lines()[i][j_m1][0])/(2.0 * vf.grid().x);
+            e_yy = (vf.lines()[i_p1][j][1] - vf.lines()[i_m1][j][1])/(2.0 * vf.grid().y);
+            e_xy = 0.5*((vf.lines()[i_p1][j][0] - vf.lines()[i_m1][j][0])/(2.0 * vf.grid().y) + (vf.lines()[i][j_p1][1] - vf.lines()[i][j_m1][1])/(2.0 * vf.grid().x));
+            w_z  = 0.5*((vf.lines()[i][j_p1][1] - vf.lines()[i][j_m1][1])/(2.0 * vf.grid().x) - (vf.lines()[i_p1][j][0] - vf.lines()[i_m1][j][0])/(2.0 * vf.grid().y));
+
+            //! 0.81649658092 - Это sqrt(2/3)
+            g_i = 0.81649658092 * sqrt(pow((e_xx - e_yy),2) + pow((e_xx),2) + pow(e_yy ,2) + (1.5)*(pow(e_xy, 2)));
+            e_xx_tmp.lines()[i][j] = e_xx;
+            e_yy_tmp.lines()[i][j] = e_yy;
+            e_xy_tmp.lines()[i][j] = e_xy;
+            g_z_tmp.lines()[i][j]  = g_i;
+            w_z_tmp.lines()[i][j]  = w_z;
         }
     }
-    //WriteImage(QString(g_outputFolder + "/" + info + ".png").toLocal8Bit().data(), defor_e_xx );
-    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), defor_e_xx, false);
-    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), defor_e_xy, false);
-    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), defor_e_yy, false);
-    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), defor_g_z, false);
-    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), defor_w_z, false);
+    Data2Dd deform_exx("Defom_Exx", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
+    BSplineResize2D<double>(e_xx_tmp.lines(),e_xx_tmp.cx(),e_xx_tmp.cy(), deform_exx.lines(), deform_exx.cx(), deform_exx.cy());
+    Data2Dd deform_eyy("Defom_Eyy", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
+    BSplineResize2D<double>(e_yy_tmp.lines(),e_yy_tmp.cx(),e_yy_tmp.cy(), deform_eyy.lines(), deform_eyy.cx(), deform_eyy.cy());
+    Data2Dd deform_exy("Defom_Exy", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
+    BSplineResize2D<double>(e_xy_tmp.lines(),e_xy_tmp.cx(),e_xy_tmp.cy(), deform_exy.lines(), deform_exy.cx(), deform_exy.cy());
+    Data2Dd deform_g_z("Defom_SSI", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
+    BSplineResize2D<double>(g_z_tmp.lines(),g_z_tmp.cx(),g_z_tmp.cy(), deform_g_z.lines(), deform_g_z.cx(), deform_g_z.cy());
+    Data2Dd deform_w_z("Defom_Wz", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
+    BSplineResize2D<double>(w_z_tmp.lines(),w_z_tmp.cx(),w_z_tmp.cy(), deform_w_z.lines(), deform_w_z.cx(), deform_w_z.cy());
+
+    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), deform_exx, false);
+    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), deform_eyy, false);
+    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), deform_exy, false);
+    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), deform_g_z, false);
+    writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), deform_w_z, false);
 }

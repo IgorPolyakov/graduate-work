@@ -21,8 +21,9 @@ int main(int argc, char *argv[])
     g_iteration = 10;
     g_outputFolder = "output/";
     g_interpolation = 0;
-    g_fastProgBar = 0;
-    g_slowProgBar = 0;
+    g_slowProgBar = 0.0;
+    g_fastProgBar = 0.0;
+
     bool isPyramid = false;
     /*!
      * end
@@ -90,6 +91,10 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    QDir outDir(g_outputFolder);
+    if (!outDir.exists()) {
+        outDir.mkpath(".");
+    }
     QFile listfile(listfilename);
     if (!listfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Cannot load image list file\n";
@@ -106,8 +111,7 @@ int main(int argc, char *argv[])
         imagelist.append(in.readLine());
     listfile.close();
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++) {
-        g_slowProgBar = (100*i)/imagelist.size();
-        printProgressBar();
+        printProgressBar(0.0,(double)(100*i)/imagelist.size());
         pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
         if (pLeftImg==NULL) {
             qDebug() << "Cannot load " << cnt << "image file\n";
@@ -119,46 +123,29 @@ int main(int argc, char *argv[])
             return (-1);
         }
 
-        QDir outDir(g_outputFolder);
-        if (!outDir.exists()) {
-            outDir.mkpath(".");
+        printProgressBar(2.0, 0);
+
+        int lvlPyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy(),isPyramid);
+        QString outfilename = QString("out_i-%1_w-%2_p-%3").arg(g_iteration).arg(g_sizeWindowSeach).arg(lvlPyramid);
+
+        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvlPyramid, "Image_Left");
+        printProgressBar(3.0, 0);
+
+        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvlPyramid, "Image_Right");
+        printProgressBar(3.0, 0);
+
+        writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listLeft)[0], true);
+        writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listRight)[0], false);
+        printProgressBar(1.0, 0);
+
+        for (int j = lvlPyramid; j >= 0; j--) {
+            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled, outfilename);
+            vf->set_name(QString("Vector_Field_%1").arg(j).toLocal8Bit().data());
         }
-        g_fastProgBar++;
-        printProgressBar();
-
-        int lvl_pyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy(),isPyramid);
-
-        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid, "left");
-        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid, "right");
-
-        printProgressBar();
-        QString outfilename = "out";
-
-        if (g_isDebug)
-        {
-            for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-                QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
-                WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
-                writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listLeft)[i_cnt], i_cnt == 0 ? true : false);
-            }
-
-            for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-                QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
-                WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
-                writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listRight)[i_cnt], false);
-            }
-        }
-        for (int j = lvl_pyramid; j >= 0; j--) {
-            g_fastProgBar += (lvl_pyramid-j);
-            printProgressBar();
-            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
-            vf->set_name(QString("vf_%1").arg(j).toLocal8Bit().data());
-            /*if (g_isDebug)saveVfResult(*vf, outfilename);// + QString("%1").arg(j));*/
-        }
-        printProgressBar();
-        if (g_isDebug)saveVfResult(*vf, outfilename);
-        if (g_isDebug)derivativeVectorField(*vf, outfilename);
+        printProgressBar(1.0, 0);
+        saveVfResult(*vf, outfilename);
+        derivativeVectorField(*vf, outfilename);
     }
-    printProgressBar();
+    printProgressBar(1.0, 0);
     return 0;
 }//End of Main
