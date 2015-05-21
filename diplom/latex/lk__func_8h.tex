@@ -1,0 +1,263 @@
+\hypertarget{lk__func_8h}{}\subsection{Файл src/lk\+\_\+func.h}
+\label{lk__func_8h}\index{src/lk\+\_\+func.\+h@{src/lk\+\_\+func.\+h}}
+
+
+Заголовочный файл с описанием функций  
+
+
+{\ttfamily \#include $<$Q\+Painter$>$}\\*
+{\ttfamily \#include $<$Q\+Image$>$}\\*
+{\ttfamily \#include $<$Q\+Debug$>$}\\*
+{\ttfamily \#include \char`\"{}lk\+\_\+struct.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}global.\+h\char`\"{}}\\*
+\subsubsection*{Функции}
+\begin{DoxyCompactItemize}
+\item 
+Q\+Image \hyperlink{lk__func_8h_a80904b2e89655a3c2b0d4232c35d3b62}{compute\+Grid} (Q\+Image image, int $\ast$$\ast$arr\+Gray\+Previous, int $\ast$$\ast$arr\+Gray\+Next)
+\begin{DoxyCompactList}\small\item\em compute\+Grid \end{DoxyCompactList}\item 
+double $\ast$ \hyperlink{lk__func_8h_aa689d0ccdb6070d22bc7ec10d9fe0ada}{compute\+Opt\+Flow} (\hyperlink{structSubSize}{Sub\+Size} $\ast$initial\+Window, int $\ast$$\ast$arr\+Gray\+Previous, int $\ast$$\ast$arr\+Gray\+Next)
+\begin{DoxyCompactList}\small\item\em compute\+Opt\+Flow \end{DoxyCompactList}\item 
+double $\ast$ \hyperlink{lk__func_8h_a45e5cc32160f899dd9e1edf54359c4d6}{multiplic\+Mtrx\+And\+Vectr} (double $\ast$$\ast$array, int $\ast$vector)
+\begin{DoxyCompactList}\small\item\em multiplic\+Mtrx\+And\+Vectr \end{DoxyCompactList}\item 
+int $\ast$$\ast$ \hyperlink{lk__func_8h_af708378a3262a926104846475001d054}{get\+Arr\+Bright} (Q\+Image image)
+\begin{DoxyCompactList}\small\item\em get\+Arr\+Bright \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_a199afa0cf2ff107b96384db2cc996622}{free\+Memory\+Float} (double $\ast$$\ast$trash, int size)
+\begin{DoxyCompactList}\small\item\em free\+Memory\+Float \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_afa4971aa5a5f91d535a16c11386286b9}{free\+Memory\+Int} (int $\ast$$\ast$trash, int size)
+\begin{DoxyCompactList}\small\item\em free\+Memory\+Int \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_a2d7ff0a6723fef0e9fde6c2e009d5a38}{get\+Image\+Info} (Q\+Image image, Q\+String path)
+\begin{DoxyCompactList}\small\item\em get\+Image\+Info \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_ab039b1f248e06ea110956738f323d600}{inversion} (double $\ast$$\ast$A, int N)
+\begin{DoxyCompactList}\small\item\em inversion \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_a665a561c4e9443378e62c77e74c06796}{join\+Image} (Q\+Image img1, Q\+Image img2, Q\+Image img3, Q\+String info)
+\begin{DoxyCompactList}\small\item\em join\+Image Объединение трех изображений(первого, второго и первого с нанесенным поверх веторным полем) \end{DoxyCompactList}\item 
+void \hyperlink{lk__func_8h_a1f78bb19941509ca88879df24a7acfa8}{resize\+Image} (Q\+Image image, int $\ast$$\ast$arr\+Gray\+Previous, int k\+K)
+\begin{DoxyCompactList}\small\item\em resize\+Image \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Подробное описание}
+Заголовочный файл с описанием функций 
+
+Данный файл содержит в себе определения основных функций, используемых в программе 
+
+\subsubsection{Функции}
+\hypertarget{lk__func_8h_a80904b2e89655a3c2b0d4232c35d3b62}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!compute\+Grid@{compute\+Grid}}
+\index{compute\+Grid@{compute\+Grid}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{compute\+Grid}]{\setlength{\rightskip}{0pt plus 5cm}Q\+Image compute\+Grid (
+\begin{DoxyParamCaption}
+\item[{Q\+Image}]{image, }
+\item[{int $\ast$$\ast$}]{arr\+Gray\+Previous, }
+\item[{int $\ast$$\ast$}]{arr\+Gray\+Next}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a80904b2e89655a3c2b0d4232c35d3b62}
+
+
+compute\+Grid 
+
+Строит сетку по верх изображения, в точках пересечения ищется вектор оптического потока 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em image} & − исходное изображение() \\
+\hline
+\mbox{\tt in}  & {\em arr\+Gray\+Previous} & − указатель на массив яркостей первого кадра \\
+\hline
+\mbox{\tt in}  & {\em arr\+Gray\+Next} & − указатель на массив яркостей второго кадра \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+изображение с нанесенным по верх векторным полем 
+\end{DoxyReturn}
+\hypertarget{lk__func_8h_aa689d0ccdb6070d22bc7ec10d9fe0ada}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!compute\+Opt\+Flow@{compute\+Opt\+Flow}}
+\index{compute\+Opt\+Flow@{compute\+Opt\+Flow}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{compute\+Opt\+Flow}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ compute\+Opt\+Flow (
+\begin{DoxyParamCaption}
+\item[{{\bf Sub\+Size} $\ast$}]{initial\+Window, }
+\item[{int $\ast$$\ast$}]{arr\+Gray\+Previous, }
+\item[{int $\ast$$\ast$}]{arr\+Gray\+Next}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_aa689d0ccdb6070d22bc7ec10d9fe0ada}
+
+
+compute\+Opt\+Flow 
+
+Вычисление вектора оптического потока. Для одного пикселя! 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em initial\+Window} & − структура содержащая расположение пикселя, размер изображения и радиус поиска \\
+\hline
+\mbox{\tt in}  & {\em arr\+Gray\+Previous} & − указатель на массив яркостей первого кадра \\
+\hline
+\mbox{\tt in}  & {\em arr\+Gray\+Next} & − указатель на массив яркостей второго кадра \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+вектор оптического потока 
+\end{DoxyReturn}
+\hypertarget{lk__func_8h_a199afa0cf2ff107b96384db2cc996622}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!free\+Memory\+Float@{free\+Memory\+Float}}
+\index{free\+Memory\+Float@{free\+Memory\+Float}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{free\+Memory\+Float}]{\setlength{\rightskip}{0pt plus 5cm}void free\+Memory\+Float (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{trash, }
+\item[{int}]{size}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a199afa0cf2ff107b96384db2cc996622}
+
+
+free\+Memory\+Float 
+
+Функцияя освобождения памяти для массивов типа float 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em $\ast$$\ast$trash} & − массив для освобождения \\
+\hline
+\mbox{\tt in}  & {\em size} & − размер массива \\
+\hline
+\end{DoxyParams}
+\hypertarget{lk__func_8h_afa4971aa5a5f91d535a16c11386286b9}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!free\+Memory\+Int@{free\+Memory\+Int}}
+\index{free\+Memory\+Int@{free\+Memory\+Int}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{free\+Memory\+Int}]{\setlength{\rightskip}{0pt plus 5cm}void free\+Memory\+Int (
+\begin{DoxyParamCaption}
+\item[{int $\ast$$\ast$}]{trash, }
+\item[{int}]{size}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_afa4971aa5a5f91d535a16c11386286b9}
+
+
+free\+Memory\+Int 
+
+Функцияя освобождения памяти для массивов типа int 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em $\ast$$\ast$trash} & − массив для освобождения \\
+\hline
+\mbox{\tt in}  & {\em size} & − размер массива \\
+\hline
+\end{DoxyParams}
+\hypertarget{lk__func_8h_af708378a3262a926104846475001d054}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!get\+Arr\+Bright@{get\+Arr\+Bright}}
+\index{get\+Arr\+Bright@{get\+Arr\+Bright}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{get\+Arr\+Bright}]{\setlength{\rightskip}{0pt plus 5cm}int$\ast$$\ast$ get\+Arr\+Bright (
+\begin{DoxyParamCaption}
+\item[{Q\+Image}]{image}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_af708378a3262a926104846475001d054}
+
+
+get\+Arr\+Bright 
+
+Преобразование изображения в массив яркостей 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em image} & − исходное изображение \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+$\ast$tmp − указатель на полученный массив 
+\end{DoxyReturn}
+\hypertarget{lk__func_8h_a2d7ff0a6723fef0e9fde6c2e009d5a38}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!get\+Image\+Info@{get\+Image\+Info}}
+\index{get\+Image\+Info@{get\+Image\+Info}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{get\+Image\+Info}]{\setlength{\rightskip}{0pt plus 5cm}void get\+Image\+Info (
+\begin{DoxyParamCaption}
+\item[{Q\+Image}]{image, }
+\item[{Q\+String}]{path}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a2d7ff0a6723fef0e9fde6c2e009d5a38}
+
+
+get\+Image\+Info 
+
+Получение информации о входном изображении 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em image} & − Изображение \\
+\hline
+\mbox{\tt in}  & {\em path} & − Путь к нему \\
+\hline
+\end{DoxyParams}
+\hypertarget{lk__func_8h_ab039b1f248e06ea110956738f323d600}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!inversion@{inversion}}
+\index{inversion@{inversion}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{inversion}]{\setlength{\rightskip}{0pt plus 5cm}void inversion (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{A, }
+\item[{int}]{N}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_ab039b1f248e06ea110956738f323d600}
+
+
+inversion 
+
+Нахождения обратной матрицы. 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em $\ast$$\ast$\+A} & − Указатель на массив \\
+\hline
+\mbox{\tt in}  & {\em N} & − Его размер \\
+\hline
+\end{DoxyParams}
+\hypertarget{lk__func_8h_a665a561c4e9443378e62c77e74c06796}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!join\+Image@{join\+Image}}
+\index{join\+Image@{join\+Image}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{join\+Image}]{\setlength{\rightskip}{0pt plus 5cm}void join\+Image (
+\begin{DoxyParamCaption}
+\item[{Q\+Image}]{img1, }
+\item[{Q\+Image}]{img2, }
+\item[{Q\+Image}]{img3, }
+\item[{Q\+String}]{info}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a665a561c4e9443378e62c77e74c06796}
+
+
+join\+Image Объединение трех изображений(первого, второго и первого с нанесенным поверх веторным полем) 
+
+
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em img1} & − Первое изображение \\
+\hline
+\mbox{\tt in}  & {\em img2} & − Второе изображение \\
+\hline
+\mbox{\tt in}  & {\em img3} & − Первого с нанесенным поверх веторным полем \\
+\hline
+\mbox{\tt in}  & {\em info} & − Имя сохраняемого файла \\
+\hline
+\end{DoxyParams}
+\hypertarget{lk__func_8h_a45e5cc32160f899dd9e1edf54359c4d6}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!multiplic\+Mtrx\+And\+Vectr@{multiplic\+Mtrx\+And\+Vectr}}
+\index{multiplic\+Mtrx\+And\+Vectr@{multiplic\+Mtrx\+And\+Vectr}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{multiplic\+Mtrx\+And\+Vectr}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ multiplic\+Mtrx\+And\+Vectr (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{array, }
+\item[{int $\ast$}]{vector}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a45e5cc32160f899dd9e1edf54359c4d6}
+
+
+multiplic\+Mtrx\+And\+Vectr 
+
+Произведение матрицы на вектор. 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em $\ast$$\ast$array} & − указатель на массив \\
+\hline
+\mbox{\tt in}  & {\em $\ast$vector} & − указатель на вектор \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+$\ast$tmp − результат произведения 
+\end{DoxyReturn}
+\hypertarget{lk__func_8h_a1f78bb19941509ca88879df24a7acfa8}{}\index{lk\+\_\+func.\+h@{lk\+\_\+func.\+h}!resize\+Image@{resize\+Image}}
+\index{resize\+Image@{resize\+Image}!lk\+\_\+func.\+h@{lk\+\_\+func.\+h}}
+\paragraph[{resize\+Image}]{\setlength{\rightskip}{0pt plus 5cm}void resize\+Image (
+\begin{DoxyParamCaption}
+\item[{Q\+Image}]{image, }
+\item[{int $\ast$$\ast$}]{arr\+Gray\+Previous, }
+\item[{int}]{k\+K}
+\end{DoxyParamCaption}
+)}\label{lk__func_8h_a1f78bb19941509ca88879df24a7acfa8}
+
+
+resize\+Image 
+
+Функция масштабирует изображения, на вход указатель массив яркостей 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em arr\+Gray\+Next} & − указатель на массив яркостей второго кадра \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+изображение с нанесенным по верх векторным полем
+\end{DoxyReturn}
+resize\+Image 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\tt in}  & {\em image} & − исходное изображение \\
+\hline
+\mbox{\tt in}  & {\em arr\+Gray\+Previous} & − указатель на массив яркостей первого кадра \\
+\hline
+\end{DoxyParams}

@@ -1,0 +1,27 @@
+\input{config}
+
+\begin{document}
+\input{titleList}
+\input{referat}
+\newpage
+\ESKDstyle{plain}
+\renewcommand\contentsname{\hfill Содержание \hfill}
+\tableofcontents
+\input{intro-vvedenie}
+\section{Методы определения смещения участков изображения}
+\input{partI-I}
+\section{Разработка программного обеспечения для оценки деформаций поверхностей твердых тел}
+\input{partII-I}
+\newpage
+\section{Экспериментальное исследование программного обеспечения}
+\input{partIII}
+\section{Охрана труда}
+\input{partIV}
+\section{Заключение}
+\input{out}
+\newpage
+\renewcommand{\refname}{Список использованных источников}
+\bibliography{lib}
+\ESKDappendix{cправочное}{\normalfont Документация}
+\input{out}
+\end{document}

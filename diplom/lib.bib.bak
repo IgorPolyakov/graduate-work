@@ -1,0 +1,33 @@
+% This file was created with JabRef 2.10b2.
+% Encoding: UTF8
+
+
+@Book{bhzd_1,
+  Title                    = {Безопасность жизнедеятельности},
+  Author                   = {Г.В. Смирнов, Л.И. Кодолова},
+  Editor                   = {Учебное пособие},
+  Publisher                = {ТУСУР},
+  Year                     = {2007},
+
+  Owner                    = {fox},
+  Timestamp                = {2015.02.17}
+}
+
+@Book{bhzd_1,
+  Title                    = {``Типовая инструкция по охране труда при работе на персональном компьютере''},
+  Editor                   = {ТОИ Р-45-084-01},
+  Year                     = {2001},
+
+  Owner                    = {fox},
+  Timestamp                = {2015.02.17}
+}
+
+@Book{bhzd_2,
+  Title                    = {``Гигиенические требования ПЭВМ и организации работы''},
+  Editor                   = {СанПиН 2.2.2/2.4.1340-03},
+  Year                     = {2003},
+
+  Owner                    = {fox},
+  Timestamp                = {2015.02.17}
+}
+
