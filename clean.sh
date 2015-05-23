@@ -32,3 +32,12 @@ find . -iname 'Makefile' -delete
 find . -iname 'cmake_install.cmake' -delete
 find . -iname 'install_manifest.txt' -delete
 echo $OK
+
+echo -ne " * clean dv output folder"
+find -type d -regextype posix-egrep -regex '.*[0-9]_[0-9].*' -exec rm -rf {} \;
+echo $OK
+
+echo -ne " * clean astyle backup"
+find -iname "*.orig" -delete
+echo $OK
+

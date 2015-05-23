@@ -2,18 +2,31 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 
 Item {
-    width: 300
+    width: 400
     height: 240
+    ComboBox {
+        id: comboBox1
+        x: 150
+        y: 0
+        model: [ "B-spline", "Bilinear", "Bicubic" ]
+    }   
+    Label {
+        id: countInterpolation
+        x: 20
+        y: 5
+        text: qsTr("Interpolation")
+    } 
     SpinBox {
         id: countIteration
-        x: 200
+        x: 150
         y: 40
         minimumValue : 1
-        maximumValue : 10
+        maximumValue : 100
+        value : 10
     }
     SpinBox {
         id: windowSearch
-        x: 200
+        x: 150
         y: 80
         minimumValue : 2
         maximumValue : 1000
@@ -21,7 +34,7 @@ Item {
     }
     SpinBox {
         id: stepGrid
-        x: 200
+        x: 150
         y: 120
         minimumValue : 1
         maximumValue : 500
@@ -59,30 +72,30 @@ Item {
 
     Button {
         id: buttonOutDirField
-        x: 200
+        x: 150
         y: 160
         text: qsTr("Browse")
     }
 
     CheckBox {
-        id: checkBox1
-        x: 200
+        id: debugCheckBox
+        x: 20
         y: 200
-        text: qsTr("")
+        text: qsTr("More log")
         checked: false
     }
 
-    Label {
-        id: debugModeON
-        x: 20
+    CheckBox {
+        id: pyramidCheckBox
+        x: 150
         y: 200
-        text: qsTr("Debug mode ON")
+        text: qsTr("Use pyramid")
+        checked: true
     }
-
 
     function getcmd()
     {
-      return "lukas_kanade_qt";
+      return "lucas_kanade";
     }
 
     function getarg()
@@ -94,8 +107,10 @@ Item {
         "-i", countIteration.value,//count iteration (1 by default)
         "-w", windowSearch.value,//size window search (3px by default)
         "-g", stepGrid.value,//step for grid (5px by default)
+        "-b", comboBox1.currentIndex,
+        pyramidCheckBox.checked ? "-p" : "",
+        debugCheckBox.checked ? "-d" : "",
         /*"-h", //show help
-        "-d", debugModeON,//debug mod on
         "-v" //show version*/
       ];
 

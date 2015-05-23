@@ -1,9 +1,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QImage>
 #include <QTextStream>
-#include <qmath.h>
 #include <iostream>
 #include <getopt.h>
 #include <stdlib.h>
@@ -13,53 +11,63 @@
 #include "version.h"
 int main(int argc, char *argv[])
 {
-    //QImage leftImg, rightImg, outImg;
-    QString info, listfilename;
-    /*
-     * Default opt'arg
-     * Begin
+    QString listfilename;
+    /*!
+     * Default opt'arg:Begin
      */
     g_isDebug = false;
-    g_sizeWindowSeach = 10;
-    g_stepForGrid = 10;
-    g_iteration = 1;
+    g_sizeWindowSeach = 24;
+    g_stepForGrid = 16;
+    g_iteration = 10;
     g_outputFolder = "output/";
-    /*
+    g_interpolation = 0;
+    g_slowProgBar = 0.0;
+    g_fastProgBar = 0.0;
+
+    bool isPyramid = false;
+    /*!
      * end
      */
     if (argc <= 1) {
         qDebug() <<
-                 "LukasKanadeQt: пропущены операнды, задающие входные файлы\nПо команде «lukas_kanade_qt -h» можно получить дополнительную информацию.\n";
+                 "Lucas-Kanade: пропущены операнды, задающие входные файлы\nПо команде «lucas_kanade -h» можно получить дополнительную информацию.\n";
         return (0);
     }
     int pr = 0;
-    while ((pr = getopt(argc, argv, "l:vhdi:w:g:o:")) != -1) {
+    while ((pr = getopt(argc, argv, "l:vhdpi:w:g:o:b:")) != -1) {
         switch (pr) {
         case 'l':
             listfilename = optarg;
             break;
         case 'v':
-            qDebug() << "LukasKanadeQt version: " << VERSION ;
-            qDebug() << "branch: " << PROJECT_GIT_REF ;
-            qDebug() << "build date: " << PROJECT_BUILD_DATE << " " <<
+            qDebug() << "Lucas-Kanade";
+            qDebug() << " * Version:\t" << VERSION ;
+            qDebug() << " * Branch:\t\t" << PROJECT_GIT_REF ;
+            qDebug() << " * Build date:\t" << PROJECT_BUILD_DATE << " " <<
                      PROJECT_BUILD_TIME ;
             return (0);
         case 'h':
-            qDebug() << "\nNAME: \n\tLukasKanadeQt \n\tUsage to EXEC ./bin/lukas_kanade_qt  -l <list_of_image>";
+            qDebug() << "\nNAME: \nLucas-Kanade \n\tUsage to EXEC ./bin/lucas_kanade  -l <list_of_image>";
             qDebug() << "\nDESCRIPTION:";
             qDebug() << "\n\tApplication created in order to write a graduate work on specialty 220301\n";
             qDebug() << "\n\t-l\t\t load list path image";
             qDebug() << "\n\t-o\t\t output directory";
-            qDebug() << "\n\t-i\t\t count iteration (1 by default)";
-            qDebug() << "\n\t-w\t\t size window search (3px by default)";
-            qDebug() << "\n\t-g\t\t step for grid (5px by default)";
+            qDebug() << "\n\t-i\t\t count iteration (10 by default)";
+            qDebug() << "\n\t-w\t\t size window search (24 by default)";
+            qDebug() << "\n\t-g\t\t step for grid (16 by default)";
+            qDebug() << "\n\t-p\t\t pyramid mod (enable by default)";
             qDebug() << "\n\t-v\t\t show version";
+            qDebug() << "\n\t-b\t\t use interpolation method (0 - B-spline, 1 - Bilinear, 2 - Bicubic), 0 by default";
             qDebug() << "\n\t-h\t\t show help";
-            qDebug() << "\n\t-d\t\t debug mod on\n";
+            qDebug() << "\n\t-d\t\t create more log (disable by default)\n";
             return (0);
         case 'w':
             g_sizeWindowSeach = atoi(optarg);
             qDebug() << "Size window search: " << g_sizeWindowSeach;
+            break;
+        case 'b':
+            g_interpolation= atoi(optarg);
+            qDebug() << "Interpolation method: " << g_interpolation;
             break;
         case 'g':
             g_stepForGrid = atoi(optarg);
@@ -77,7 +85,15 @@ int main(int argc, char *argv[])
             qDebug() << "Debug mode: ON" ;
             g_isDebug = true;
             break;
+        case 'p':
+            qDebug() << "Pyramid mode: ON" ;
+            isPyramid = true;
+            break;
         }
+    }
+    QDir outDir(g_outputFolder);
+    if (!outDir.exists()) {
+        outDir.mkpath(".");
     }
     QFile listfile(listfilename);
     if (!listfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -89,77 +105,47 @@ int main(int argc, char *argv[])
     Data2Db *pLeftImg = 0;
     Data2Db *pRightImg = 0;
     VF2d *vf = 0;
-    VF2d* prevFiled = 0;
+    VF2d *prevFiled = 0;
 
     while (!in.atEnd())
         imagelist.append(in.readLine());
     listfile.close();
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++) {
-        std::cout << 0 << "," << (100*i)/imagelist.size() << "," << std::endl;
+        printProgressBar(0.0,(double)(100*i)/imagelist.size());
         pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
-        /*if (!leftImg.load(imagelist[cnt].toLocal8Bit().data())) {
+        if (pLeftImg==NULL) {
             qDebug() << "Cannot load " << cnt << "image file\n";
             return (-1);
-        }*/
+        }
         pRightImg = ReadImage(imagelist[i].toLocal8Bit().data());
-        /*if (!rightImg.load(imagelist[i].toLocal8Bit().data())) {
+        if (pRightImg==NULL) {
             qDebug() << "Cannot load " << i << "image file\n";
             return (-1);
-        }*/
-
-        QDir outDir(g_outputFolder);
-        if (!outDir.exists()) {
-            outDir.mkpath(".");
-        }
-        std::cout << 15 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
-        int lvl_pyramid = 0;
-
-        if (pLeftImg->cx()>pLeftImg->cy()) {
-            int tmp = pLeftImg->cy();
-//            while (tmp > (g_sizeWindowSeach + 1)*2 + 2)
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                lvl_pyramid++;
-                tmp = tmp/2;
-            }
-        }
-        else {
-            int tmp = pLeftImg->cx();
-            while ((tmp-(2*(g_sizeWindowSeach + 2))-1)/g_stepForGrid >= 1)
-            {
-                //while (tmp > (g_sizeWindowSeach + 1)*2 + 2) {
-                lvl_pyramid++;
-                tmp = tmp/2;
-            }
         }
 
-        lvl_pyramid--;
+        printProgressBar(2.0, 0);
 
-        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvl_pyramid);
-        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvl_pyramid);
+        int lvlPyramid = calcLvlPyramid(pLeftImg->cx(),pLeftImg->cy(),isPyramid);
+        QString outfilename = QString("out_i-%1_w-%2_p-%3").arg(g_iteration).arg(g_sizeWindowSeach).arg(lvlPyramid);
 
-        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-            QString name = QString(g_outputFolder + "/" + "left_%1.png").arg(i_cnt);
-            WriteImage(name.toLocal8Bit().data(), (*listLeft)[i_cnt]);
+        std::vector<Data2Db*> *listLeft = createPyramid_v2(pLeftImg, lvlPyramid, "Image_Left");
+        printProgressBar(3.0, 0);
+
+        std::vector<Data2Db*> *listRight = createPyramid_v2(pRightImg, lvlPyramid, "Image_Right");
+        printProgressBar(3.0, 0);
+
+        writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listLeft)[0], true);
+        writeHdf5File(QString(g_outputFolder + "/" + outfilename + ".h5"), *(*listRight)[0], false);
+        printProgressBar(1.0, 0);
+
+        for (int j = lvlPyramid; j >= 0; j--) {
+            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled, outfilename);
+            vf->set_name(QString("Vector_Field_%1").arg(j).toLocal8Bit().data());
         }
-
-        for (int i_cnt = 0; i_cnt <= lvl_pyramid; ++i_cnt) {
-            QString name = QString(g_outputFolder + "/" + "right_%1.png").arg(i_cnt);
-            WriteImage(name.toLocal8Bit().data(), (*listRight)[i_cnt]);
-        }
-
-        for (int j = lvl_pyramid; j >= 0; j--){
-            vf = prevFiled = computeGrid((*listLeft)[j], (*listRight)[j], prevFiled);
-            saveVfResult(*vf, "lvl_debug_" + QString("%1").arg(j));
-        }
-
-        std::cout << 75 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
-        //saveVfResult(*vf, "result_lvl_" + QString("%1").arg(lvl_pyramid));
-        std::cout << 100 << "," << (100*i)/imagelist.size() << "," <<
-                  std::endl;
+        printProgressBar(1.0, 0);
+        saveVfResult(*vf, outfilename);
+        derivativeVectorField(*vf, outfilename);
     }
-    std::cout << 100 << "," << 100 << "," << std::endl;
+    printProgressBar(1.0, 0);
     return 0;
 }//End of Main
