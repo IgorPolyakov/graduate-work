@@ -1,5 +1,6 @@
 #ifndef LK_INTERPOLATION
 #define LK_INTERPOLATION
+#include <deprecated/dvfile.h>
 /*!
 \file
 \brief Заголовочный файл с описанием функций. Данный файл содержит в себе определения функций отвечающих за интерполирование данных.

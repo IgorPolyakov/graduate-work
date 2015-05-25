@@ -1,3 +1,4 @@
+#include "lk_interpolation.h"
 /*!
  * \brief bilinearInterpolation
  * \param delx − Смещение по х
