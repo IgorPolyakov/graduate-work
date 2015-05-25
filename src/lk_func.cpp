@@ -53,6 +53,7 @@ void inversion(Matx22d &A)
  * \brief calcLvlPyramid − Автоматическое вычисление колличества уровней пирамиды на основе размеров изображения
  * \param [in] cx − Ширина изображения
  * \param [in] cy − Высота изображения
+ * \param [in] isPyramid − Вычислять ли уровень пирамиды
  * \return [out] − Колличество уровней пирамиды
  */
 int calcLvlPyramid(int cx, int cy, bool isPyramid)
@@ -76,11 +77,12 @@ int calcLvlPyramid(int cx, int cy, bool isPyramid)
 }
 
 /*!
- * \brief computeGrid − Строит сетку по верх изображения, в точках
- * пересечения ищется вектор оптического потока
+ * \brief computeGrid − Строит сетку с ранее заданным шагом, в точках
+ * пересечения ищется вектор оптического потока.
  * \param [in] leftImg − указатель на массив яркостей первого кадра
  * \param [in] rightImg − указатель на массив яркостей второго кадра
  * \param [in] prev − указатель на векторное поле содержащий предыдущий уровень пирамиды
+ * \param [in] info − имя слоя содержащего векторное поле смещений
  * \return [out] двумерный массив содержащий векторное поле, в формате VF
  */
 VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
@@ -202,12 +204,14 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
     delete kernel;
     return vf;
 }
+
 /*!
  * \brief computeOptFlow − Вычисление вектора оптического потока
  * \param [in] kernel − структура содержащая сведения о местонахождении
  * пикселя, размерах окна поиска и прочего
  * \param [in] leftImg − массив яркостей первого кадра
  * \param [in] rightImg − массив яркостей второго кадра
+ * \param [in] dv − векторное поле предыдущего поля
  * \return [out] vf − вектор оптического потока
  */
 Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* d_mid_x, double* d_mid_y, double* d_max_x, double* d_min_x, double* d_min_y, double* d_max_y, double* d_avg_x, double* d_avg_y, double* v_mid_x, double* v_mid_y, double* v_max_x, double* v_min_x, double* v_min_y, double* v_max_y)
@@ -362,8 +366,9 @@ double* multiplicMtrxAndVectr(double** array, int* vector)
 
 /*!
  * \brief resizeImage − Функция масштабирования изображения, для построения пирамиды уменьшенных изображений
- * \param [in] image − структура содержащая сведения о размерах масштабируемого изображения
+ * \param [in] image − Cтруктура содержащая сведения о размерах масштабируемого изображения
  * \param [in] kK − Коэффициент уменьшения изображения
+ * \param [in] prefix − Префикс имени для создаваемого слоя
  * \return [out] − указатель на массив масштабированных изображений
  */
 Data2Db* resizeImage(Data2Db* image, int kK, QString prefix)
@@ -389,6 +394,7 @@ Data2Db* resizeImage(Data2Db* image, int kK, QString prefix)
  * \brief createPyramid_v2 − Выделение памяти для пирамиды изображений
  * \param [in] img − Указатель на оригинальное изображение
  * \param [in] lvl_pyramid − Уровень пирамиды
+ * \param [in] pref − Префикс имени для создаваемого слоя
  * \return [out] Список изображений
  */
 std::vector<Data2Db*>* createPyramid_v2(Data2Db* img, int lvl_pyramid, QString pref)
@@ -418,6 +424,12 @@ void saveVfResult(VF2d &vf, QString info)
     writeHdf5File(QString(g_outputFolder + "/" + info + ".h5"), vf, false);
 }
 
+/*!
+ * \brief writeHdf5File − Сохранение всех результатов в формат HD5F
+ * \param filename − Имя сохраняемого файла
+ * \param layer − Указатель на слой
+ * \param writeMode − Режим записи для данного слоя
+ */
 void writeHdf5File(QString filename, ProtoData2D &layer, bool writeMode)
 {
     if (writeMode) {
@@ -444,6 +456,11 @@ void writeHdf5File(QString filename, ProtoData2D &layer, bool writeMode)
     }
 }
 
+/*!
+ * \brief printProgressBar − Функция ответственная за отрисовку прогресс бара при использовании графического интерфейса
+ * \param fastProgBar − Промежуточный уровень
+ * \param slowProgBar − Полный уровень
+ */
 void printProgressBar(double fastProgBar, double slowProgBar)
 {
     g_fastProgBar += fastProgBar;
@@ -451,6 +468,11 @@ void printProgressBar(double fastProgBar, double slowProgBar)
     std::cout << round(g_fastProgBar) << "," << round(g_slowProgBar) << "," << std::endl;
 }
 
+/*!
+ * \brief derivativeVectorField − Вычисление поля деформации
+ * \param vf − Векторное поле
+ * \param info − Имя сохраняемого файла
+ */
 void derivativeVectorField(VF2d &vf, QString info)
 {
     Data2Dd e_xx_tmp("Defom_Exx", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);

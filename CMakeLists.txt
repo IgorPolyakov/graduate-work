@@ -18,7 +18,7 @@ project(lucas_kanade)
 exec_program(
     "git"
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ARGS "describe"
+    ARGS "describe --long"
     OUTPUT_VARIABLE VERSION )
 
 string( REGEX MATCH "-g.*$" VERSION_SHA1 ${VERSION} )
