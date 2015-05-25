@@ -148,9 +148,17 @@ g_xg_y & g^3_y
 \end{enumerate}
 Для самого первого уровня этот вектор принимается равным (0,0).
 
-
 \begin{figure}[ht]
 \center{\includegraphics[width=0.6\linewidth]{pyramid}}
 \caption{Пример пирамиды Гаусса}
 \label{pic:pyramid}
 \end{figure}
+
+\subsection{Оценка деформации}
+Компоненты расчитываются путем численного дифференцирования полученного поля смещений. Вырожения для продольной $\varepsilon_{xx}$, поперечной $\varepsilon_{yy}$, сдвиговой $\varepsilon_{xy}$ и поворотной $\omega_z$ компонент тензора дисторсии:
+
+$$\varepsilon_{xx}= \frac{\mathrm{d} U_x}{\mathrm{d} x},\varepsilon_{yy}= \frac{\mathrm{d} U_y}{\mathrm{d} y},\varepsilon_{xy}=\frac{1}{2}(\frac{\mathrm{d} U_x}{\mathrm{d} y} + \frac{\mathrm{d} U_y}{\mathrm{d} x}),\omega_z=\frac{1}{2}(\frac{\mathrm{d} U_y}{\mathrm{d} x} - \frac{\mathrm{d} U_x}{\mathrm{d} y})$$
+
+Также выражение для интенсивности деформации сдвига $\gamma_i$
+
+$$\gamma_i = \sqrt\frac{2}{3}\sqrt{(\varepsilon_{xx}-\varepsilon_{xx})^2+\varepsilon_{yy}^2+\varepsilon_{xx}^2 + \frac{3}{2}\varepsilon_{xy}^2}$$
