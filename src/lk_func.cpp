@@ -333,10 +333,10 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
         if (dv[1] > v_max_y[k])
             v_max_y[k] = dv[1];
 
-        if (delta[0] < v_min_x[k])
+        if (dv[0] < v_min_x[k])
             v_min_x[k] = dv[0];
 
-        if (delta[1] < v_min_y[k])
+        if (dv[1] < v_min_y[k])
             v_min_y[k] = dv[1];
         /* end */
 
