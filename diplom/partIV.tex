@@ -1,5 +1,5 @@
-Эксперименты ставились на парах модельных изображений и на изображениях поверхностях реальных образцов.
-
+Эксперименты ставились на парах модельных изображений и на изображениях поверхностях реальных образцов. Для тестирования использовалась следующая конфигурация.
+\input{technical_attributes}
 \subsection{Модельные изображения}
 
 В качестве образцов брались наборы изображений из интернет ресурса ``Society for Experimental Mechanics (sem.org)'' описание текстур находится в таблице \ref{tab:set_image}.
@@ -16,18 +16,6 @@ Strain Gradient & Sample11b & FFT & 20-185 	& Средний  & 0.01-1  & 6   \\
 Strain Gradient & Sample10  & FFT & 30-225 	& Средний  & 0.01-1  & 10   \\ \hline
 \end{longtable}
 
-\begin{figure}[ht]
-\center{\includegraphics[width=0.8\linewidth]{gray_mix}}
-\caption{Тестовая серия изображений: По часовой стрелке Серая подборка, Тестовая серия №11, Серия высокого контраста, Тестовая серия №6}
-\label{pic:gray_mix}
-\end{figure}
-
-\begin{figure}[ht]
-\center{\includegraphics[width=0.8\linewidth]{gray_set}}
-\caption{Тестовая серия изображений:Grey texture}
-\label{pic:gray_set}
-\end{figure}
-
 \subsection{Реальные отснятые изображения}
 
 В данном разделе приведены результаты тестирования разрабатываемого программного обеспечения на изображениях поверхностей реальных образцов. В экспериментах использовались металлические образцы из авиационного алюминиевого сплава Д16АТ и полимерные образцы из полипропилена, нагружавшиеся на механической испытательной машине ИМАШ-2078 в условиях одноосного статического растяжения.
@@ -38,9 +26,34 @@ Strain Gradient & Sample10  & FFT & 30-225 	& Средний  & 0.01-1  & 10   \
 \label{pic:real_deform}
 \end{figure}
 
-\subsection{Синтетические изображения}
+\subsection{Тестирование на модельных изображениях}
 
 Для первого раза используем изображения из серии Grey texture, представленные на рисунке \ref{pic:gray_set}. Они имеют сдвиг по оси $x$ на один пиксель влево, по $y$ сдвиг отсутствует.
 
+\begin{figure}[ht]
+\center{\includegraphics[width=0.6\linewidth]{gray_set}}
+\caption{Тестовая серия изображений:Grey texture}
+\label{pic:gray_set}
+\end{figure}
 
-\subsection{Экспериментальные изображения}
+Результатом работы ПО, как описано в первом разделе, является векторное поле и поля деформации твёрдого тела представленное на рисунке \ref{pic:gray_set_out}.
+
+\begin{figure}[ht]
+\center{\includegraphics[width=0.6\linewidth]{gray_set_out}}
+\caption{Поле смещений и деформации твёрдого тела}
+\label{pic:gray_set_out}
+\end{figure}
+
+\begin{figure}[ht]
+\center{\includegraphics[width=0.6\linewidth]{gray_set_func_iteration}}
+\caption{Зависимость уровня ошибки, от числа итераций}
+\label{pic:gray_set_func_iteration}
+\end{figure}
+
+\begin{figure}[ht]
+\center{\includegraphics[width=0.6\linewidth]{gray_set_func_iter_vector}}
+\caption{Зависимость смещение по x, от числа итераций}
+\label{pic:gray_set_func_iter_vector}
+\end{figure}
+
+\subsection{Тестирование на экспериментально полученных изображения}
