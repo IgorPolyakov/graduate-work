@@ -3,7 +3,7 @@
 \usepackage[utf8x]{inputenc}
 
 \usepackage{setspace}
-\doublespacing % двойной интервал для всего текста
+\onehalfspacing % полуторный интервал для всего текста
 
 % - Подключаем шрифты из пакета scalable-cyrfonts-tex
 \usepackage{cyrtimes}
@@ -15,10 +15,14 @@
 \makeatletter
 \def\@biblabel#1{#1 }
 
+% ограничение для оглавления
+%\usepackage{tocvsec2}
+\setcounter{tocdepth}{2}
+
 % - Точки для всех пунктов в оглавлении
 \renewcommand*{\l@section}{\@dottedtocline{1}{1.5em}{2.3em}}
 \renewcommand*{\l@subsection}{\@dottedtocline{1}{1.5em}{2.3em}}
-\renewcommand*{\l@subsubsection}{\@dottedtocline{1}{1.5em}{2.3em}}
+%\renewcommand*{\l@subsubsection}{\@dottedtocline{1}{1.5em}{2.3em}}
 
 % - Для переопределения списков
 \renewcommand{\theenumi}{\arabic{enumi}}
