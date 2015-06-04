@@ -1,19 +1,20 @@
-Эксперименты ставились на парах модельных изображений и на изображениях поверхностях реальных образцов.
+Тестирование  на парах модельных изображений и на изображениях поверхностях реальных образцов.
 \subsection{Образцы изображений}
 \subsubsection{Модельные изображения}
 
-В качестве образцов брались наборы изображений из интернет ресурса ``Society for Experimental Mechanics (sem.org)'' описание текстур находится в таблице \ref{tab:set_image}.
+В качестве образцов брались наборы изображений из интернет ресурса ``Society for Experimental Mechanics (sem.org)'' описание текстур находится в таблице \ref{tab:set_image}, текстуры изображены на рисунке \ref{pic:gray_mix}.
 
-\begin{longtable}[h!]{|*7{m{0.12\textwidth}|}}
-\caption{Описание используемых серий изображений}
+\begin{longtable}[h!]{|m{0.45\textwidth}|m{0.12\textwidth}|m{0.11\textwidth}|m{0.08\textwidth}|m{0.1\textwidth}|}
+\caption{Описание модельных изображений}
 \label{tab:set_image}
 \\ \hline
-Серия & Имя & Метод & Диапазон яркостей 	& Уровень шума & Сдвиг (px) & Кол-во изображений \\ \hline
-Grey texture & Grey set & Shift  & 0-188 & Нет & 1-20 & 5   \\ \hline
-HC texture & High contrast & QEM & 10-240 & Низкий  & 0.1-1 & 122  \\ \hline
-Prosilica Bin  & Sample6  & Binning & 10-156 & Низкий  & 0.1-1 & 10   \\ \hline
-Strain Gradient & Sample11b & FFT & 20-185 	& Средний  & 0.01-1  & 6   \\ \hline
-Strain Gradient & Sample10  & FFT & 30-225 	& Средний  & 0.01-1  & 10   \\ \hline
+Серия & Диапазон яркостей 	& Уровень шума & Сдвиг (px) &  Размеры \\ \hline
+Модель многослойного изображения & 0-188 & Нет & 1-20 &  510x510 \\ \hline
+Модель спекла & 0-188 & Нет & 1-70 &  512x512 \\ \hline
+Модель высокий контраст & 10-240 & Низкий  & 0.1-1 & 487x325 \\ \hline
+Prosilica Bin  & 10-156 & Низкий  & 0.1-1 & 487x325 \\ \hline
+Strain Gradient & 20-185 	& Средний  & 0.01-1 & 512x512 \\ \hline
+Strain Gradient & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 \end{longtable}
 
 \subsubsection{Реальные отснятые изображения}
@@ -39,12 +40,12 @@ Strain Gradient & Sample10  & FFT & 30-225 	& Средний  & 0.01-1  & 10   \
 \subsection{Тестирование программного обеспечения}
 \subsubsection{Тестирование на модельных изображениях}
 
-Для первого раза используем изображения из серии Grey texture, представленные на рисунке \ref{pic:gray_set}. Они имеют сдвиг по оси $x$ на один пиксель влево, по $y$ сдвиг отсутствует.
+Для первого раза используем изображения из серии Grey texture, представленные на рисунке \ref{pic:gray_mix} а). Они имеют сдвиг по оси $x$ на один пиксель влево, по $y$ сдвиг отсутствует.
 
 \begin{figure}[ht]
-\center{\includegraphics[width=0.6\linewidth]{gray_set}}
-\caption{Тестовая серия изображений: Grey texture}
-\label{pic:gray_set}
+\center{\includegraphics[width=0.9\linewidth]{gray_mix}}
+\caption{Тестовая серия изображений: Grey set, High contrast, Sample6, Sample10, Sample11b, Grey set V2 }
+\label{pic:gray_mix}
 \end{figure}
 
 Результатом работы ПО, как описано в первом разделе, является векторное поле и поля деформации твёрдого тела представленное на рисунке \ref{pic:gray_set_out}.

@@ -1,7 +1,7 @@
 \input{config}
 
 \begin{document}
-\input{titleList}
+\input{title}
 \input{referat_ru}
 \input{referat_en}
 \input{quest}
@@ -10,10 +10,6 @@
 \renewcommand\contentsname{\hfill Содержание \hfill}
 \tableofcontents
 \input{intro-vvedenie}
-\newpage
-\section{Проектирование программного обеспечения}
-\setcounter{figure}{0}
-\input{partI}
 \newpage
 \section{Описание алгоритмов и методов для решения задачи}
 \setcounter{figure}{0}
@@ -41,6 +37,9 @@
 \newpage
 \renewcommand{\refname}{Список использованных источников}
 \bibliography{lib}
-\ESKDappendix{cправочное}{\normalfont Документация}
-%\includepdf[pages={-}]{refman.pdf}
+\ESKDappendix{обязательное}{\normalfont Текст графического модуля}
+\input{qml_listing}
+\ESKDappendix{обязательное}{\normalfont Документация программного обеспечения}
+\input{doxygen_doc_start}
+\includepdf[pages={2-}]{refman.pdf}
 \end{document}
