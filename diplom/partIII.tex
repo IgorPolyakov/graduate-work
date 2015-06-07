@@ -16,13 +16,13 @@
 Программа ``Deformation Analysis'' разрабатывалась сотрудниками ИФПМ и служит средством для запуска и отображения выходных результатов. Форма ``strain\_calculate.qml'' является более удобным способом запуска основного приложения. 
 
 \begin{figure}[ht]
-\center{\includegraphics[width=0.8\linewidth]{shema_PO}}
+\center{\includegraphics[width=0.8\linewidth]{images/shema_PO.pdf}
 \caption{Структура разработанного ПО}
 \label{pic:shema_PO}
 \end{figure}
 
 \begin{figure}[ht]
-\center{\includegraphics[width=0.8\linewidth]{idef0}}
+\center{\includegraphics[width=0.8\linewidth]{images/idef0.pdf}}
 \caption{Функциональная схема}
 \label{pic:idef0}
 \end{figure}
@@ -54,7 +54,7 @@ HDF-Structure-Example
 Содержимое файлов HDF5 организовано подобно иерархической файловой системе, и для доступа к данным применяются пути, сходные с POSIX-синтаксисом, например, /path/to/resource. Метаданные хранятся в виде набора именованных атрибутов объектов.\cite{hdf5}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\linewidth]{images/structHDF5}
+\includegraphics[width=0.7\linewidth]{images/structHDF5.pdf}
 \caption{Структура HDF5 файла}
 \label{fig:structHDF5}
 \end{figure}
@@ -85,15 +85,21 @@ HDF-Structure-Example
 \subsection{Блок схему оригинальных, разработанных автором, алгоритмов работы основных, по мнению автора, программных модулей}
 Основной алгоритм работы представлен на рисунке \ref{fig:lucas_kanade_alg}. Для удобства, крупное блоки вынесены в отдельные блок-схемы и представлены на рисунках \ref{fig:calc_pyr} и т.д. 
 \begin{figure}
-\center{\includegraphics[width=0.7\linewidth]{images/lucas_kanade_alg}}
+\center{\includegraphics[width=0.7\linewidth]{images/lucas_kanade_alg.pdf}}
 \caption{Общий алгоритм работы}
 \label{fig:lucas_kanade_alg}
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=0.7\linewidth]{images/calc_pyr}}
-\caption{Адгоритм вычисления уровня пирамиды}
+\center{\includegraphics[width=0.7\linewidth]{images/calc_pyr.pdf}}
+\caption{Алгоритм вычисления уровня пирамиды}
 \label{fig:calc_pyr}
+\end{figure}
+
+\begin{figure}
+\center{\includegraphics[width=0.5\linewidth]{images/calc_opt_flow.pdf}}
+\caption{Алгоритм вычисления оптического потока}
+\label{fig:calc_opt_flow}
 \end{figure}
 
 \subsection {Интерфейс разрабатываемого программного обеспечения}
