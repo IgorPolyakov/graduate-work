@@ -1,0 +1,96 @@
+\documentclass[russian,14pt]{eskdtext}
+\usepackage[numbertop, numbercenter]{eskdplain}
+\usepackage[utf8x]{inputenc}
+
+\usepackage{setspace}
+\onehalfspacing % полуторный интервал для всего текста
+
+% - Подключаем шрифты из пакета scalable-cyrfonts-tex
+\usepackage{cyrtimes}
+
+% - Отступ красной строки
+\setlength{\parindent}{1.25cm}
+
+% - Убирает точку в списке литературы
+\makeatletter
+\def\@biblabel#1{#1 }
+
+% ограничение для оглавления
+%\usepackage{tocvsec2}
+\setcounter{tocdepth}{2}
+
+% - Точки для всех пунктов в оглавлении
+\renewcommand*{\l@section}{\@dottedtocline{1}{1.5em}{2.3em}}
+\renewcommand*{\l@subsection}{\@dottedtocline{1}{1.5em}{2.3em}}
+%\renewcommand*{\l@subsubsection}{\@dottedtocline{1}{1.5em}{2.3em}}
+
+% - Для переопределения списков
+\renewcommand{\theenumi}{\arabic{enumi}}
+\renewcommand{\labelenumi}{\theenumi)}
+\makeatother
+
+\usepackage{enumitem}
+\setlist{nolistsep, itemsep=0.3cm,parsep=0pt}
+
+% - ГОСТ списка литературы
+\bibliographystyle{gost71u2003}
+
+% - Верикальные отступы заголовков 
+\ESKDsectSkip{section}{1em}{1em}
+\ESKDsectSkip{subsection}{1em}{1em}
+\ESKDsectSkip{subsubsection}{1em}{1em}
+
+% - Изменение заголовков
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\normalsize\centering}{\thesection}{1.0em}{}
+\titleformat{\subsection}{\normalfont\normalsize\centering}{\thesubsection}{1.0em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\centering}{\thesubsubsection}{1.0em}{}
+\titleformat{\paragraph}{\normalfont\normalsize\centering}{\theparagraph}{1.0em}{}
+
+% - Оставим место под ТЗ 
+%\setcounter{page}{4}
+
+% - Для больших таблиц
+\usepackage{longtable}
+\usepackage{tabularx}
+\renewcommand{\thetable}{\thesection.\arabic{table}}
+
+% - Используем графику в документе
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\renewcommand{\thefigure}{\thesection.\arabic{figure}}
+
+% - Счётчики
+\usepackage{eskdtotal}
+
+% - Выравнивание по ширине
+\sloppy
+
+% - Разрешить перенос двух последних букв слова
+\righthyphenmin=2
+
+% - Оформление списков
+\RequirePackage{enumitem}
+\renewcommand{\alph}[1]{\asbuk{#1}}
+\setlist{nolistsep}
+\setitemize[1]{label=--, fullwidth, itemindent=\parindent, 
+  listparindent=\parindent}% для дефисного списка
+\setitemize[2]{label=--, fullwidth, itemindent=\parindent, 
+  listparindent=\parindent, leftmargin=\parindent}
+\setenumerate[1]{label=\arabic*), fullwidth, itemindent=\parindent, 
+  listparindent=\parindent}% для нумерованного списка
+\setenumerate[2]{label=\alph*), fullwidth, itemindent=\parindent, 
+  listparindent=\parindent, leftmargin=\parindent}% для списка 2-ой ступени, который будет нумероваться а), б) и т.д.
+  
+% - Оформляем листинг кода (не использовать комментарии на русском!)
+\usepackage{listings}  
+\lstset{basicstyle=\ttfamily\scriptsize}
+\lstset{extendedchars=\true}
+
+% - выводим текст как есть с размером шрифта scriptsize
+\makeatletter
+\def\verbatim{\scriptsize\@verbatim \frenchspacing\@vobeyspaces \@xverbatim}
+\makeatother
+
+% - Вставка pdf
+\usepackage{pdfpages}

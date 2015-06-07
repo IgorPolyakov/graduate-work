@@ -1,16 +1,14 @@
-#include <deprecated/dvfile.h>
 #include "lk_interpolation.h"
-
 /*!
  * \brief bilinearInterpolation
- * \param x   - Смещение по х
- * \param y   - Смещение по у
- * \param q11 - Значение функции в левом верхнем углу
- * \param q12 - Значение функции в левом нижнем углу
- * \param q21 - Значение функции в правом верхнем углу
- * \param q22 - Значение функции в правом нижнем углу
- * \param x1  - Координата верхнего левого угла по х
- * \param y1  - Координата верхнего левого угла по у
+ * \param delx − Смещение по х
+ * \param dely − Смещение по у
+ * \param q11 − Значение функции в левом верхнем углу
+ * \param q12 − Значение функции в левом нижнем углу
+ * \param q21 − Значение функции в правом верхнем углу
+ * \param q22 − Значение функции в правом нижнем углу
+ * \param x1  − Координата верхнего левого угла по х
+ * \param y1  − Координата верхнего левого угла по у
  * \return
  */
 double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uchar q21, uchar q22, int x1, int y1)
@@ -27,9 +25,9 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
 }
 
 /*!
- * \brief cubicInterpolate
- * \param p
- * \param x
+ * \brief cubicInterpolate − Кубическая интерполяция
+ * \param [in] p −
+ * \param [in] x −
  * \return
  */
 double cubicInterpolate (double p[4], double x) {
@@ -37,10 +35,10 @@ double cubicInterpolate (double p[4], double x) {
 }
 
 /*!
- * \brief bicubicInterpolate
- * \param p
- * \param x
- * \param y
+ * \brief bicubicInterpolate − Бикубическая интерполяция
+ * \param [in] p −
+ * \param [in] x −
+ * \param [in] y −
  * \return
  */
 double bicubicInterpolate (double p[4][4], double x, double y) {
@@ -51,21 +49,3 @@ double bicubicInterpolate (double p[4][4], double x, double y) {
     arr[3] = cubicInterpolate(p[3], y);
     return cubicInterpolate(arr, x);
 }
-
-/*!
- * \brief tricubicInterpolate
- * \param p
- * \param x
- * \param y
- * \param z
- * \return
- */
-double tricubicInterpolate (double p[4][4][4], double x, double y, double z) {
-    double arr[4];
-    arr[0] = bicubicInterpolate(p[0], y, z);
-    arr[1] = bicubicInterpolate(p[1], y, z);
-    arr[2] = bicubicInterpolate(p[2], y, z);
-    arr[3] = bicubicInterpolate(p[3], y, z);
-    return cubicInterpolate(arr, x);
-}
-

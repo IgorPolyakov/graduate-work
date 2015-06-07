@@ -1,0 +1,45 @@
+\input{config}
+
+\begin{document}
+\input{title}
+\input{referat_ru}
+\input{referat_en}
+\input{quest}
+\newpage
+\ESKDstyle{plain}
+\renewcommand\contentsname{\hfill Содержание \hfill}
+\tableofcontents
+\input{intro-vvedenie}
+\newpage
+\section{Описание алгоритмов и методов для решения задачи}
+\setcounter{figure}{0}
+\input{partII}
+\newpage
+\section{Конструкторско-технологическая часть}
+\setcounter{figure}{0}
+\input{partIII}
+\newpage
+\section{Тестирование программного обеспечения}
+\setcounter{figure}{0}
+\input{partIV}
+\newpage
+\section{Безопасность жизнедеятельности}
+\setcounter{figure}{0}
+\input{partV}
+\newpage
+\section{Технико-экономическое обоснование}
+\setcounter{figure}{0}
+\input{partVI}
+\newpage
+\section{Заключение}
+\setcounter{figure}{0}
+\input{out}
+\newpage
+\renewcommand{\refname}{Список использованных источников}
+\bibliography{lib}
+\ESKDappendix{обязательное}{\normalfont Текст графического модуля}
+\input{qml_listing}
+\ESKDappendix{обязательное}{\normalfont Документация программного обеспечения}
+\input{doxygen_doc_start}
+\includepdf[pages={2-}]{refman.pdf}
+\end{document}
