@@ -330,10 +330,10 @@ FUNCTION {bbl.vvolume} %  { "\bblVolume{}" }
 
 FUNCTION {bbl.vvol}    %  { "\bblVol{}" }
 {  curlanguage "english" =
-    {"Vol."}
+    {"с."}
     { curlanguage "ukrainian" = curlanguage "russian" = or
-           {"\CYRT."}
-           {"language is not defined: " language  "Vol." * * warning$ "Vol."}
+           {"с."}
+           {"language is not defined: " language  "с." * * warning$ "с."}
       if$}
   if$
 }
@@ -500,7 +500,7 @@ INTEGERS { nameptr namesleft numnames }
 
 FUNCTION {format.names}
 {
-  #1 "{vv~}{ll}{~jj},{~f.}" format.name$
+  #1 "{vv~}{ll}{~jj},{~ff}" format.name$
 }
 
 
@@ -511,7 +511,7 @@ FUNCTION {format.names.rev}
   numnames 'namesleft :=
     { namesleft #0 > }
     { s nameptr
-      "{f.~}{vv~}{ll}{, jj}"
+      "{ff~}{vv~}{ll}{, jj}"
       format.name$ 't :=
       nameptr #1 >
         {
@@ -687,7 +687,7 @@ FUNCTION {either.or.check}
 FUNCTION {format.bvolume}
 { volume empty$
     { "" }
-    { bbl.vvol volume tie.connect
+    { volume bbl.vvol tie.connect
       series empty$
         'skip$
         { bbl.of space.word * series emphasize * }
@@ -937,7 +937,16 @@ FUNCTION {format.url}
 { url empty$
     { "" }
     { after.sentence 'output.state :=
-      "\BibUrl{ " url * "}" *
+      "URL: " url * "" *
+    }
+  if$
+}
+
+FUNCTION {format.chapter}
+{ chapter empty$
+    { "" }
+    { after.sentence 'output.state :=
+      "--- Ч. " chapter * "" *
     }
   if$
 }
@@ -1099,6 +1108,7 @@ FUNCTION {inproceedings}
     }
   if$
   new.block
+  format.chapter output
   format.pages.page output
   new.block
   note output
@@ -1392,5 +1402,4 @@ FUNCTION {end.bib}
 EXECUTE {end.bib}
 
 %%
-%% End of file `gost780u.bst'.
-
+%% End of file `gost71u2003.bst'.
