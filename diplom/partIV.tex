@@ -29,7 +29,7 @@ Strain Gradient & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 \end{figure}
 
 На второй серии (рисунок \ref{pic:carbon_deform}) изображён углерод-углеродный композиционный материал. Образец испытывали на одноосное статическое растяжение на электро-механической машине Instron 5582 со скоростью перемещения подвижного захвата 0,3 мм/мин.
-\begin{figure}[ht]
+\begin{figure}[h!]
 \center{\includegraphics[width=0.6\linewidth]{carbon_deform}}
 \caption{Углерод-углеродный композиционный материал}
 \label{pic:carbon_deform}
@@ -44,7 +44,7 @@ Strain Gradient & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 
 Для первого раза используем изображения из серии Grey texture, представленные на рисунке \ref{pic:gray_mix} а). Они имеют сдвиг по оси $x$ на один пиксель влево, по $y$ сдвиг отсутствует.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \center{\includegraphics[width=0.9\linewidth]{gray_mix}}
 \caption{Тестовая серия изображений: Grey set, High contrast, Sample6, Sample10, Sample11b, Grey set V2 }
 \label{pic:gray_mix}
@@ -52,22 +52,16 @@ Strain Gradient & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 
 Результатом работы ПО, как описано в первом разделе, является векторное поле и поля деформации твёрдого тела представленное на рисунке \ref{pic:gray_set_out}.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \center{\includegraphics[width=0.6\linewidth]{gray_set_out}}
 \caption{Поле смещений и деформации твёрдого тела}
 \label{pic:gray_set_out}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \center{\includegraphics[width=0.6\linewidth]{gray_set_func_iteration}}
 \caption{Зависимость уровня ошибки, от числа итераций}
 \label{pic:gray_set_func_iteration}
-\end{figure}
-
-\begin{figure}[ht]
-\center{\includegraphics[width=0.6\linewidth]{gray_set_func_iter_vector}}
-\caption{Зависимость смещение по x, от числа итераций}
-\label{pic:gray_set_func_iter_vector}
 \end{figure}
 
 \subsubsection{Тестирование на экспериментально полученных изображения}
@@ -76,3 +70,14 @@ Strain Gradient & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 \subsection{Исследование метода интерполяции}
 
 \subsection{Исследование размера окна поиска}
+\begin{figure}[h!]
+\center{\includegraphics[width=0.6\linewidth]{images/window_time.png}}
+\caption{Время работы программы, в зависимости от размера окна}
+\label{pic:window_time}
+\end{figure}
+
+\begin{figure}[h!]
+\center{\includegraphics[width=0.6\linewidth]{images/window_size.png}}
+\caption{Уровень ошибки, в зависимости от размера окна}
+\label{pic:window_size}
+\end{figure}
