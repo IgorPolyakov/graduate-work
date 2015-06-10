@@ -101,6 +101,7 @@ set(SOURCES
   src/main.cpp
   src/global.cpp
   src/lk_interpolation.cpp
+  src/lk_math.cpp
 )
 
 set(HEADERS
@@ -108,6 +109,7 @@ set(HEADERS
   src/lk_struct.h
   src/global.h
   src/lk_interpolation.h
+  src/lk_math.h
 )
 
 # Build the app!

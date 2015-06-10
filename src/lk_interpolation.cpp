@@ -1,15 +1,16 @@
 #include "lk_interpolation.h"
 /*!
- * \brief bilinearInterpolation
- * \param delx − Смещение по х
- * \param dely − Смещение по у
- * \param q11 − Значение функции в левом верхнем углу
- * \param q12 − Значение функции в левом нижнем углу
- * \param q21 − Значение функции в правом верхнем углу
- * \param q22 − Значение функции в правом нижнем углу
- * \param x1  − Координата верхнего левого угла по х
- * \param y1  − Координата верхнего левого угла по у
- * \return
+ * \brief bilinearInterpolation − Билинейная интерполяция — в вычислительной математике
+ * расширение линейной интерполяции для функций двух переменных.
+ * \param [in] delx − Смещение по х
+ * \param [in] dely − Смещение по у
+ * \param [in] q11 − Значение функции в левом верхнем углу
+ * \param [in] q12 − Значение функции в левом нижнем углу
+ * \param [in] q21 − Значение функции в правом верхнем углу
+ * \param [in] q22 − Значение функции в правом нижнем углу
+ * \param [in] x1  − Координата верхнего левого угла по х
+ * \param [in] y1  − Координата верхнего левого угла по у
+ * \return [out] Интерполированное значение
  */
 double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uchar q21, uchar q22, int x1, int y1)
 {
@@ -28,7 +29,7 @@ double bilinearInterpolation(double delx, double dely, uchar q11, uchar q12, uch
  * \brief cubicInterpolate − Кубическая интерполяция
  * \param [in] p −
  * \param [in] x −
- * \return
+ * \return [out] Интерполированное значение
  */
 double cubicInterpolate (double p[4], double x) {
     return p[1] + 0.5 * x*(p[2] - p[0] + x*(2.0*p[0] - 5.0*p[1] + 4.0*p[2] - p[3] + x*(3.0*(p[1] - p[2]) + p[3] - p[0])));
@@ -39,7 +40,7 @@ double cubicInterpolate (double p[4], double x) {
  * \param [in] p −
  * \param [in] x −
  * \param [in] y −
- * \return
+ * \return [out] Интерполированное значение
  */
 double bicubicInterpolate (double p[4][4], double x, double y) {
     double arr[4];

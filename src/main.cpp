@@ -9,6 +9,7 @@
 #include "dv.h"
 #include "deprecated/dvfile.h"
 #include "version.h"
+#include <QTime>
 int main(int argc, char *argv[])
 {
     QString listfilename;
@@ -110,6 +111,8 @@ int main(int argc, char *argv[])
     while (!in.atEnd())
         imagelist.append(in.readLine());
     listfile.close();
+    QTime timer1;
+    timer1.start();
     for (int i = 1, cnt = 0, ocnt = 0; i < imagelist.size(); i++) {
         printProgressBar(0.0,(double)(100*i)/imagelist.size());
         pLeftImg = ReadImage(imagelist[cnt].toLocal8Bit().data());
@@ -144,8 +147,11 @@ int main(int argc, char *argv[])
         }
         printProgressBar(1.0, 0);
         saveVfResult(*vf, outfilename);
+        show("deform_field", *vf, vf->len());
         derivativeVectorField(*vf, outfilename);
     }
     printProgressBar(1.0, 0);
+    int curtime = timer1.elapsed();
+    qDebug() << "Time is: "<< (0.001f * curtime);
     return 0;
 }//End of Main

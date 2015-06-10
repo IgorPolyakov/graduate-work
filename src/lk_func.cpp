@@ -104,20 +104,6 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
 
     }
 
-    double *v_mid_x = new double[g_iteration];
-    double *v_mid_y = new double[g_iteration];
-    double *v_max_x = new double[g_iteration];
-    double *v_min_x = new double[g_iteration];
-    double *v_max_y = new double[g_iteration];
-    double *v_min_y = new double[g_iteration];
-
-    for (int f_var = 0; f_var < g_iteration; ++f_var) {
-        v_mid_x[f_var] = v_mid_y[f_var] = 0;
-        v_min_x[f_var] = v_min_y[f_var] = 1000.00;
-        v_max_x[f_var] = v_max_y[f_var] = -1000.00;
-
-    }
-
     subSize* kernel = new subSize;
     kernel->rc = g_sizeWindowSeach;
     kernel->step = g_stepForGrid;
@@ -149,7 +135,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
             kernel->y_2 = (i * vf->grid().y) + vf->origin().y + vf->lines()[i][j][1];
             kernel->x_2 = (j * vf->grid().x) + vf->origin().x + vf->lines()[i][j][0];
             /*TODO:  Cделать проверку выхода за границы*/
-            computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], d_mid_x,  d_mid_y,  d_max_x,  d_min_x,  d_min_y,  d_max_y,  d_abs_x,  d_abs_y,  v_mid_x,  v_mid_y,  v_max_x,  v_min_x,  v_min_y,  v_max_y);
+            computeOptFlow(kernel, leftImg, rightImg, vf->lines()[i][j], d_mid_x,  d_mid_y,  d_max_x,  d_min_x,  d_min_y,  d_max_y,  d_abs_x,  d_abs_y);
             state->lines()[i][j] = 1;
         }
     }
@@ -161,29 +147,21 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
     QTextStream deltXtext(&writeDeltaX);
     QTextStream deltYtext(&writeDeltaY);
 
-    QFile writeVectorX(g_outputFolder + "/vX_" + info + "txt");
-    QFile writeVectorY(g_outputFolder + "/VY_" + info + "txt");
-    writeVectorX.open(QIODevice::WriteOnly);
-    writeVectorY.open(QIODevice::WriteOnly);
-    QTextStream vectXtext(&writeVectorX);
-    QTextStream vectYtext(&writeVectorY);
-
     if (g_isDebug)
     {
         double deli = Vcx * Vcy;
         for (int m = 0; m < g_iteration; ++m)
         {
-            deltXtext << m << "\t" << (d_mid_x[m]/deli) << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
-            deltYtext << m << "\t" << (d_mid_y[m]/deli) << "\t" << (d_abs_y[m]/deli) << "\t" << d_max_y[m] << "\t" << d_min_y[m] << "\n";
-            vectXtext << m << "\t" << v_mid_x[m]/deli << "\t" << v_min_x[m] << "\t" << v_max_x[m] << "\n";
-            vectYtext << m << "\t" << v_mid_y[m]/deli << "\t" << v_min_y[m] << "\t" << v_max_y[m] << "\n";
+            deltXtext << (d_mid_x[m]/deli)+(d_abs_y[m]/deli) << "\n";// << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
+            //deltXtext << m << "\t" << (d_mid_x[m]/deli) << "\t" << (d_abs_x[m]/deli) << "\t" << d_max_x[m] << "\t" << d_min_x[m] << "\n";
+            //deltYtext << m << "\t" << (d_mid_y[m]/deli) << "\t" << (d_abs_y[m]/deli) << "\t" << d_max_y[m] << "\t" << d_min_y[m] << "\n";
+            //vectXtext << m << "\t" << v_mid_x[m]/deli << "\t" << v_min_x[m] << "\t" << v_max_x[m] << "\n";
+            //vectYtext << m << "\t" << v_mid_y[m]/deli << "\t" << v_min_y[m] << "\t" << v_max_y[m] << "\n";
         }
     }
 
     writeDeltaX.close();
     writeDeltaY.close();
-    writeVectorX.close();
-    writeVectorY.close();
 
     delete d_mid_x;
     delete d_mid_y;
@@ -193,13 +171,6 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
     delete d_min_y;
     delete d_abs_y;
     delete d_abs_x;
-
-    delete v_mid_x;
-    delete v_mid_y;
-    delete v_max_x;
-    delete v_min_x;
-    delete v_max_y;
-    delete v_min_y;
 
     delete kernel;
     return vf;
@@ -214,7 +185,7 @@ VF2d* computeGrid(Data2Db* leftImg, Data2Db* rightImg, VF2d* prev, QString info)
  * \param [in] dv − векторное поле предыдущего поля
  * \return [out] vf − вектор оптического потока
  */
-Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* d_mid_x, double* d_mid_y, double* d_max_x, double* d_min_x, double* d_min_y, double* d_max_y, double* d_avg_x, double* d_avg_y, double* v_mid_x, double* v_mid_y, double* v_max_x, double* v_min_x, double* v_min_y, double* v_max_y)
+Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d& dv, double* d_mid_x, double* d_mid_y, double* d_max_x, double* d_min_x, double* d_min_y, double* d_max_y, double* d_avg_x, double* d_avg_y)
 {
     double iY = 0.0,   iX = 0.0,   iTX = 0.0, iTY = 0.0, iXY = 0.0;
     double tmpX = 0.0, tmpY = 0.0, tmpT = 0.0;
@@ -323,21 +294,6 @@ Vec2d computeOptFlow(subSize* kernel, Data2Db* leftImg, Data2Db* rightImg, Vec2d
 
         if (delta[1] < d_min_y[k])
             d_min_y[k] = delta[1];
-
-        v_mid_x[k] += dv[0];
-        v_mid_y[k] += dv[1];
-
-        if (dv[0] > v_max_x[k])
-            v_max_x[k] = dv[0];
-
-        if (dv[1] > v_max_y[k])
-            v_max_y[k] = dv[1];
-
-        if (dv[0] < v_min_x[k])
-            v_min_x[k] = dv[0];
-
-        if (dv[1] < v_min_y[k])
-            v_min_y[k] = dv[1];
         /* end */
 
         if (fabs(delta[0]) < thdelta && fabs(delta[1]) < thdelta) break;
@@ -465,7 +421,7 @@ void printProgressBar(double fastProgBar, double slowProgBar)
 {
     g_fastProgBar += fastProgBar;
     g_slowProgBar += slowProgBar;
-    std::cout << round(g_fastProgBar) << "," << round(g_slowProgBar) << "," << std::endl;
+    //std::cout << round(g_fastProgBar) << "," << round(g_slowProgBar) << "," << std::endl;
 }
 
 /*!
