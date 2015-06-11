@@ -73,6 +73,12 @@ Strain Gradient №2 & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 В данном разделе приведены результаты тестирования разрабатываемого программного обеспечения на изображениях поверхностей реальных образцов.
 
 \subsection{Исследование метода интерполяции}
+В работе рассматривались три метода интерполяции:
+\begin{itemize}
+\item Билинейная
+\item Бикубическая
+\item Б-сплайн
+\end{itemize}
 
 \subsection{Исследование размера окна поиска}
 \begin{figure}[h!]
@@ -81,8 +87,24 @@ Strain Gradient №2 & 30-225 	& Средний  & 0.01-1 & 512x512 \\ \hline
 \label{pic:window_time}
 \end{figure}
 
+\subsection{Исследование числа итераций}
+\begin{figure}[h!]
+\center{\includegraphics[width=0.6\linewidth]{images/window_time.png}}
+\caption{Время работы программы, в зависимости от размера окна}
+\label{pic:window_iter}
+\end{figure}
+
 \begin{figure}[h!]
 \center{\includegraphics[width=0.6\linewidth]{images/window_size.png}}
 \caption{Уровень ошибки, в зависимости от размера окна}
 \label{pic:window_size}
+\end{figure}
+
+\subsection{Исследование на опытных изображениях}
+Результаты работы программы представлены на рисунках \ref{fig:al_strain}.
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{images/al_strain}
+\caption{Результат работы программы: верхний слой исходное изображение с 30\% альфа каналом, нижний слой -- поле деформации по оси $x$}
+\label{fig:al_strain}
 \end{figure}
