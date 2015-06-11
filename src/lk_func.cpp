@@ -436,6 +436,7 @@ void derivativeVectorField(VF2d &vf, QString info)
     Data2Dd e_xy_tmp("Defom_Exy", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
     Data2Dd  g_z_tmp("Defom_SSI", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
     Data2Dd   w_z_tmp("Defom_Wz", vf.cx(), vf.cy(), vf.grid().x, vf.grid().y, vf.origin().x, vf.origin().y);
+    double *why = new double[e_xx_tmp.len()];
 
     double e_xx = 0.0, e_yy = 0.0, e_xy = 0.0, g_i = 0.0, w_z = 0.0;
     for (int i = 0; i < vf.cy(); ++i)
@@ -455,12 +456,16 @@ void derivativeVectorField(VF2d &vf, QString info)
             //! 0.81649658092 - Это sqrt(2/3)
             g_i = 0.81649658092 * sqrt(pow((e_xx - e_yy),2) + pow((e_xx),2) + pow(e_yy ,2) + (1.5)*(pow(e_xy, 2)));
             e_xx_tmp.lines()[i][j] = e_xx;
+            why[i*vf.cy() + j] = e_xx;
             e_yy_tmp.lines()[i][j] = e_yy;
             e_xy_tmp.lines()[i][j] = e_xy;
             g_z_tmp.lines()[i][j]  = g_i;
             w_z_tmp.lines()[i][j]  = w_z;
         }
     }
+    show(why, e_xx_tmp.len());
+
+    delete why;
     Data2Dd deform_exx("Defom_Exx", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);
     BSplineResize2D<double>(e_xx_tmp.lines(),e_xx_tmp.cx(),e_xx_tmp.cy(), deform_exx.lines(), deform_exx.cx(), deform_exx.cy());
     Data2Dd deform_eyy("Defom_Eyy", vf.grid().x * (vf.cx()-1), vf.grid().y * (vf.cy()-1), 1, 1, vf.origin().x, vf.origin().y);

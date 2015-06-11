@@ -10,20 +10,20 @@
 #include <QString>
 
 extern bool
-g_isDebug;          //!< Глобальная переменная − Включить режим вывода в консоль отладочной информации
+g_isDebug;
 extern int
-g_sizeWindowSeach;  //!< Глобальная переменная − Размер окна поиска
+g_sizeWindowSeach;
 extern int
-g_stepForGrid;      //!< Глобальная переменная − Размер шага сетки (через какое расстояние повторяются точки поиска)
+g_stepForGrid;
 extern int
-g_iteration;        //!< Глобальная переменная − Число итераций (уточнений)
+g_iteration;
 extern int
-g_interpolation;    //!< Глобальная переменная − Выбор метода интерполирования(0 - Б-сплайн, 1 - Билинейный, 3 - Бикубический)
+g_interpolation;
 extern QString
-g_outputFolder;     //!< Глобальная переменная − Директория для сохранения результатов работы
+g_outputFolder;
 extern double
-g_fastProgBar;      //!< Глобальная переменная − Переменная хранящая промежуточный уровень прогресс бара
+g_fastProgBar;
 extern double
-g_slowProgBar;      //!< Глобальная переменная − Переменная хранящая полный уровень прогресс бара
+g_slowProgBar;
 
 #endif // GLOBAL_H

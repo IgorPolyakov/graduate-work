@@ -1,7 +1,5 @@
 #include "lk_math.h"
 
-#define SIZE(ARR) (sizeof(ARR) / sizeof(*ARR))
-
 /*!
  * \brief expectation − Математи́ческое ожида́ние — среднее значение случайной величины
  * (это распределение вероятностей случайной величины, рассматривается в теории вероятностей)
@@ -9,14 +7,13 @@
  * \param [in] size − Длинна массива.
  * \return [out] Матожидание
  */
-double expectation(VF2d &var, size_t size)
+double expectation(double *var, int size)
 {
     double sum = 0;
-    size_t i;
+    int i;
 
     for(i = 0; i < size; ++i)
-        sum += (double)var.data()[i][0];
-        //qDebug() << var.data()[3];
+        sum += var[i];
     return sum / size;
 }
 
@@ -27,15 +24,15 @@ double expectation(VF2d &var, size_t size)
  * \param [in] size − Длинна массива.
  * \return [out] − Дисперсия
  */
-double variance(VF2d &var, size_t size)
+double variance(double *var, int size)
 {
     double sum = 0;
     double mean = expectation(var, size);
 
-    size_t i;
+    int i;
 
     for(i = 0; i < size; ++i)
-        sum += (var.data()[i][0] - mean) * (var.data()[i][0] - mean);
+        sum += (var[i] - mean) * (var[i] - mean);
 
     return sum / size;
 }
@@ -48,7 +45,7 @@ double variance(VF2d &var, size_t size)
  * \param [in] size − Длинна массива.
  * \return [out] − Среднеквадратическое отклонение.
  */
-double std_deviation(VF2d &var, size_t size)
+double std_deviation(double *var, int size)
 {
     return sqrt(variance(var, size));
 }
@@ -59,11 +56,11 @@ double std_deviation(VF2d &var, size_t size)
  * \param [in] var − Ссылка на массив данных.
  * \param [in] size − Длинна массива.
  */
-void show(QString varname, VF2d &var, int size)
+void show(double *var, int size)
 {
-    qDebug() << "Given variable " << varname <<" with uniform distribution:\n";
+    //qDebug() << "Given variable " << varname <<" with uniform distribution:";
 
-    printf("Мат. Ожидание: %.5f\n", expectation(var, size));
-    printf("Дисперсия: %.5f\n", variance(var, size));
-    printf("Среднеквадратическое отклонение: %.5f\n", std_deviation(var, size));
+    qDebug() << "!Мат. Ожидание: " << expectation(var, size);
+    qDebug() << "!Дисперсия: " << variance(var, size);
+    qDebug() << "!Среднеквадратическое отклонение: " << std_deviation(var, size);
 }

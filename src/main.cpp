@@ -147,7 +147,6 @@ int main(int argc, char *argv[])
         }
         printProgressBar(1.0, 0);
         saveVfResult(*vf, outfilename);
-        show("deform_field", *vf, vf->len());
         derivativeVectorField(*vf, outfilename);
     }
     printProgressBar(1.0, 0);

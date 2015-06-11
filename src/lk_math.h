@@ -10,10 +10,9 @@
 \brief Заголовочный файл с описанием функций.
 * Данный файл содержит в себе определения функций отвечающих за подсчет статистических показателей.
 */
-double expectation(VF2d &var, size_t size);
-double variance(VF2d &var, size_t size);
-double std_deviation(VF2d &var, size_t size);
-void   show(QString varname, VF2d &var, int size);
+double expectation(double &var, int size);
+double variance(double &var, int size);
+double std_deviation(double &var, int size);
+void   show(double *var, int size);
 
 #endif // LK_MATH
-
