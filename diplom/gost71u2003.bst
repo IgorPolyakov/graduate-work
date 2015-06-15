@@ -937,7 +937,7 @@ FUNCTION {format.url}
 { url empty$
     { "" }
     { after.sentence 'output.state :=
-      "URL: " url * "" *
+      "Режим доступа: " url * "" *
     }
   if$
 }

@@ -1,23 +1,24 @@
 # Lucas–Kanade
 
-In computer vision, the Lucas–Kanade method is a widely used differential method for optical flow estimation developed by Bruce D. Lucas and Takeo Kanade. It assumes that the flow is essentially constant in a local neighbourhood of the pixel under consideration, and solves the basic optical flow equations for all the pixels in that neighbourhood, by the least squares criterion.
+Целью настоящей работы является разработка программного обеспечения (ПО) для оценки деформаций поверхностей твёрдых тел, а также проведение исследований алгоритмов и методов как на модельных, так и на реальных оптических изображениях.
 
-By combining information from several nearby pixels, the Lucas–Kanade method can often resolve the inherent ambiguity of the optical flow equation. It is also less sensitive to image noise than point-wise methods. On the other hand, since it is a purely local method, it cannot provide flow information in the interior of uniform regions of the image.
+В работе исследовано влияние метода интерполяции изображений с субпиксельной точностью с использованием итеративного подхода на расчёт оптического потока(векторного поля).
 
-## Version
-1.2
-## Installation
-You need install some packet:
-#### Qt
+Проект выполнен с использованием следующих средств разработки: языка программирования C++(Qt), среды разработки QtCreator 3, Sublime 3. Система контроля версий git.
+
+## Версия
+1.4
+## Установка
+Для начала, необходимо настроить окружение:
+## Qt
 ```sh
-$ sudo apt-get install qt-sdk 
-$ sudo apt-get install libarchive-dev libqt5webkit5-dev
+$ sudo apt-get install qt-sdk libarchive-dev libqt5webkit5-dev 
 ```
-#### CMAKE
+## CMAKE
 ```sh
 $ sudo apt-get install cmake
 ```
-#### HDF5 Software
+## HDF5 Software
 ```sh
 $ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.14.tar
 $ tar -xvf hdf5-1.8.14.tar
@@ -26,7 +27,7 @@ $ cmake CMakeLists.txt
 $ make
 $ sudo make install
 ```
-#### DV(Deformation analys)
+## DV(Deformation analys)
 ```sh
 $ cp /media/flash_card/dv.zip
 $ unzip dv.zip
@@ -34,20 +35,18 @@ $ cd dv/df-cl
 $ cmake CMakeLists.txt
 $ make
 ```
-
-#### Lucas-Kanade
+## Lucas-Kanade
 ```sh
 $ git clone git@github.com:IgorPolyakov/graduate-work.git
 $ cd graduate-work
 $ cmake CMakeLists.txt
 $ make
 ```
-
-## Run
+## Запуск
 ```sh
-$ ./bin/lukas_kanade_qt  -l <list_of_image>
+$ ./bin/lucas_kanade  -l <list_of_image>
 ```
-## Options
+## Опции
  - l — load list image
  - o — output directory
  - i — count iteration (1 by default)
@@ -57,14 +56,9 @@ $ ./bin/lukas_kanade_qt  -l <list_of_image>
  - h — show help
  - d — debug mod on
 
-## Todo's
- - Added pyramid
- - Write Tests
- - Add Code Comments for doxygen
+## Список дел
+ - Добавить юнит-тесты
 
-License
+## Лицензия
 ----
-
 GNU GPL
-
-**Repository created in order to write a graduate work on specialty 220301.**
