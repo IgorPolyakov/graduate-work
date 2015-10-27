@@ -62,3 +62,6 @@ $ ./bin/lucas_kanade  -l <list_of_image>
 ## Лицензия
 ----
 GNU GPL
+
+В случае если cmake отрабатывает не корректно 
+-DHDF5_PATH=/usr/local/HDF_Group/HDF5/1.8.15/share/cmake/
