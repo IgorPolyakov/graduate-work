@@ -20,11 +20,13 @@ $ sudo apt-get install cmake
 ```
 ## HDF5 Software
 ```sh
-$ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.14.tar
-$ tar -xvf hdf5-1.8.14.tar
-$ cd hdf5-1.8.14
-$ cmake CMakeLists.txt
-$ make
+$ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.16.tar.gz
+$ tar -xvf hdf5-1.8.16.tar.gz
+$ cd hdf5-1.8.16
+$ mkdir build
+$ cd build
+$ cmake ../
+$ make -j`nproc`
 $ sudo make install
 ```
 ## DV(Deformation analys)
@@ -63,5 +65,12 @@ $ ./bin/lucas_kanade  -l <list_of_image>
 ----
 GNU GPL
 
-В случае если cmake отрабатывает не корректно 
--DHDF5_PATH=/usr/local/HDF_Group/HDF5/1.8.15/share/cmake/
+В случае если cmake возвращает ошибку, добавить переменную для сборки.
+```
+Could not find a package configuration file provided by "HDF5" with any of
+  the following names:
+
+    HDF5Config.cmake
+    hdf5-config.cmake
+```
+-DHDF5_PATH=/usr/local/HDF_Group/HDF5/1.8.1#/share/cmake/
