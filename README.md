@@ -12,11 +12,13 @@
 Для начала, необходимо настроить окружение:
 ## Qt
 ```sh
-$ sudo apt-get install qt-sdk libarchive-dev libqt5webkit5-dev 
+$ sudo apt-get install qt5-default libopencv-dev libqt5opengl5-dev libqt5quick5 qtcreator libarchive-dev libqt5webkit5-dev 
 ```
 ## CMAKE
 ```sh
-$ sudo apt-get install cmake
+$ sudo add-apt-repository ppa:george-edison55/cmake-3.x
+$ sudo apt-get update
+$ sudo apt-get install cmake cmake-qt-gui
 ```
 ## HDF5 Software
 ```sh
@@ -74,3 +76,8 @@ Could not find a package configuration file provided by "HDF5" with any of
     hdf5-config.cmake
 ```
 -DHDF5_PATH=/usr/local/HDF_Group/HDF5/1.8.1#/share/cmake/
+
+## Update
+QtCreator::Tool -> Option -> Build&Run -> Kits -> Default -> Enviroment
+add to window PATH=${PATH}:/usr/local/HDF_Group/HDF5/1.8.17/share/cmake
+
