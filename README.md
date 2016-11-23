@@ -12,7 +12,7 @@
 Для начала, необходимо настроить окружение:
 ## Qt
 ```sh
-$ sudo apt-get install qt5-default libopencv-dev libqt5opengl5-dev libqt5quick5 qtcreator libarchive-dev libqt5webkit5-dev 
+$ sudo apt-get install qt5-default libopencv-dev libqt5opengl5-dev libqt5quick5 qtcreator libnglib-dev  libarchive-dev libqt5webkit5-dev 
 ```
 ## CMAKE
 ```sh
