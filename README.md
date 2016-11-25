@@ -30,6 +30,7 @@ $ cd build
 $ cmake ../
 $ make -j`nproc`
 $ sudo make install
+$ ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix,STATIC_LIBRARIES=OFF -C Release -V -O hdf5.log
 ```
 ## DV(Deformation analys)
 ```sh
